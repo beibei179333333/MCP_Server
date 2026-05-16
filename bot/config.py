@@ -107,8 +107,7 @@ class Settings:
         missing: List[str] = []
         if not self.bot_token:
             missing.append("BOT_TOKEN")
-        if not self.admin_ids:
-            missing.append("ADMIN_IDS")
+        # ADMIN_IDS 推荐但非必需：留空时仅警告，部分管理功能不可用
         return missing
 
     @property

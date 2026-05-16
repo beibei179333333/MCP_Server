@@ -154,6 +154,18 @@ async def _run() -> None:
     me = await app.bot.get_me()
     log.info("Bot 已启动: @%s", me.username)
 
+    # 启动通告：通知所有管理员机器人已就绪
+    ready_msg = f"✅ 我已经准备好了，可以工作！\n机器人 @{me.username} 已成功上线 🚀"
+    if not settings.admin_ids:
+        log.warning("ADMIN_IDS 未配置，启动通告仅记录到日志：%s", ready_msg)
+    else:
+        for admin_id in settings.admin_ids:
+            try:
+                await app.bot.send_message(admin_id, ready_msg)
+                log.info("已向管理员 %s 发送启动通告", admin_id)
+            except Exception as e:
+                log.warning("向 %s 发送启动通告失败: %s", admin_id, e)
+
     scheduler.start()
     log.info("调度器已启动（broadcasts/sub_expire/recurring/captcha）")
 
