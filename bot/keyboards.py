@@ -12,8 +12,9 @@ def main_menu(is_admin: bool = False) -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton("📊 统计报表", callback_data="menu:stats"),
-            InlineKeyboardButton("ℹ️ 帮助", callback_data="menu:help"),
+            InlineKeyboardButton("💎 订阅", callback_data="menu:subscription"),
         ],
+        [InlineKeyboardButton("ℹ️ 帮助", callback_data="menu:help")],
     ]
     if is_admin:
         rows.append(

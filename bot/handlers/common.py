@@ -27,32 +27,57 @@ WELCOME = """\
 """
 
 HELP = """\
-*可用命令*
+*命令参考*
 
-通用：
+🔹 *通用*
 /start /menu — 主菜单
-/id — 查看当前 chat 和 user id
+/id — 查看当前 chat / user id
 /cancel — 取消当前操作
 
-记账（私聊）：
+🔹 *记账*（私聊）
 直接发 `金额 类别 备注`，如 `120 餐饮 午餐`、`-50 打车`
-/ledger — 打开记账面板
-/today /month — 今日/本月汇总
-/chart — 收支走势图
-/export — 导出 CSV
+/ledger /today /month /chart /export
+/budget 类别 金额 — 设置月预算
+/budgets — 查看预算执行
 
-自动回复：
-/ar\\_add 关键词 ::: 回复内容
-/ar\\_list — 列出本群规则
-/ar\\_del <id> — 删除规则
+🔹 *自动回复*
+`/ar_add 关键词 ::: 回复内容`
+`/ar_add_re 正则 ::: 内容`
+/ar_list  /ar_toggle <id>  /ar_del <id>
 
-管理员：
-/admin — 管理面板
-/fw\\_add 源 目标 [名字] — 添加搬运规则
-/fw\\_list /fw\\_del <id> /fw\\_toggle <id>
-/broadcast — 进入群发流程
-/stats — 全局统计
-/users /chats — 查看用户 / 群组列表
+🔹 *订阅*
+/plans — 查看套餐
+/mysub — 我的订阅
+
+🔹 *群组*（群管理员）
+/welcome <文本>  /welcome_off
+/captcha — 切换入群验证
+/antispam — 切换反垃圾
+
+🔹 *管理员*
+/admin /stats /users /chats /payments
+/grant\\_sub <user_id> <plan>
+
+🔹 *搬运（仅管理员）*
+/fw\\_add 源 目标[,目标2] [名字]
+/fw\\_filter <id> kw=A,B bl=C
+/fw\\_replace <id> 原文 => 新文
+/fw\\_caption <id> header=🔥 | footer=—@CH
+/fw\\_format <id> links=1 mentions=1 emoji=0
+/fw\\_media <id> allow=photo,video,text
+/fw\\_watermark <id> @MyChannel
+/fw\\_backfill <id> 200 — 历史回填
+/fw\\_list /fw\\_toggle /fw\\_del /fw\\_reload
+
+🔹 *群发（仅管理员）*
+/broadcast — 面板
+/broadcast users 内容
+/broadcast tag VIP 内容
+消息可附加：`@schedule 2030-01-01 10:00` 定时
+消息可附加：`@buttons [["按钮","https://..."]]`
+
+🔹 *Web 后台*
+默认 http://server:8000
 """
 
 
@@ -123,6 +148,9 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     elif target == "stats":
         from .admin import show_stats
         await show_stats(update, context)
+    elif target == "subscription":
+        from .subscription import plans_cmd
+        await plans_cmd(update, context)
     elif target == "forward" and is_a:
         from .forward_admin import open_forward_panel
         await open_forward_panel(update, context)

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>📡 搬运规则</h1>
+<table>
+  <tr><th>ID</th><th>名称</th><th>源 → 目标</th><th>模式</th><th>插件</th><th>转发/丢弃</th><th>状态</th><th>操作</th></tr>
+  {% for r in rules %}
+  <tr>
+    <td>#{{ r.id }}</td>
+    <td>{{ r.name }}</td>
+    <td><code>{{ r.source_chat }}</code> → <code>{{ r.targets }}</code></td>
+    <td>{{ r.mode }}</td>
+    <td>{{ (r.plugins or {}).keys() | list | join(', ') or '—' }}</td>
+    <td>{{ r.forwarded_count }} / {{ r.dropped_count }}</td>
+    <td>
+      {% if r.enabled %}<span class="badge badge-ok">启用</span>
+      {% else %}<span class="badge badge-err">停用</span>{% endif %}
+    </td>
+    <td>
+      <form method="post" action="/rules/{{ r.id }}/toggle">
+        <button>切换</button>
+      </form>
+      <form method="post" action="/rules/{{ r.id }}/delete" onsubmit="return confirm('确认删除规则 #{{ r.id }}？')">
+        <button class="btn-danger">删除</button>
+      </form>
+    </td>
+  </tr>
+  {% else %}
+  <tr><td colspan="8" style="text-align:center;color:#8899a6;">暂无规则。请在 Telegram 中用 <code>/fw_add</code> 创建。</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

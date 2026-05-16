@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  bot:
+    build: .
+    image: telegram-allinone-bot:latest
+    container_name: tg-bot
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    # 首次运行（user-bot 登录需要手输验证码）改为：
+    # docker compose run --rm bot python run.py
+
+  # 可选：切换到 PostgreSQL 时取消注释
+  # postgres:
+  #   image: postgres:16-alpine
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: bot
+  #     POSTGRES_PASSWORD: bot
+  #     POSTGRES_DB: botdb
+  #   volumes:
+  #     - pg_data:/var/lib/postgresql/data
+
+# volumes:
+#   pg_data:

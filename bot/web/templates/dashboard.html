@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>📊 仪表盘</h1>
+
+<div class="grid">
+  <div class="card"><div class="label">👥 用户</div><div class="value">{{ users }}</div></div>
+  <div class="card"><div class="label">💬 群组 / 频道</div><div class="value">{{ chats }}</div></div>
+  <div class="card"><div class="label">📡 搬运规则</div><div class="value">{{ rules }}</div></div>
+  <div class="card"><div class="label">📨 已转发消息</div><div class="value">{{ forwarded }}</div></div>
+  <div class="card"><div class="label">💬 自动回复</div><div class="value">{{ ar }}</div></div>
+  <div class="card"><div class="label">📒 记账流水</div><div class="value">{{ entries }}</div></div>
+  <div class="card"><div class="label">💎 活跃订阅</div><div class="value">{{ active_subs }}</div></div>
+  <div class="card"><div class="label">💰 累计营收</div><div class="value">{{ '%.0f' | format(revenue) }}</div></div>
+</div>
+
+<h1>📜 最近群发</h1>
+<table>
+  <tr><th>ID</th><th>状态</th><th>目标</th><th>标签</th><th>成功/总</th><th>计划时间</th></tr>
+  {% for j in recent_jobs %}
+  <tr>
+    <td>#{{ j.id }}</td>
+    <td>
+      {% if j.status == 'done' %}<span class="badge badge-ok">完成</span>
+      {% elif j.status == 'running' %}<span class="badge badge-pending">进行中</span>
+      {% elif j.status == 'failed' %}<span class="badge badge-err">失败</span>
+      {% else %}<span class="badge badge-pending">等待</span>{% endif %}
+    </td>
+    <td>{{ j.target_type }}</td>
+    <td>{{ j.target_tag or '—' }}</td>
+    <td>{{ j.sent }}/{{ j.total }}</td>
+    <td>{{ (j.scheduled_at or j.created_at).strftime('%Y-%m-%d %H:%M') }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="6" style="text-align:center;color:#8899a6;">暂无数据</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

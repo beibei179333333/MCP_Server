@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="login-wrap">
+  <h2>⚡ Bot 控制台</h2>
+  {% if err %}<div class="err">用户名或密码错误</div>{% endif %}
+  <form method="post" action="/login">
+    <input name="username" placeholder="用户名" autofocus required>
+    <input type="password" name="password" placeholder="密码" required>
+    <button type="submit">登录</button>
+  </form>
+</div>
+{% endblock %}

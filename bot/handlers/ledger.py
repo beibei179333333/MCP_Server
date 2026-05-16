@@ -13,9 +13,9 @@ from telegram import InputFile, Update
 from telegram.constants import ChatType, ParseMode
 from telegram.ext import ContextTypes
 
-from ..database import LedgerAccount, LedgerEntry, SessionLocal
+from ..database import Budget, LedgerAccount, LedgerEntry, SessionLocal
 from ..keyboards import back_home, ledger_menu
-from ..utils import month_range, parse_amount_note, today_range
+from ..utils import is_admin, month_range, parse_amount_note, today_range
 
 log = logging.getLogger(__name__)
 DEFAULT_ACCOUNT = "默认"
@@ -100,6 +100,11 @@ async def quick_record(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bo
         + f"流水号 #{entry.id}"
     )
     await msg.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+    if kind == "expense":
+        try:
+            await maybe_alert_budget(context.bot, owner_id, category)
+        except Exception:
+            pass
     return True
 
 
@@ -337,3 +342,128 @@ async def _show_accounts(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await update.callback_query.edit_message_text(
         "\n".join(lines), parse_mode=ParseMode.MARKDOWN, reply_markup=ledger_menu()
     )
+
+
+# =============================================================
+# 预算 / 告警
+# =============================================================
+async def budget_set_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """/budget <类别> <月限额>"""
+    if len(context.args) < 2:
+        await update.effective_message.reply_text(
+            "用法：`/budget 餐饮 1500`", parse_mode=ParseMode.MARKDOWN
+        )
+        return
+    category = context.args[0]
+    try:
+        limit = float(context.args[1])
+    except ValueError:
+        await update.effective_message.reply_text("❌ 金额必须为数字")
+        return
+    owner_id = update.effective_user.id
+    async with SessionLocal() as s:
+        stmt = select(Budget).where(
+            Budget.owner_id == owner_id, Budget.category == category
+        )
+        b = (await s.execute(stmt)).scalar_one_or_none()
+        if b:
+            b.monthly_limit = limit
+        else:
+            s.add(Budget(owner_id=owner_id, category=category, monthly_limit=limit))
+        await s.commit()
+    await update.effective_message.reply_text(
+        f"💰 已设置预算 *{category}* ＝ {limit:.2f} / 月", parse_mode=ParseMode.MARKDOWN
+    )
+
+
+async def budget_list_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    owner_id = update.effective_user.id
+    start, end = month_range()
+    async with SessionLocal() as s:
+        budgets = (
+            await s.execute(select(Budget).where(Budget.owner_id == owner_id))
+        ).scalars().all()
+        if not budgets:
+            await update.effective_message.reply_text(
+                "📭 还没有预算。用 `/budget 类别 金额` 设置。",
+                parse_mode=ParseMode.MARKDOWN,
+            )
+            return
+        # 当月已用
+        used_stmt = (
+            select(LedgerEntry.category, func.sum(LedgerEntry.amount))
+            .join(LedgerAccount, LedgerAccount.id == LedgerEntry.account_id)
+            .where(
+                LedgerAccount.owner_id == owner_id,
+                LedgerEntry.kind == "expense",
+                LedgerEntry.occurred_at >= start,
+                LedgerEntry.occurred_at < end,
+            )
+            .group_by(LedgerEntry.category)
+        )
+        used = {cat or "其他": float(v) for cat, v in (await s.execute(used_stmt)).all()}
+
+    lines = [f"💰 *本月预算*（{start:%Y-%m}）\n"]
+    for b in budgets:
+        u = used.get(b.category, 0.0)
+        pct = u / b.monthly_limit * 100 if b.monthly_limit > 0 else 0
+        bar = _bar(pct)
+        flag = "🚨" if pct >= 100 else ("⚠️" if pct >= b.alert_threshold * 100 else "✅")
+        lines.append(
+            f"{flag} *{b.category}*  {u:.0f}/{b.monthly_limit:.0f}  ({pct:.0f}%)\n{bar}"
+        )
+    await update.effective_message.reply_text(
+        "\n".join(lines), parse_mode=ParseMode.MARKDOWN
+    )
+
+
+def _bar(pct: float, width: int = 20) -> str:
+    pct = max(0, min(100, pct))
+    fill = int(width * pct / 100)
+    return "`" + "█" * fill + "░" * (width - fill) + "`"
+
+
+async def maybe_alert_budget(bot, user_id: int, category: str) -> None:
+    """每次记账后检查是否触发预算告警。"""
+    if not category:
+        return
+    start, end = month_range()
+    async with SessionLocal() as s:
+        b = (
+            await s.execute(
+                select(Budget).where(
+                    Budget.owner_id == user_id, Budget.category == category
+                )
+            )
+        ).scalar_one_or_none()
+        if not b:
+            return
+        used_stmt = (
+            select(func.coalesce(func.sum(LedgerEntry.amount), 0))
+            .join(LedgerAccount, LedgerAccount.id == LedgerEntry.account_id)
+            .where(
+                LedgerAccount.owner_id == user_id,
+                LedgerEntry.kind == "expense",
+                LedgerEntry.category == category,
+                LedgerEntry.occurred_at >= start,
+                LedgerEntry.occurred_at < end,
+            )
+        )
+        used = float((await s.execute(used_stmt)).scalar() or 0)
+        pct = used / b.monthly_limit * 100 if b.monthly_limit > 0 else 0
+        if pct < b.alert_threshold * 100:
+            return
+        # 同一阈值不重复提醒（每月每类别仅 1 次）
+        if b.last_alert_at and b.last_alert_at >= start:
+            return
+        b.last_alert_at = datetime.utcnow()
+        await s.commit()
+    try:
+        await bot.send_message(
+            user_id,
+            f"⚠️ *预算提醒*：*{category}* 本月已用 *{pct:.0f}%* "
+            f"({used:.0f} / {b.monthly_limit:.0f})",
+            parse_mode=ParseMode.MARKDOWN,
+        )
+    except Exception:
+        pass

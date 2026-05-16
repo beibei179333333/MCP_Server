@@ -1,4 +1,4 @@
-"""消息路由：处理非命令文本与自动回复。"""
+"""消息路由：群组反垃圾 / 验证码 / 入账 / 自动回复 / 群发上下文。"""
 from __future__ import annotations
 
 from telegram import Update
@@ -6,16 +6,25 @@ from telegram.constants import ChatType
 from telegram.ext import ContextTypes
 
 from ..utils import upsert_user
-from . import autoreply, broadcast, ledger
+from . import autoreply, broadcast, group, ledger
 
 
 async def text_router(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await upsert_user(update)
 
+    # 1) 群里反垃圾（命中即删除并停止）
+    if update.effective_chat.type in ("group", "supergroup"):
+        if await group.antispam_check(update, context):
+            return
+        # 2) 数字回复可能是 math 验证码
+        if await group.captcha_text_answer(update, context):
+            return
+
+    # 3) flow 状态
     flow = context.user_data.get("flow")
     if flow:
         ftype = flow.get("type")
-        if ftype == "broadcast":
+        if ftype in ("broadcast", "broadcast_tag_pick"):
             if await broadcast.handle_broadcast_content(update, context):
                 return
         elif ftype == "ledger_add":
@@ -23,10 +32,10 @@ async def text_router(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 context.user_data.pop("flow", None)
                 return
 
-    # 私聊直接尝试记账
+    # 4) 私聊：尝试解析为记账
     if update.effective_chat.type == ChatType.PRIVATE:
         if await ledger.quick_record(update, context):
             return
 
-    # 自动回复（群组 / 私聊都支持）
+    # 5) 自动回复
     await autoreply.maybe_reply(update, context)

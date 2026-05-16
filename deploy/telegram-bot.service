@@ -1,0 +1,25 @@
+[Unit]
+Description=Telegram All-in-One Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=botuser
+Group=botuser
+WorkingDirectory=/opt/telegram-bot
+EnvironmentFile=/opt/telegram-bot/.env
+ExecStart=/opt/telegram-bot/.venv/bin/python /opt/telegram-bot/run.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/opt/telegram-bot/logs/stdout.log
+StandardError=append:/opt/telegram-bot/logs/stderr.log
+
+# 安全加固
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
