@@ -73,9 +73,16 @@ async def _render_fwlist(page: int):
     async with SessionLocal() as s:
         rules = (await s.execute(select(ForwardRule).order_by(ForwardRule.id))).scalars().all()
     if not rules:
-        return "📭 暂无规则", None
+        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+        kb = InlineKeyboardMarkup([
+            [InlineKeyboardButton("➕ 新建第一条规则", callback_data="fwed:new")],
+            [InlineKeyboardButton("« 返回主菜单", callback_data="menu:home")],
+        ])
+        return "📭 暂无规则\n\n点下面按钮开始建一条 ⬇️", kb
     chunk, page, pages = paginate(rules, page, per_page=5)
     lines = [f"📡 *搬运规则* — {len(rules)} 条 · 第 {page}/{pages} 页\n"]
+    from telegram import InlineKeyboardButton
+    rule_btns = []
     for r in chunk:
         status = "✅" if r.enabled else "🚫"
         plugin_keys = ",".join((r.plugins or {}).keys()) or "—"
@@ -84,7 +91,12 @@ async def _render_fwlist(page: int):
             f"   {r.source_chat} → {r.targets}\n"
             f"   插件: `{plugin_keys}` · 已转 {r.forwarded_count} · 丢弃 {r.dropped_count}"
         )
-    return "\n".join(lines), pager_keyboard("fwlist", page, pages)
+        rule_btns.append([InlineKeyboardButton(
+            f"🔧 编辑 #{r.id}", callback_data=f"fwed:open:{r.id}"
+        )])
+    rule_btns.append([InlineKeyboardButton("➕ 新建", callback_data="fwed:new")])
+    kb = pager_keyboard("fwlist", page, pages, extra=rule_btns)
+    return "\n".join(lines), kb
 
 
 @admin_only

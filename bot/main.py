@@ -20,8 +20,8 @@ from telegram.ext import (
 from .config import settings
 from .database import init_db
 from .handlers import (
-    admin, autoreply, backup, broadcast, common, forward_admin, group, ledger,
-    referral, router, subscription,
+    admin, autoreply, backup, broadcast, common, forward_admin, fw_editor,
+    group, ledger, referral, router, subscription,
 )
 from .logger import setup_logging
 from .scheduler import scheduler, set_bot_app, setup_jobs
@@ -143,6 +143,9 @@ def build_application() -> Application:
     app.add_handler(CallbackQueryHandler(subscription.subscription_callback, pattern=r"^sub:"))
     app.add_handler(CallbackQueryHandler(group.captcha_callback, pattern=r"^cap:"))
     app.add_handler(CallbackQueryHandler(admin.pager_callback, pattern=r"^(ulist|clist|fwlist):"))
+    app.add_handler(CallbackQueryHandler(fw_editor.editor_callback, pattern=r"^fwed:"))
+    app.add_handler(CallbackQueryHandler(fw_editor.wizard_skip_callback, pattern=r"^fwwz:"))
+    app.add_handler(CallbackQueryHandler(autoreply.ar_callback, pattern=r"^ar:"))
 
     # ---- chat 状态追踪 ----
     app.add_handler(

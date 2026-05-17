@@ -19,12 +19,15 @@ def main_menu(is_admin: bool = False) -> InlineKeyboardMarkup:
     if is_admin:
         rows.append(
             [
-                InlineKeyboardButton("📡 搬运规则", callback_data="menu:forward"),
-                InlineKeyboardButton("📣 群发中心", callback_data="menu:broadcast"),
+                InlineKeyboardButton("➕ 新建搬运", callback_data="fwed:new"),
+                InlineKeyboardButton("📡 我的搬运", callback_data="fwlist:1"),
             ]
         )
         rows.append(
-            [InlineKeyboardButton("⚙️ 管理面板", callback_data="menu:admin")]
+            [
+                InlineKeyboardButton("📣 群发中心", callback_data="menu:broadcast"),
+                InlineKeyboardButton("⚙️ 管理面板", callback_data="menu:admin"),
+            ]
         )
     return InlineKeyboardMarkup(rows)
 

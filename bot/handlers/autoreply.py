@@ -18,26 +18,42 @@ log = logging.getLogger(__name__)
 PANEL = """\
 💬 *自动回复*
 
-命令：
-• `/ar_add 关键词 ::: 回复内容` — 添加规则
-• `/ar_add_re 正则 ::: 回复内容` — 正则匹配
-• `/ar_list` — 列出当前群规则
-• `/ar_del <id>` — 删除规则
-• `/ar_toggle <id>` — 启用 / 停用
+最简单：直接发一行
+`/ar_add 关键词 ::: 回复内容`
 
-群组中由管理员配置；私聊中将作为全局规则（仅 bot 管理员可建）。
+例：
+  `/ar_add 价格 ::: 看这里 https://shop.com`
+  `/ar_add 客服 ::: 联系 @cs_username`
+
+更多：
+  `/ar_list` 看本群规则
+  `/ar_del <id>` 删除
+  `/ar_toggle <id>` 开关
+  `/ar_add_re ^正则$ ::: 内容` 正则匹配
 """
 
 
 async def open_autoreply_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    kb = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📋 看规则列表", callback_data="ar:list")],
+        [InlineKeyboardButton("« 返回主菜单", callback_data="menu:home")],
+    ])
     if update.callback_query:
         await update.callback_query.edit_message_text(
-            PANEL, parse_mode=ParseMode.MARKDOWN, reply_markup=back_home()
+            PANEL, parse_mode=ParseMode.MARKDOWN, reply_markup=kb
         )
     else:
         await update.effective_message.reply_text(
-            PANEL, parse_mode=ParseMode.MARKDOWN, reply_markup=back_home()
+            PANEL, parse_mode=ParseMode.MARKDOWN, reply_markup=kb
         )
+
+
+async def ar_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    q = update.callback_query
+    await q.answer()
+    if q.data == "ar:list":
+        await list_cmd(update, context)
 
 
 def _scope_for(update: Update) -> int | None:

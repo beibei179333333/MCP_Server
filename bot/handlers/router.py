@@ -31,6 +31,10 @@ async def text_router(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             if await ledger.quick_record(update, context):
                 context.user_data.pop("flow", None)
                 return
+        elif ftype in ("fw_wizard", "fw_edit"):
+            from . import fw_editor
+            if await fw_editor.handle_wizard_text(update, context):
+                return
 
     # 4) 私聊：尝试解析为记账
     if update.effective_chat.type == ChatType.PRIVATE:
