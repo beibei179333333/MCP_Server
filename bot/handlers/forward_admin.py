@@ -319,6 +319,249 @@ async def plugins_show(update, context):
 
 
 @admin_only
+async def chain_cmd(update, context):
+    """/fw_chain A B C [D...]  —— 一键建立链式搬运 A→B→C→…"""
+    if len(context.args) < 3:
+        await update.effective_message.reply_text(
+            "用法：`/fw_chain A B C [D...]`\n例：`/fw_chain @src @mid -1001234567890`",
+            parse_mode=ParseMode.MARKDOWN,
+        )
+        return
+    chain = context.args
+    if len(set(chain)) != len(chain):
+        await update.effective_message.reply_text("❌ 链中有重复节点，可能导致循环")
+        return
+    created = []
+    async with SessionLocal() as s:
+        for i in range(len(chain) - 1):
+            src, dst = chain[i], chain[i + 1]
+            rule = ForwardRule(
+                name=f"chain {src}→{dst}",
+                source_chat=src, targets=dst, plugins={},
+            )
+            s.add(rule)
+            await s.commit()
+            await s.refresh(rule)
+            created.append(rule.id)
+    from ..userbot import manager
+    manager.request_reload()
+    await update.effective_message.reply_text(
+        "✅ 链式搬运已建立：" + " → ".join(chain) + f"\n规则 IDs: {created}\n"
+        "⚠️ user-bot 必须在每个中间节点都能看到消息才有效。"
+    )
+
+
+@admin_only
+async def sender_cmd(update, context):
+    """/fw_sender <id> bot|user  —— 切换发送身份"""
+    if len(context.args) < 2 or context.args[1] not in ("bot", "user"):
+        await update.effective_message.reply_text(
+            "用法：`/fw_sender <id> bot|user`", parse_mode=ParseMode.MARKDOWN
+        )
+        return
+    try:
+        rid = int(context.args[0])
+    except ValueError:
+        await update.effective_message.reply_text("❌ id 必须是数字")
+        return
+    async with SessionLocal() as s:
+        rule = await s.get(ForwardRule, rid)
+        if not rule:
+            await update.effective_message.reply_text("❌ 规则不存在")
+            return
+        rule.sender = context.args[1]
+        await s.commit()
+    from ..userbot import manager
+    manager.request_reload()
+    await update.effective_message.reply_text(
+        f"✅ #{rid} 发送身份 = `{context.args[1]}`",
+        parse_mode=ParseMode.MARKDOWN,
+    )
+
+
+@admin_only
+async def topic_cmd(update, context):
+    """/fw_topic <id> source=N target=N  —— 设 Topic 过滤/目标"""
+    if len(context.args) < 2:
+        await update.effective_message.reply_text(
+            "用法：`/fw_topic <id> source=12 target=34`\n用 `none` 清除",
+            parse_mode=ParseMode.MARKDOWN,
+        )
+        return
+    try:
+        rid = int(context.args[0])
+    except ValueError:
+        await update.effective_message.reply_text("❌ id 必须是数字")
+        return
+    pairs = _kv_parse(context.args[1:])
+    async with SessionLocal() as s:
+        rule = await s.get(ForwardRule, rid)
+        if not rule:
+            await update.effective_message.reply_text("❌ 规则不存在")
+            return
+        if "source" in pairs:
+            v = pairs["source"]
+            rule.source_topic = None if v in ("none", "null", "0") else int(v)
+        if "target" in pairs:
+            v = pairs["target"]
+            rule.target_topic = None if v in ("none", "null", "0") else int(v)
+        await s.commit()
+    from ..userbot import manager
+    manager.request_reload()
+    await update.effective_message.reply_text(
+        f"✅ #{rid} Topic 已更新：源={rule.source_topic} 目标={rule.target_topic}"
+    )
+
+
+@admin_only
+async def folder_cmd(update, context):
+    """/fw_folder <id> <文件夹名>  —— 给规则归类"""
+    if len(context.args) < 2:
+        await update.effective_message.reply_text(
+            "用法：`/fw_folder <id> <文件夹名>`\n用 `-` 清除", parse_mode=ParseMode.MARKDOWN
+        )
+        return
+    try:
+        rid = int(context.args[0])
+    except ValueError:
+        await update.effective_message.reply_text("❌ id 必须是数字")
+        return
+    folder = " ".join(context.args[1:])
+    async with SessionLocal() as s:
+        rule = await s.get(ForwardRule, rid)
+        if not rule:
+            await update.effective_message.reply_text("❌ 规则不存在")
+            return
+        rule.folder = None if folder == "-" else folder
+        await s.commit()
+    await update.effective_message.reply_text(f"✅ #{rid} 文件夹 = {rule.folder or '(无)'}")
+
+
+@admin_only
+async def folders_cmd(update, context):
+    """/fw_folders —— 按文件夹列出所有规则"""
+    async with SessionLocal() as s:
+        rules = (await s.execute(select(ForwardRule).order_by(ForwardRule.folder, ForwardRule.id))).scalars().all()
+    if not rules:
+        await update.effective_message.reply_text("📭 暂无规则")
+        return
+    groups: dict = {}
+    for r in rules:
+        groups.setdefault(r.folder or "(未分组)", []).append(r)
+    lines = ["📁 *规则按文件夹*\n"]
+    for folder, items in groups.items():
+        lines.append(f"\n📂 *{folder}* ({len(items)})")
+        for r in items:
+            mark = "✅" if r.enabled else "🚫"
+            lines.append(f"  {mark} #{r.id} {r.name}  {r.source_chat}→{r.targets}")
+    await update.effective_message.reply_text("\n".join(lines), parse_mode=ParseMode.MARKDOWN)
+
+
+@admin_only
+async def sync_cmd(update, context):
+    """/fw_sync <id> edits=1 deletes=1  —— 开启编辑/删除同步"""
+    if len(context.args) < 2:
+        await update.effective_message.reply_text(
+            "用法：`/fw_sync <id> edits=1 deletes=1`", parse_mode=ParseMode.MARKDOWN
+        )
+        return
+    try:
+        rid = int(context.args[0])
+    except ValueError:
+        await update.effective_message.reply_text("❌ id 必须是数字")
+        return
+    pairs = _kv_parse(context.args[1:])
+    async with SessionLocal() as s:
+        rule = await s.get(ForwardRule, rid)
+        if not rule:
+            await update.effective_message.reply_text("❌ 规则不存在")
+            return
+        if "edits" in pairs:
+            rule.sync_edits = pairs["edits"] in ("1", "true", "yes", "on")
+        if "deletes" in pairs:
+            rule.sync_deletes = pairs["deletes"] in ("1", "true", "yes", "on")
+        await s.commit()
+    await update.effective_message.reply_text(
+        f"✅ #{rid} 编辑同步={rule.sync_edits} 删除同步={rule.sync_deletes}"
+    )
+
+
+@admin_only
+async def buttons_cmd(update, context):
+    """/fw_buttons <id> 标签1|URL1 ; 标签2|URL2  ——  给转发消息附加按钮"""
+    raw = update.effective_message.text or ""
+    parts = raw.split(maxsplit=2)
+    if len(parts) < 3:
+        await update.effective_message.reply_text(
+            "用法：`/fw_buttons <id> 关注频道|https://t.me/xxx ; 加客服|https://t.me/cs`\n"
+            "用 `-` 清除",
+            parse_mode=ParseMode.MARKDOWN,
+        )
+        return
+    try:
+        rid = int(parts[1])
+    except ValueError:
+        await update.effective_message.reply_text("❌ id 必须是数字")
+        return
+    body = parts[2].strip()
+    rows = []
+    if body != "-":
+        for seg in body.split(";"):
+            seg = seg.strip()
+            if "|" not in seg:
+                continue
+            label, url = seg.split("|", 1)
+            rows.append([{"label": label.strip(), "url": url.strip()}])
+    async with SessionLocal() as s:
+        rule = await s.get(ForwardRule, rid)
+        if not rule:
+            await update.effective_message.reply_text("❌ 规则不存在")
+            return
+        cfg = dict(rule.plugins or {})
+        if rows:
+            cfg["buttons"] = {"rows": rows}
+        else:
+            cfg.pop("buttons", None)
+        rule.plugins = cfg
+        await s.commit()
+    from ..userbot import manager
+    manager.request_reload()
+    await update.effective_message.reply_text(
+        f"✅ #{rid} 按钮 = {len(rows)} 行"
+    )
+
+
+@admin_only
+async def ai_cmd(update, context):
+    """/fw_ai <id> action=rewrite [target_lang=zh] [tone=正式]"""
+    if len(context.args) < 2:
+        await update.effective_message.reply_text(
+            "用法：`/fw_ai <id> action=rewrite|translate|summarize|polish|tone|extract`\n"
+            "可选：`target_lang=zh tone=正式 max_chars=4000`",
+            parse_mode=ParseMode.MARKDOWN,
+        )
+        return
+    try:
+        rid = int(context.args[0])
+    except ValueError:
+        await update.effective_message.reply_text("❌ id 必须是数字")
+        return
+    pairs = _kv_parse(context.args[1:])
+    async with SessionLocal() as s:
+        rule = await s.get(ForwardRule, rid)
+        if not rule:
+            await update.effective_message.reply_text("❌ 规则不存在")
+            return
+        cfg = dict(rule.plugins or {})
+        cfg["ai"] = pairs or {"action": "rewrite"}
+        rule.plugins = cfg
+        await s.commit()
+    from ..userbot import manager
+    manager.request_reload()
+    await update.effective_message.reply_text(f"✅ #{rid} AI 插件已配置：{pairs}")
+
+
+@admin_only
 async def quick_forward_cmd(update, context):
     """/qf 源 目标 [黑名单逗号分隔] —— 一键创建带黑名单的搬运规则。"""
     if len(context.args) < 2:

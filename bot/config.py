@@ -93,6 +93,21 @@ class Settings:
     )
     web_password: str = field(default_factory=lambda: os.getenv("WEB_PASSWORD", ""))
 
+    # ---- AI（OpenAI 兼容协议：OpenAI/DeepSeek/Moonshot/智谱/Together…） ----
+    ai_provider: str = field(default_factory=lambda: os.getenv("AI_PROVIDER", "openai"))
+    ai_api_key: str = field(default_factory=lambda: os.getenv("AI_API_KEY", ""))
+    ai_base_url: str = field(default_factory=lambda: os.getenv("AI_BASE_URL", "https://api.openai.com/v1"))
+    ai_model: str = field(default_factory=lambda: os.getenv("AI_MODEL", "gpt-4o-mini"))
+    ai_timeout: int = field(default_factory=lambda: int(os.getenv("AI_TIMEOUT", "30")))
+
+    # ---- 返佣 / MMO ----
+    referral_commission: float = field(
+        default_factory=lambda: float(os.getenv("REFERRAL_COMMISSION", "0.20"))
+    )
+    referral_min_withdraw: float = field(
+        default_factory=lambda: float(os.getenv("REFERRAL_MIN_WITHDRAW", "50"))
+    )
+
     # ---- 多语言 ----
     default_lang: str = field(default_factory=lambda: os.getenv("DEFAULT_LANG", "zh"))
 

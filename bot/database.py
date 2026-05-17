@@ -117,6 +117,16 @@ class ForwardRule(Base):
     targets: Mapped[str] = mapped_column(Text)
     # 模式：live = 实时，past = 历史（一次性回填）
     mode: Mapped[str] = mapped_column(String(8), default="live")
+    # 发送身份：user = user-bot 用你账号发，bot = 机器人发
+    sender: Mapped[str] = mapped_column(String(8), default="user")
+    # 编辑 / 删除同步
+    sync_edits: Mapped[bool] = mapped_column(Boolean, default=False)
+    sync_deletes: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Topic 支持（论坛超级群）
+    source_topic: Mapped[Optional[int]] = mapped_column(Integer)
+    target_topic: Mapped[Optional[int]] = mapped_column(Integer)
+    # 任务分组
+    folder: Mapped[Optional[str]] = mapped_column(String(64), index=True)
     # 插件链配置（JSON），按顺序应用
     plugins: Mapped[dict] = mapped_column(JSON, default=dict)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -124,6 +134,42 @@ class ForwardRule(Base):
     dropped_count: Mapped[int] = mapped_column(Integer, default=0)
     last_message_id: Mapped[Optional[int]] = mapped_column(BigInteger)  # 用于断点续传
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class ForwardedMapping(Base):
+    """搬运消息映射表：用于编辑/删除同步。"""
+
+    __tablename__ = "forwarded_mappings"
+    __table_args__ = (
+        Index("ix_fwm_src", "rule_id", "src_chat_id", "src_msg_id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    rule_id: Mapped[int] = mapped_column(Integer, index=True)
+    src_chat_id: Mapped[int] = mapped_column(BigInteger)
+    src_msg_id: Mapped[int] = mapped_column(BigInteger)
+    dst_chat: Mapped[str] = mapped_column(String(128))
+    dst_msg_id: Mapped[int] = mapped_column(BigInteger)
+    sent_by: Mapped[str] = mapped_column(String(8), default="user")  # user / bot
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class Withdrawal(Base):
+    """佣金提现申请。"""
+
+    __tablename__ = "withdrawals"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    points: Mapped[int] = mapped_column(Integer)
+    amount: Mapped[float] = mapped_column(Float)  # 折算金额
+    currency: Mapped[str] = mapped_column(String(8), default="CNY")
+    method: Mapped[str] = mapped_column(String(32))  # usdt / alipay / wechat
+    account: Mapped[str] = mapped_column(String(255))
+    status: Mapped[str] = mapped_column(String(16), default="pending")
+    note: Mapped[Optional[str]] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    settled_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
 
 # =============================================================
@@ -330,9 +376,9 @@ SessionLocal = async_sessionmaker(_engine, expire_on_commit=False)
 async def init_db() -> None:
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        # SQLAlchemy create_all 对已有库不会新建索引；手动 IF NOT EXISTS 补一次
         if _engine.url.drivername.startswith("sqlite"):
             from sqlalchemy import text
+            # 已有库补索引
             patches = [
                 "CREATE INDEX IF NOT EXISTS ix_entries_kind_time ON ledger_entries(kind, occurred_at)",
                 "CREATE INDEX IF NOT EXISTS ix_rules_enabled_mode ON forward_rules(enabled, mode)",
@@ -343,6 +389,20 @@ async def init_db() -> None:
                 "CREATE INDEX IF NOT EXISTS ix_chat_active ON chats(is_active)",
             ]
             for sql in patches:
+                try:
+                    await conn.execute(text(sql))
+                except Exception:
+                    pass
+            # 旧 forward_rules 表补新字段（SQLite 不支持 IF NOT EXISTS 列）
+            alters = [
+                "ALTER TABLE forward_rules ADD COLUMN sender VARCHAR(8) DEFAULT 'user'",
+                "ALTER TABLE forward_rules ADD COLUMN sync_edits BOOLEAN DEFAULT 0",
+                "ALTER TABLE forward_rules ADD COLUMN sync_deletes BOOLEAN DEFAULT 0",
+                "ALTER TABLE forward_rules ADD COLUMN source_topic INTEGER",
+                "ALTER TABLE forward_rules ADD COLUMN target_topic INTEGER",
+                "ALTER TABLE forward_rules ADD COLUMN folder VARCHAR(64)",
+            ]
+            for sql in alters:
                 try:
                     await conn.execute(text(sql))
                 except Exception:

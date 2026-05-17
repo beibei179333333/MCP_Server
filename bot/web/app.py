@@ -25,6 +25,7 @@ from ..database import (
     SessionLocal,
     Subscription,
     User,
+    Withdrawal,
 )
 
 log = logging.getLogger(__name__)
@@ -250,6 +251,26 @@ def create_app() -> FastAPI:
             {"request": request,
              "settings": settings,
              "host_link": f"http://{request.url.hostname}:{settings.web_port}"},
+        )
+
+    @app.get("/referrals", response_class=HTMLResponse)
+    async def refs(request: Request):
+        if not _is_auth(request):
+            return RedirectResponse("/login")
+        async with SessionLocal() as s:
+            top = (
+                await s.execute(
+                    select(User).where(User.referrals > 0)
+                    .order_by(User.referrals.desc()).limit(50)
+                )
+            ).scalars().all()
+            wds = (
+                await s.execute(
+                    select(Withdrawal).order_by(Withdrawal.id.desc()).limit(50)
+                )
+            ).scalars().all()
+        return templates.TemplateResponse(
+            "referrals.html", {"request": request, "top": top, "wds": wds}
         )
 
     @app.get("/healthz")

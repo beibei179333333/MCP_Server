@@ -20,8 +20,12 @@ def build_chain(plugins_cfg: dict | None) -> PluginChain:
     plugins_cfg = plugins_cfg or {}
     ordered_keys = [
         "filter", "media", "length", "sender", "dedupe",
-        "replace", "raw", "format", "caption", "watermark",
-        "delay",  # 延迟放最后，发送前等待
+        "btn2text",      # 先把原按钮转文本（依赖 ctx.extra.source_buttons）
+        "replace", "raw", "format",
+        "ai",            # AI 改写在替换之后、加 caption 之前
+        "caption", "watermark",
+        "buttons",       # 加新按钮放最后（写入 ctx.extra.buttons 供发送时读取）
+        "delay",
     ]
     chain: list[BasePlugin] = []
     for key in ordered_keys:
@@ -35,3 +39,5 @@ from . import filters as _filters     # noqa: E402,F401
 from . import transforms as _trans     # noqa: E402,F401
 from . import watermark as _wm         # noqa: E402,F401
 from . import advanced as _adv         # noqa: E402,F401
+from . import buttons as _btn          # noqa: E402,F401
+from . import ai as _ai                # noqa: E402,F401

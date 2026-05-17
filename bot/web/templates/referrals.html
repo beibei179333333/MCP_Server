@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>🎁 推广 / 返佣</h1>
+
+<h1 style="font-size:18px;margin-top:20px;">🏆 邀请榜（Top 50）</h1>
+<table>
+  <tr><th>用户</th><th>邀请人数</th><th>积分</th></tr>
+  {% for u in top %}
+  <tr>
+    <td>{{ u.first_name or '' }} {% if u.username %}@{{ u.username }}{% else %}<code>{{ u.id }}</code>{% endif %}</td>
+    <td><strong>{{ u.referrals }}</strong></td>
+    <td>{{ u.points }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="3" style="text-align:center;color:#8899a6;">暂无</td></tr>
+  {% endfor %}
+</table>
+
+<h1 style="font-size:18px;margin-top:24px;">💸 提现申请</h1>
+<table>
+  <tr><th>ID</th><th>用户</th><th>金额</th><th>方式</th><th>账号</th><th>状态</th><th>申请时间</th></tr>
+  {% for w in wds %}
+  <tr>
+    <td>#{{ w.id }}</td>
+    <td><code>{{ w.user_id }}</code></td>
+    <td>{{ '%.2f' | format(w.amount) }} {{ w.currency }}</td>
+    <td>{{ w.method }}</td>
+    <td><code>{{ w.account[:30] }}</code></td>
+    <td>
+      {% if w.status == 'settled' %}<span class="badge badge-ok">已打款</span>
+      {% elif w.status == 'rejected' %}<span class="badge badge-err">已驳回</span>
+      {% else %}<span class="badge badge-pending">待处理</span>{% endif %}
+    </td>
+    <td>{{ w.created_at.strftime('%m-%d %H:%M') }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="7" style="text-align:center;color:#8899a6;">暂无</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

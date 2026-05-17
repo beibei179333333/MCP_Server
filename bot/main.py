@@ -21,11 +21,11 @@ from .config import settings
 from .database import init_db
 from .handlers import (
     admin, autoreply, backup, broadcast, common, forward_admin, group, ledger,
-    router, subscription,
+    referral, router, subscription,
 )
 from .logger import setup_logging
 from .scheduler import scheduler, set_bot_app, setup_jobs
-from .userbot import manager as forward_manager, start_userbot
+from .userbot import manager as forward_manager, set_bot_app as set_userbot_app, start_userbot
 from .web.app import start_web
 
 
@@ -91,6 +91,24 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("fw_backfill", forward_admin.backfill_cmd))
     app.add_handler(CommandHandler("fw_preview", forward_admin.preview_cmd))
     app.add_handler(CommandHandler("qf", forward_admin.quick_forward_cmd))
+    app.add_handler(CommandHandler("fw_chain", forward_admin.chain_cmd))
+    app.add_handler(CommandHandler("fw_sender", forward_admin.sender_cmd))
+    app.add_handler(CommandHandler("fw_topic", forward_admin.topic_cmd))
+    app.add_handler(CommandHandler("fw_folder", forward_admin.folder_cmd))
+    app.add_handler(CommandHandler("fw_folders", forward_admin.folders_cmd))
+    app.add_handler(CommandHandler("fw_sync", forward_admin.sync_cmd))
+    app.add_handler(CommandHandler("fw_buttons", forward_admin.buttons_cmd))
+    app.add_handler(CommandHandler("fw_ai", forward_admin.ai_cmd))
+
+    # ---- 推广 / 返佣 ----
+    app.add_handler(CommandHandler("myref", referral.myref_cmd))
+    app.add_handler(CommandHandler("withdraw", referral.withdraw_cmd))
+    app.add_handler(CommandHandler("toplist", referral.toplist_cmd))
+    app.add_handler(CommandHandler("wd_approve", referral.wd_approve))
+    app.add_handler(CommandHandler("wd_reject", referral.wd_reject))
+
+    # ---- AI ----
+    app.add_handler(CommandHandler("ai", common.ai_query_cmd))
 
     async def fw_reload(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         from .utils import is_admin
@@ -160,6 +178,7 @@ async def _run() -> None:
 
     app = build_application()
     set_bot_app(app)
+    set_userbot_app(app)
     setup_jobs()
 
     await app.initialize()

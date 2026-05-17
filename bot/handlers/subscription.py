@@ -154,7 +154,14 @@ async def _grant(user_id: int, plan: SubscriptionPlan) -> Subscription:
         s.add(sub)
         await s.commit()
         await s.refresh(sub)
-        return sub
+    # 触发返佣（仅付费套餐）
+    if plan.price > 0:
+        try:
+            from .referral import credit_referral_commission
+            await credit_referral_commission(user_id, plan.price)
+        except Exception as e:  # noqa: BLE001
+            log.warning("返佣失败: %s", e)
+    return sub
 
 
 @admin_only

@@ -73,19 +73,46 @@ HELP_TOPICS = {
     ),
     "forward": (
         "🔹 *搬运*（管理员）\n\n"
-        "*一键创建*：\n"
-        "  `/qf 源 目标 黑名单A,黑名单B`\n\n"
-        "*详细*：\n"
-        "  /fw_add 源 目标[,目标2] [名字]\n"
+        "*快捷*：\n"
+        "  `/qf 源 目标 黑名单A,B` — 一键创建\n"
+        "  `/fw_chain A B C` — 链式 A→B→C\n\n"
+        "*插件配置*：\n"
         "  /fw_filter <id> kw=A,B bl=C,D\n"
         "  /fw_replace <id> 原文 => 新文\n"
         "  /fw_caption <id> header=🔥 | footer=—@CH\n"
         "  /fw_format <id> links=1 mentions=1 emoji=0\n"
         "  /fw_media <id> allow=photo,video,text\n"
         "  /fw_watermark <id> @MyChannel\n"
+        "  /fw_buttons <id> 标签1|URL1 ; 标签2|URL2\n"
+        "  /fw_ai <id> action=rewrite (translate/summarize…)\n\n"
+        "*行为开关*：\n"
+        "  /fw_sender <id> bot|user — 用谁发\n"
+        "  /fw_sync <id> edits=1 deletes=1 — 编辑/删除同步\n"
+        "  /fw_topic <id> source=N target=N — Topic 过滤\n"
+        "  /fw_folder <id> 文件夹名 — 任务分组\n\n"
+        "*运维*：\n"
         "  /fw_backfill <id> 200 — 历史回填\n"
-        "  /fw_preview <id> 样本文本 — 试丢/转\n"
-        "  /fw_list /fw_toggle /fw_del /fw_reload"
+        "  /fw_preview <id> 样本 — 试丢/转\n"
+        "  /fw_plugins <id> — 看完整 JSON\n"
+        "  /fw_list /fw_folders /fw_toggle /fw_del /fw_reload"
+    ),
+    "referral": (
+        "🔹 *推广返佣*\n\n"
+        "/myref — 我的邀请链接 + 数据\n"
+        "/toplist — 邀请榜 Top 10\n"
+        "/withdraw <方式> <账号> — 申请提现\n\n"
+        "管理员：/wd_approve <id> · /wd_reject <id> 原因"
+    ),
+    "ai": (
+        "🔹 *AI*\n\n"
+        "/ai <问题> — 通用问答\n\n"
+        "搬运里给规则加 AI 改写/翻译：\n"
+        "  /fw_ai <id> action=rewrite\n"
+        "  /fw_ai <id> action=translate target_lang=英文\n"
+        "  /fw_ai <id> action=summarize\n"
+        "  /fw_ai <id> action=polish\n"
+        "  /fw_ai <id> action=tone tone=活泼\n\n"
+        "在 .env 配 `AI_API_KEY` 任何兼容 OpenAI 协议的服务都可（DeepSeek/Moonshot/智谱/官方 OpenAI）。"
     ),
     "group": (
         "🔹 *群组管理*（群管理员）\n\n"
@@ -124,6 +151,8 @@ def _help_keyboard() -> InlineKeyboardMarkup:
             [InlineKeyboardButton("📡 搬运", callback_data="help:forward"),
              InlineKeyboardButton("👋 群组", callback_data="help:group")],
             [InlineKeyboardButton("💎 订阅", callback_data="help:sub"),
+             InlineKeyboardButton("🎁 推广", callback_data="help:referral")],
+            [InlineKeyboardButton("🤖 AI", callback_data="help:ai"),
              InlineKeyboardButton("⚙️ 管理员", callback_data="help:admin")],
             [InlineKeyboardButton("« 返回主菜单", callback_data="menu:home")],
         ]
@@ -132,11 +161,46 @@ def _help_keyboard() -> InlineKeyboardMarkup:
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await upsert_user(update)
+    # 解析 /start ref_<uid> 推广链接
+    if context.args:
+        payload = context.args[0]
+        if payload.startswith("ref_"):
+            from .referral import handle_start_payload
+            await handle_start_payload(update, payload)
     user = update.effective_user
     is_a = bool(user and is_admin(user.id))
     await update.effective_message.reply_text(
         WELCOME, parse_mode=ParseMode.MARKDOWN, reply_markup=main_menu(is_a)
     )
+
+
+async def ai_query_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """/ai <问题> —— 通用 AI 问答"""
+    raw = update.effective_message.text or ""
+    parts = raw.split(maxsplit=1)
+    if len(parts) < 2:
+        await update.effective_message.reply_text(
+            "用法：`/ai <问题>`\n例：`/ai 用 3 句话介绍 Telegram Bot`",
+            parse_mode=ParseMode.MARKDOWN,
+        )
+        return
+    from ..plugins.ai import quick_chat
+    from ..config import settings
+    if not settings.ai_api_key:
+        await update.effective_message.reply_text(
+            "⚠️ AI 未配置。请在 `.env` 里设置 `AI_API_KEY` 后重启。",
+            parse_mode=ParseMode.MARKDOWN,
+        )
+        return
+    thinking = await update.effective_message.reply_text("🤔 思考中…")
+    answer = await quick_chat(parts[1])
+    if answer is None:
+        await thinking.edit_text("❌ AI 调用失败（看日志）")
+        return
+    try:
+        await thinking.edit_text(answer[:4000])
+    except Exception:
+        await update.effective_message.reply_text(answer[:4000])
 
 
 async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
