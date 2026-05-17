@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>👥 用户管理 <small style="color:#8899a6;font-weight:400;font-size:14px;">（{{ users|length }}）</small></h1>
+<form method="get" style="margin-bottom:16px;">
+  <input class="search" name="q" placeholder="搜索用户名 / 名字" value="{{ q }}">
+  <button>搜索</button>
+</form>
+<table>
+  <tr><th>ID</th><th>用户名</th><th>姓名</th><th>语言</th><th>标签</th><th>状态</th><th>最近活跃</th></tr>
+  {% for u in users %}
+  <tr>
+    <td><code>{{ u.id }}</code></td>
+    <td>{% if u.username %}@{{ u.username }}{% else %}—{% endif %}</td>
+    <td>{{ (u.first_name or '') + ' ' + (u.last_name or '') }}</td>
+    <td>{{ u.language or '—' }}</td>
+    <td>{{ u.tags or '—' }}</td>
+    <td>
+      {% if u.is_admin %}<span class="badge badge-ok">admin</span>{% endif %}
+      {% if u.is_blocked %}<span class="badge badge-err">blocked</span>{% endif %}
+      {% if u.is_banned %}<span class="badge badge-err">banned</span>{% endif %}
+    </td>
+    <td>{{ u.last_seen.strftime('%Y-%m-%d %H:%M') }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>💬 群组 / 频道 <small style="color:#8899a6;font-weight:400;font-size:14px;">（{{ chats|length }}）</small></h1>
+{% if not chats %}
+<p style="color:#8899a6;">机器人尚未被加入任何群组或频道。在 Telegram 把它拉进去后会自动出现。</p>
+{% endif %}
+<table>
+  <tr><th>类型</th><th>标题</th><th>用户名 / ID</th><th>加入时间</th></tr>
+  {% for c in chats %}
+  <tr>
+    <td><span class="badge {% if c.type=='channel' %}badge-pending{% else %}badge-ok{% endif %}">{{ c.type }}</span></td>
+    <td>{{ c.title or '—' }}</td>
+    <td>{% if c.username %}@{{ c.username }}{% else %}<code>{{ c.id }}</code>{% endif %}</td>
+    <td>{{ c.joined_at.strftime('%Y-%m-%d %H:%M') }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

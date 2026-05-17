@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Bot 控制台{% endblock %}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif; margin: 0; background: #0f1419; color: #e0e6ed; }
+    .nav { background: #15202b; padding: 14px 28px; display: flex; gap: 24px; align-items: center; border-bottom: 1px solid #253341; }
+    .nav .brand { font-weight: 700; font-size: 18px; color: #1da1f2; }
+    .nav a { color: #8899a6; text-decoration: none; transition: color 0.2s; }
+    .nav a:hover, .nav a.active { color: #fff; }
+    .nav .spacer { flex: 1; }
+    .container { padding: 28px; max-width: 1240px; margin: 0 auto; }
+    h1 { margin: 0 0 24px; font-size: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: #15202b; border: 1px solid #253341; border-radius: 10px; padding: 18px; }
+    .card .label { color: #8899a6; font-size: 13px; }
+    .card .value { font-size: 28px; font-weight: 700; margin-top: 6px; color: #1da1f2; }
+    table { width: 100%; border-collapse: collapse; background: #15202b; border-radius: 10px; overflow: hidden; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #253341; font-size: 14px; }
+    th { background: #1c2732; color: #8899a6; font-weight: 600; }
+    tr:hover { background: #1c2732; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .badge-ok { background: rgba(0, 186, 124, 0.15); color: #00ba7c; }
+    .badge-err { background: rgba(244, 33, 46, 0.15); color: #f4212e; }
+    .badge-pending { background: rgba(255, 173, 31, 0.15); color: #ffad1f; }
+    button, .btn { background: #1da1f2; color: white; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-block; }
+    button:hover, .btn:hover { background: #1a91da; }
+    .btn-danger { background: #f4212e; }
+    .btn-danger:hover { background: #d11920; }
+    form { display: inline; }
+    .search { padding: 8px 12px; background: #1c2732; border: 1px solid #253341; color: #fff; border-radius: 6px; width: 280px; }
+    .login-wrap { max-width: 360px; margin: 100px auto; padding: 32px; background: #15202b; border-radius: 12px; }
+    .login-wrap h2 { margin-top: 0; }
+    .login-wrap input { width: 100%; padding: 10px 12px; margin-bottom: 12px; background: #0f1419; border: 1px solid #253341; color: #fff; border-radius: 6px; }
+    .login-wrap button { width: 100%; padding: 11px; font-size: 15px; }
+    .err { background: rgba(244, 33, 46, 0.15); color: #f4212e; padding: 10px; border-radius: 6px; margin-bottom: 14px; }
+    code { background: #0f1419; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  {% if request.session.get('user') %}
+  <div class="nav">
+    <span class="brand">⚡ Bot Console</span>
+    <a href="/">仪表盘</a>
+    <a href="/users">用户</a>
+    <a href="/chats">群组</a>
+    <a href="/rules">搬运</a>
+    <a href="/autoreplies">自动回复</a>
+    <a href="/broadcasts">群发</a>
+    <a href="/ledger">记账</a>
+    <a href="/subs">订阅</a>
+    <a href="/referrals">推广</a>
+    <a href="/settings">设置</a>
+    <span class="spacer"></span>
+    <a href="/healthz" target="_blank" style="font-size:12px;">健康检查</a>
+    <a href="/logout">退出</a>
+  </div>
+  {% endif %}
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

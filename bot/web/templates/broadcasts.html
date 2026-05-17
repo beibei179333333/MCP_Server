@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>📣 群发历史</h1>
+<table>
+  <tr><th>ID</th><th>标题/内容</th><th>状态</th><th>目标</th><th>成功/失败/总</th><th>计划</th><th>结束</th></tr>
+  {% for j in jobs %}
+  <tr>
+    <td>#{{ j.id }}</td>
+    <td>{{ (j.title or j.content)[:60] }}</td>
+    <td>
+      {% if j.status == 'done' %}<span class="badge badge-ok">完成</span>
+      {% elif j.status == 'running' %}<span class="badge badge-pending">进行中</span>
+      {% elif j.status == 'failed' %}<span class="badge badge-err">失败</span>
+      {% else %}<span class="badge badge-pending">等待</span>{% endif %}
+    </td>
+    <td>{{ j.target_type }}{% if j.target_tag %} [{{ j.target_tag }}]{% endif %}</td>
+    <td>{{ j.sent }} / {{ j.failed }} / {{ j.total }}</td>
+    <td>{{ j.scheduled_at.strftime('%m-%d %H:%M') if j.scheduled_at else '—' }}</td>
+    <td>{{ j.finished_at.strftime('%m-%d %H:%M') if j.finished_at else '—' }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

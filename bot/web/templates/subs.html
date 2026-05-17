@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>💎 订阅</h1>
+<table>
+  <tr><th>ID</th><th>用户</th><th>套餐</th><th>状态</th><th>开始</th><th>到期</th></tr>
+  {% for s in subs %}
+  <tr>
+    <td>#{{ s.id }}</td>
+    <td><code>{{ s.user_id }}</code></td>
+    <td>{{ s.plan_id }}</td>
+    <td>
+      {% if s.status == 'active' %}<span class="badge badge-ok">{{ s.status }}</span>
+      {% else %}<span class="badge badge-err">{{ s.status }}</span>{% endif %}
+    </td>
+    <td>{{ s.started_at.strftime('%Y-%m-%d') }}</td>
+    <td>{{ s.expires_at.strftime('%Y-%m-%d') }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h1 style="margin-top:32px;">💳 付款记录</h1>
+<table>
+  <tr><th>ID</th><th>用户</th><th>金额</th><th>方式</th><th>状态</th><th>创建</th><th>付款</th></tr>
+  {% for p in pays %}
+  <tr>
+    <td>#{{ p.id }}</td>
+    <td><code>{{ p.user_id }}</code></td>
+    <td>{{ '%.2f' | format(p.amount) }} {{ p.currency }}</td>
+    <td>{{ p.method }}</td>
+    <td>
+      {% if p.status == 'paid' %}<span class="badge badge-ok">已付</span>
+      {% elif p.status == 'pending' %}<span class="badge badge-pending">待付</span>
+      {% else %}<span class="badge badge-err">{{ p.status }}</span>{% endif %}
+    </td>
+    <td>{{ p.created_at.strftime('%m-%d %H:%M') }}</td>
+    <td>{{ p.paid_at.strftime('%m-%d %H:%M') if p.paid_at else '—' }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
