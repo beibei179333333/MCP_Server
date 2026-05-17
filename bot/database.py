@@ -311,6 +311,13 @@ class ReferralCode(Base):
 
 
 Index("ix_entries_owner_time", LedgerEntry.account_id, LedgerEntry.occurred_at)
+Index("ix_entries_kind_time", LedgerEntry.kind, LedgerEntry.occurred_at)
+Index("ix_rules_enabled_mode", ForwardRule.enabled, ForwardRule.mode)
+Index("ix_jobs_status_sched", BroadcastJob.status, BroadcastJob.scheduled_at)
+Index("ix_subs_user_status", Subscription.user_id, Subscription.status)
+Index("ix_users_blocked", User.is_blocked, User.is_banned)
+Index("ix_ar_scope_enabled", AutoReply.scope_chat_id, AutoReply.enabled)
+Index("ix_chat_active", Chat.is_active)
 
 
 # =============================================================
@@ -323,6 +330,23 @@ SessionLocal = async_sessionmaker(_engine, expire_on_commit=False)
 async def init_db() -> None:
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        # SQLAlchemy create_all 对已有库不会新建索引；手动 IF NOT EXISTS 补一次
+        if _engine.url.drivername.startswith("sqlite"):
+            from sqlalchemy import text
+            patches = [
+                "CREATE INDEX IF NOT EXISTS ix_entries_kind_time ON ledger_entries(kind, occurred_at)",
+                "CREATE INDEX IF NOT EXISTS ix_rules_enabled_mode ON forward_rules(enabled, mode)",
+                "CREATE INDEX IF NOT EXISTS ix_jobs_status_sched ON broadcast_jobs(status, scheduled_at)",
+                "CREATE INDEX IF NOT EXISTS ix_subs_user_status ON subscriptions(user_id, status)",
+                "CREATE INDEX IF NOT EXISTS ix_users_blocked ON users(is_blocked, is_banned)",
+                "CREATE INDEX IF NOT EXISTS ix_ar_scope_enabled ON auto_replies(scope_chat_id, enabled)",
+                "CREATE INDEX IF NOT EXISTS ix_chat_active ON chats(is_active)",
+            ]
+            for sql in patches:
+                try:
+                    await conn.execute(text(sql))
+                except Exception:
+                    pass
     await _seed_defaults()
 
 

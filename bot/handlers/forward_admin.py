@@ -68,15 +68,15 @@ async def add_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
-@admin_only
-async def list_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def _render_fwlist(page: int):
+    from ..utils import paginate, pager_keyboard
     async with SessionLocal() as s:
         rules = (await s.execute(select(ForwardRule).order_by(ForwardRule.id))).scalars().all()
     if not rules:
-        await update.effective_message.reply_text("📭 暂无规则")
-        return
-    lines = ["📡 *搬运规则*\n"]
-    for r in rules:
+        return "📭 暂无规则", None
+    chunk, page, pages = paginate(rules, page, per_page=5)
+    lines = [f"📡 *搬运规则* — {len(rules)} 条 · 第 {page}/{pages} 页\n"]
+    for r in chunk:
         status = "✅" if r.enabled else "🚫"
         plugin_keys = ",".join((r.plugins or {}).keys()) or "—"
         lines.append(
@@ -84,9 +84,13 @@ async def list_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             f"   {r.source_chat} → {r.targets}\n"
             f"   插件: `{plugin_keys}` · 已转 {r.forwarded_count} · 丢弃 {r.dropped_count}"
         )
-    await update.effective_message.reply_text(
-        "\n".join(lines), parse_mode=ParseMode.MARKDOWN
-    )
+    return "\n".join(lines), pager_keyboard("fwlist", page, pages)
+
+
+@admin_only
+async def list_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    text, kb = await _render_fwlist(1)
+    await update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN, reply_markup=kb)
 
 
 @admin_only
@@ -311,6 +315,77 @@ async def plugins_show(update, context):
         body = json.dumps(rule.plugins or {}, ensure_ascii=False, indent=2)
     await update.effective_message.reply_text(
         f"```json\n{body}\n```", parse_mode=ParseMode.MARKDOWN
+    )
+
+
+@admin_only
+async def quick_forward_cmd(update, context):
+    """/qf 源 目标 [黑名单逗号分隔] —— 一键创建带黑名单的搬运规则。"""
+    if len(context.args) < 2:
+        await update.effective_message.reply_text(
+            "用法：`/qf 源 目标 [黑名单A,黑名单B,...]`\n"
+            "例：`/qf @news_src -1001234567890 广告,赌博,色情`",
+            parse_mode=ParseMode.MARKDOWN,
+        )
+        return
+    source = context.args[0]
+    target = context.args[1]
+    blacklist = []
+    if len(context.args) > 2:
+        blacklist = [w.strip() for w in context.args[2].split(",") if w.strip()]
+    name = f"{source}→{target}"
+    plugins = {}
+    if blacklist:
+        plugins["filter"] = {"blacklist": blacklist}
+    async with SessionLocal() as s:
+        rule = ForwardRule(
+            name=name, source_chat=source, targets=target, plugins=plugins
+        )
+        s.add(rule)
+        await s.commit()
+        await s.refresh(rule)
+    from ..userbot import manager
+    manager.request_reload()
+    tail = f"\n黑名单：{', '.join(blacklist)}" if blacklist else ""
+    await update.effective_message.reply_text(
+        f"✅ 已创建规则 #{rule.id}\n{name}{tail}\n"
+        f"立即生效。`/fw_backfill {rule.id} 200` 可回填历史。",
+        parse_mode=ParseMode.MARKDOWN,
+    )
+
+
+@admin_only
+async def preview_cmd(update, context):
+    """/fw_preview <id> <样本文本> —— 试规则会丢弃还是转发。"""
+    if len(context.args) < 2:
+        await update.effective_message.reply_text(
+            "用法：`/fw_preview <id> <样本文本>`\n"
+            "例：`/fw_preview 1 今天有大优惠 9G.com 限时折扣`",
+            parse_mode=ParseMode.MARKDOWN,
+        )
+        return
+    try:
+        rid = int(context.args[0])
+    except ValueError:
+        await update.effective_message.reply_text("❌ id 必须是数字")
+        return
+    sample = " ".join(context.args[1:])
+    async with SessionLocal() as s:
+        rule = await s.get(ForwardRule, rid)
+    if not rule:
+        await update.effective_message.reply_text("❌ 规则不存在")
+        return
+    from ..plugins import MessageContext, build_chain
+    ctx = MessageContext(text=sample, caption=sample, media_type="text")
+    chain = build_chain(rule.plugins or {})
+    ok = await chain.run(ctx)
+    verdict = "✅ 会转发" if ok else "❌ 会丢弃"
+    transformed = ctx.text if ctx.text else "(空)"
+    await update.effective_message.reply_text(
+        f"{verdict}  规则 #{rid}\n\n"
+        f"*原文*：{sample}\n"
+        f"*处理后*：{transformed}",
+        parse_mode=ParseMode.MARKDOWN,
     )
 
 

@@ -128,6 +128,11 @@ async def cleanup_captcha() -> None:
             await s.commit()
 
 
+async def daily_backup() -> None:
+    from .handlers.backup import run_backup
+    await run_backup()
+
+
 def setup_jobs() -> None:
     scheduler.add_job(
         run_due_broadcasts, IntervalTrigger(seconds=30), id="broadcasts", replace_existing=True
@@ -140,4 +145,8 @@ def setup_jobs() -> None:
     )
     scheduler.add_job(
         cleanup_captcha, IntervalTrigger(seconds=20), id="captcha", replace_existing=True
+    )
+    # 每天凌晨 4 点自动备份（保留 7 天）
+    scheduler.add_job(
+        daily_backup, CronTrigger(hour=4, minute=0), id="backup", replace_existing=True
     )

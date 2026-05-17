@@ -19,6 +19,7 @@ from ..database import (
     BroadcastJob,
     Chat,
     ForwardRule,
+    LedgerAccount,
     LedgerEntry,
     Payment,
     SessionLocal,
@@ -165,6 +166,90 @@ def create_app() -> FastAPI:
             ).scalars().all()
         return templates.TemplateResponse(
             "subs.html", {"request": request, "subs": subs, "pays": pays}
+        )
+
+    @app.get("/chats", response_class=HTMLResponse)
+    async def chats_view(request: Request):
+        if not _is_auth(request):
+            return RedirectResponse("/login")
+        async with SessionLocal() as s:
+            rows = (
+                await s.execute(
+                    select(Chat).where(Chat.is_active.is_(True))
+                    .order_by(Chat.joined_at.desc())
+                )
+            ).scalars().all()
+        return templates.TemplateResponse(
+            "chats.html", {"request": request, "chats": rows}
+        )
+
+    @app.get("/autoreplies", response_class=HTMLResponse)
+    async def ar_view(request: Request):
+        if not _is_auth(request):
+            return RedirectResponse("/login")
+        async with SessionLocal() as s:
+            rows = (
+                await s.execute(select(AutoReply).order_by(AutoReply.id.desc()).limit(200))
+            ).scalars().all()
+        return templates.TemplateResponse(
+            "autoreplies.html", {"request": request, "rules": rows}
+        )
+
+    @app.post("/autoreplies/{rid}/toggle")
+    async def ar_toggle(request: Request, rid: int):
+        if not _is_auth(request):
+            return RedirectResponse("/login")
+        async with SessionLocal() as s:
+            r = await s.get(AutoReply, rid)
+            if r:
+                r.enabled = not r.enabled
+                await s.commit()
+        return RedirectResponse("/autoreplies", status_code=303)
+
+    @app.post("/autoreplies/{rid}/delete")
+    async def ar_delete(request: Request, rid: int):
+        if not _is_auth(request):
+            return RedirectResponse("/login")
+        async with SessionLocal() as s:
+            r = await s.get(AutoReply, rid)
+            if r:
+                await s.delete(r)
+                await s.commit()
+        return RedirectResponse("/autoreplies", status_code=303)
+
+    @app.get("/ledger", response_class=HTMLResponse)
+    async def ledger_view(request: Request):
+        if not _is_auth(request):
+            return RedirectResponse("/login")
+        async with SessionLocal() as s:
+            entries = (
+                await s.execute(
+                    select(LedgerEntry).order_by(LedgerEntry.id.desc()).limit(200)
+                )
+            ).scalars().all()
+            total_in = (await s.execute(
+                select(func.coalesce(func.sum(LedgerEntry.amount), 0))
+                .where(LedgerEntry.kind == "income")
+            )).scalar() or 0
+            total_out = (await s.execute(
+                select(func.coalesce(func.sum(LedgerEntry.amount), 0))
+                .where(LedgerEntry.kind == "expense")
+            )).scalar() or 0
+        return templates.TemplateResponse(
+            "ledger.html",
+            {"request": request, "entries": entries,
+             "total_in": float(total_in), "total_out": float(total_out)},
+        )
+
+    @app.get("/settings", response_class=HTMLResponse)
+    async def settings_view(request: Request):
+        if not _is_auth(request):
+            return RedirectResponse("/login")
+        return templates.TemplateResponse(
+            "settings.html",
+            {"request": request,
+             "settings": settings,
+             "host_link": f"http://{request.url.hostname}:{settings.web_port}"},
         )
 
     @app.get("/healthz")

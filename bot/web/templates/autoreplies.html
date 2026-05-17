@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>💬 自动回复规则 <small style="color:#8899a6;font-weight:400;font-size:14px;">（{{ rules|length }}）</small></h1>
+<p style="color:#8899a6;font-size:13px;">在 Telegram 群里发 <code>/ar_add 关键词 ::: 回复</code> 创建。</p>
+<table>
+  <tr><th>ID</th><th>匹配</th><th>关键词 / 正则</th><th>回复（截断）</th><th>作用域</th><th>命中</th><th>状态</th><th>操作</th></tr>
+  {% for r in rules %}
+  <tr>
+    <td>#{{ r.id }}</td>
+    <td>{{ r.match_type }}</td>
+    <td><code>{{ r.pattern[:40] }}{% if r.pattern|length > 40 %}…{% endif %}</code></td>
+    <td>{{ r.reply_text[:60] }}{% if r.reply_text|length > 60 %}…{% endif %}</td>
+    <td>{% if r.scope_chat_id %}<code>{{ r.scope_chat_id }}</code>{% else %}全局{% endif %}</td>
+    <td>{{ r.hits }}</td>
+    <td>
+      {% if r.enabled %}<span class="badge badge-ok">启用</span>
+      {% else %}<span class="badge badge-err">停用</span>{% endif %}
+    </td>
+    <td>
+      <form method="post" action="/autoreplies/{{ r.id }}/toggle"><button>切换</button></form>
+      <form method="post" action="/autoreplies/{{ r.id }}/delete" onsubmit="return confirm('删除 #{{ r.id }}？')">
+        <button class="btn-danger">删除</button>
+      </form>
+    </td>
+  </tr>
+  {% else %}
+  <tr><td colspan="8" style="text-align:center;color:#8899a6;">暂无规则</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -229,11 +229,7 @@ class ForwardManager:
                 log.warning("backfill 异常: %s", e)
         return {"ok": True, "sent": sent, "dropped": dropped}
 
-    async def run(self) -> None:
-        if not settings.userbot_enabled:
-            log.warning("user-bot 未启用（缺 TG_API_ID/HASH/PHONE），搬运功能跳过。")
-            return
-
+    async def _run_once(self) -> None:
         client = TelegramClient(
             str(settings.session_path),
             settings.api_id,
@@ -245,11 +241,38 @@ class ForwardManager:
         me = await client.get_me()
         log.info("user-bot 登录成功：%s", getattr(me, "username", me.id))
         client.add_event_handler(self._on_message, events.NewMessage())
+        try:
+            await asyncio.gather(
+                self._refresh_loop(),
+                client.run_until_disconnected(),
+            )
+        finally:
+            try:
+                await client.disconnect()
+            except Exception:
+                pass
+            self.client = None
 
-        await asyncio.gather(
-            self._refresh_loop(),
-            client.run_until_disconnected(),
-        )
+    async def run(self) -> None:
+        """指数退避自动重连：1s → 2s → 4s … 上限 5min。"""
+        if not settings.userbot_enabled:
+            log.warning("user-bot 未启用（缺 TG_API_ID/HASH/PHONE），搬运功能跳过。")
+            return
+
+        backoff = 1
+        while True:
+            try:
+                await self._run_once()
+                # 正常 disconnect（如 SIGTERM）
+                log.info("user-bot 主动断开，停止重连循环")
+                return
+            except asyncio.CancelledError:
+                log.info("user-bot 任务被取消")
+                raise
+            except Exception as e:  # noqa: BLE001
+                log.warning("user-bot 异常断线: %s；%ds 后重连", e, backoff)
+                await asyncio.sleep(backoff)
+                backoff = min(backoff * 2, 300)
 
 
 manager = ForwardManager()

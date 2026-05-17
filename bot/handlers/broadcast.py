@@ -289,47 +289,65 @@ async def _execute_job(bot, job_id: int, notice_chat=None, replied=None) -> None
         )
 
     interval = settings.broadcast_interval_ms / 1000.0
+    concurrency = max(1, int(getattr(settings, "broadcast_concurrency", 10)))
+    sem = asyncio.Semaphore(concurrency)
     sent = failed = 0
     failed_user_ids: list[int] = []
     kb = _build_inline_kb(buttons) if buttons else None
+    progress_lock = asyncio.Lock()
+    done = 0
 
-    async def send_to(chat_id: int) -> bool:
-        try:
-            if replied is not None:
-                await replied.copy(chat_id=chat_id, reply_markup=kb)
-            else:
-                await bot.send_message(chat_id=chat_id, text=content, reply_markup=kb)
-            return True
-        except Forbidden:
-            return False
-        except BadRequest as e:
-            log.warning("BadRequest 群发到 %s: %s", chat_id, e)
-            return False
-        except RetryAfter as e:
-            await asyncio.sleep(e.retry_after + 1)
-            return await send_to(chat_id)
-        except Exception as e:  # noqa: BLE001
-            log.warning("群发异常 %s: %s", chat_id, e)
-            return False
-
-    step = max(1, total // 20)
-    all_targets = [("u", uid) for uid in user_ids] + [("c", cid) for cid in chat_ids]
-    for idx, (kind, cid) in enumerate(all_targets, 1):
-        ok = await send_to(cid)
-        if ok:
-            sent += 1
-        else:
-            failed += 1
-            if kind == "u":
-                failed_user_ids.append(cid)
-        if notice and (idx % step == 0 or idx == total):
+    async def send_one(chat_id: int, max_retries: int = 3) -> bool:
+        for attempt in range(max_retries):
             try:
-                await notice.edit_text(
-                    f"📣 群发 #{job_id} 进行中… {idx}/{total} (✅{sent} ❌{failed})"
-                )
-            except Exception:
-                pass
-        await asyncio.sleep(interval)
+                if replied is not None:
+                    await replied.copy(chat_id=chat_id, reply_markup=kb)
+                else:
+                    await bot.send_message(chat_id=chat_id, text=content, reply_markup=kb)
+                return True
+            except Forbidden:
+                return False
+            except BadRequest as e:
+                # 用户/群配置类问题不重试
+                log.warning("BadRequest %s: %s", chat_id, e)
+                return False
+            except RetryAfter as e:
+                await asyncio.sleep(min(e.retry_after, 60) + 1)
+                continue
+            except Exception as e:  # noqa: BLE001
+                # 暂态错误：指数退避后重试
+                if attempt == max_retries - 1:
+                    log.warning("发送 %s 失败放弃: %s", chat_id, e)
+                    return False
+                await asyncio.sleep(2 ** attempt)
+        return False
+
+    async def worker(kind: str, chat_id: int):
+        nonlocal sent, failed, done
+        async with sem:
+            ok = await send_one(chat_id)
+            async with progress_lock:
+                done += 1
+                if ok:
+                    sent += 1
+                else:
+                    failed += 1
+                    if kind == "u":
+                        failed_user_ids.append(chat_id)
+                if notice and (done % max(1, total // 20) == 0 or done == total):
+                    try:
+                        await notice.edit_text(
+                            f"📣 群发 #{job_id} 进行中… {done}/{total} "
+                            f"(✅{sent} ❌{failed}, 并发 {concurrency})"
+                        )
+                    except Exception:
+                        pass
+            # 节流：单个 worker 在自己的时间槽里 sleep
+            if interval > 0:
+                await asyncio.sleep(interval)
+
+    all_targets = [("u", uid) for uid in user_ids] + [("c", cid) for cid in chat_ids]
+    await asyncio.gather(*(worker(k, c) for k, c in all_targets))
 
     async with SessionLocal() as s:
         job = await s.get(BroadcastJob, job_id)

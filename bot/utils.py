@@ -116,3 +116,63 @@ def today_range(now: Optional[datetime] = None) -> Tuple[datetime, datetime]:
 def chunked(seq, size):
     for i in range(0, len(seq), size):
         yield seq[i : i + size]
+
+
+# =============================================================
+# 分页
+# =============================================================
+def paginate(items, page: int, per_page: int = 20) -> tuple[list, int, int]:
+    """返回 (本页数据, 当前页 1-based, 总页数)。page 越界自动收敛。"""
+    total = len(items)
+    if total == 0:
+        return [], 1, 1
+    pages = (total + per_page - 1) // per_page
+    page = max(1, min(page, pages))
+    start = (page - 1) * per_page
+    return items[start : start + per_page], page, pages
+
+
+def pager_keyboard(prefix: str, page: int, pages: int, extra: list | None = None):
+    """生成 ‹ 1/3 › 翻页键盘，回调 prefix:<page>。"""
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    row: list = []
+    if page > 1:
+        row.append(InlineKeyboardButton("‹ 上一页", callback_data=f"{prefix}:{page - 1}"))
+    row.append(InlineKeyboardButton(f"{page}/{pages}", callback_data=f"{prefix}:{page}"))
+    if page < pages:
+        row.append(InlineKeyboardButton("下一页 ›", callback_data=f"{prefix}:{page + 1}"))
+    rows = [row] if row else []
+    if extra:
+        rows.extend(extra)
+    return InlineKeyboardMarkup(rows)
+
+
+# =============================================================
+# 文本工具
+# =============================================================
+MD_ESCAPE_RE = None  # 懒加载
+
+
+def md_escape(text: str) -> str:
+    """转义 Telegram MarkdownV1 特殊字符。"""
+    return (text or "").replace("*", "\\*").replace("_", "\\_").replace("`", "\\`").replace("[", "\\[")
+
+
+def short(text: str, length: int = 40) -> str:
+    text = (text or "").replace("\n", " ").strip()
+    return text if len(text) <= length else text[:length] + "…"
+
+
+def fmt_time(dt) -> str:
+    if not dt:
+        return "—"
+    return dt.strftime("%Y-%m-%d %H:%M")
+
+
+def fmt_size(num: int) -> str:
+    for unit in ("B", "KB", "MB", "GB"):
+        if num < 1024:
+            return f"{num:.1f}{unit}"
+        num /= 1024
+    return f"{num:.1f}TB"
+

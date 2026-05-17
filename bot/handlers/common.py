@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 
-from telegram import Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
@@ -23,62 +23,111 @@ WELCOME = """\
 • 💬 *自动回复* — 关键词命中即自动答复，可分群配置
 • 📊 *数据报表* — 月度收支、群发明细、规则统计一目了然
 
-点击下方按钮开始使用 👇
+新手提示：
+• 私聊我直接发数字（如 `100 餐饮`）= 记账
+• 群里把我设为管理员才能用全部群功能
+• 发 /help 看完整命令、/menu 看图形菜单
 """
 
-HELP = """\
-*命令参考*
 
-🔹 *通用*
-/start /menu — 主菜单
-/id — 查看当前 chat / user id
-/cancel — 取消当前操作
+HELP_INDEX = (
+    "📚 *命令帮助* — 按主题点按钮查看\n"
+    "（或发 /menu 进图形菜单）"
+)
 
-🔹 *记账*（私聊）
-直接发 `金额 类别 备注`，如 `120 餐饮 午餐`、`-50 打车`
-/ledger /today /month /chart /export
-/budget 类别 金额 — 设置月预算
-/budgets — 查看预算执行
+HELP_TOPICS = {
+    "common": (
+        "🔹 *通用命令*\n\n"
+        "/start /menu — 主菜单\n"
+        "/help — 本帮助\n"
+        "/id — 查看 chat / user id\n"
+        "/cancel — 取消当前操作"
+    ),
+    "ledger": (
+        "🔹 *记账*\n\n"
+        "直接发：`金额 类别 备注`\n"
+        "例：`120 餐饮 午餐`、`+5000 工资`、`-50 打车`\n\n"
+        "/ledger — 面板\n"
+        "/today /month — 今日 / 本月汇总\n"
+        "/chart — 近 30 天走势图\n"
+        "/export — 导出 CSV\n"
+        "/budget 类别 金额 — 设月预算\n"
+        "/budgets — 查看执行"
+    ),
+    "autoreply": (
+        "🔹 *自动回复*\n\n"
+        "`/ar_add 关键词 ::: 回复内容`\n"
+        "`/ar_add_re ^正则$ ::: 回复内容`\n"
+        "/ar_list /ar_toggle <id> /ar_del <id>"
+    ),
+    "broadcast": (
+        "🔹 *群发*（管理员）\n\n"
+        "/broadcast — 进入面板\n"
+        "/broadcast users 内容\n"
+        "/broadcast chats — 回复一条消息后执行\n"
+        "/broadcast both 内容\n"
+        "/broadcast tag VIP 内容 — 按标签分群\n\n"
+        "*消息元指令*：\n"
+        "  `@schedule 2030-01-01 10:00` 定时\n"
+        "  `@buttons [[\"标签\",\"https://...\"]]` 内联按钮"
+    ),
+    "forward": (
+        "🔹 *搬运*（管理员）\n\n"
+        "*一键创建*：\n"
+        "  `/qf 源 目标 黑名单A,黑名单B`\n\n"
+        "*详细*：\n"
+        "  /fw_add 源 目标[,目标2] [名字]\n"
+        "  /fw_filter <id> kw=A,B bl=C,D\n"
+        "  /fw_replace <id> 原文 => 新文\n"
+        "  /fw_caption <id> header=🔥 | footer=—@CH\n"
+        "  /fw_format <id> links=1 mentions=1 emoji=0\n"
+        "  /fw_media <id> allow=photo,video,text\n"
+        "  /fw_watermark <id> @MyChannel\n"
+        "  /fw_backfill <id> 200 — 历史回填\n"
+        "  /fw_preview <id> 样本文本 — 试丢/转\n"
+        "  /fw_list /fw_toggle /fw_del /fw_reload"
+    ),
+    "group": (
+        "🔹 *群组管理*（群管理员）\n\n"
+        "/welcome <欢迎语> — 占位符 `{name}` `{username}` `{chat}`\n"
+        "/welcome_off — 关闭\n"
+        "/captcha — 切换入群验证\n"
+        "/antispam — 切换反垃圾"
+    ),
+    "sub": (
+        "🔹 *订阅*\n\n"
+        "/plans — 查看套餐\n"
+        "/mysub — 我的订阅\n\n"
+        "*管理员*：\n"
+        "/grant_sub <user_id> <plan_code> — 手动开通\n"
+        "/payments — 订单列表"
+    ),
+    "admin": (
+        "🔹 *管理员*\n\n"
+        "/admin — 管理面板\n"
+        "/stats — 全局统计\n"
+        "/users — 用户列表（分页）\n"
+        "/chats — 群组列表（分页）\n"
+        "/backup — 立即备份\n"
+        "/backups — 备份列表"
+    ),
+}
 
-🔹 *自动回复*
-`/ar_add 关键词 ::: 回复内容`
-`/ar_add_re 正则 ::: 内容`
-/ar_list  /ar_toggle <id>  /ar_del <id>
 
-🔹 *订阅*
-/plans — 查看套餐
-/mysub — 我的订阅
-
-🔹 *群组*（群管理员）
-/welcome <文本>  /welcome_off
-/captcha — 切换入群验证
-/antispam — 切换反垃圾
-
-🔹 *管理员*
-/admin /stats /users /chats /payments
-/grant\\_sub <user_id> <plan>
-
-🔹 *搬运（仅管理员）*
-/fw\\_add 源 目标[,目标2] [名字]
-/fw\\_filter <id> kw=A,B bl=C
-/fw\\_replace <id> 原文 => 新文
-/fw\\_caption <id> header=🔥 | footer=—@CH
-/fw\\_format <id> links=1 mentions=1 emoji=0
-/fw\\_media <id> allow=photo,video,text
-/fw\\_watermark <id> @MyChannel
-/fw\\_backfill <id> 200 — 历史回填
-/fw\\_list /fw\\_toggle /fw\\_del /fw\\_reload
-
-🔹 *群发（仅管理员）*
-/broadcast — 面板
-/broadcast users 内容
-/broadcast tag VIP 内容
-消息可附加：`@schedule 2030-01-01 10:00` 定时
-消息可附加：`@buttons [["按钮","https://..."]]`
-
-🔹 *Web 后台*
-默认 http://server:8000
-"""
+def _help_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("📘 通用", callback_data="help:common"),
+             InlineKeyboardButton("📒 记账", callback_data="help:ledger")],
+            [InlineKeyboardButton("💬 自动回复", callback_data="help:autoreply"),
+             InlineKeyboardButton("📣 群发", callback_data="help:broadcast")],
+            [InlineKeyboardButton("📡 搬运", callback_data="help:forward"),
+             InlineKeyboardButton("👋 群组", callback_data="help:group")],
+            [InlineKeyboardButton("💎 订阅", callback_data="help:sub"),
+             InlineKeyboardButton("⚙️ 管理员", callback_data="help:admin")],
+            [InlineKeyboardButton("« 返回主菜单", callback_data="menu:home")],
+        ]
+    )
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -101,8 +150,31 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.effective_message.reply_text(
-        HELP, parse_mode=ParseMode.MARKDOWN, reply_markup=back_home()
+        HELP_INDEX, parse_mode=ParseMode.MARKDOWN, reply_markup=_help_keyboard()
     )
+
+
+async def help_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer()
+    parts = query.data.split(":", 1)
+    if len(parts) < 2:
+        return
+    topic = parts[1]
+    if topic == "back":
+        await query.edit_message_text(
+            HELP_INDEX, parse_mode=ParseMode.MARKDOWN, reply_markup=_help_keyboard()
+        )
+        return
+    body = HELP_TOPICS.get(topic, "未知主题")
+    kb = InlineKeyboardMarkup(
+        [[InlineKeyboardButton("« 主题列表", callback_data="help:back"),
+          InlineKeyboardButton("🏠 主菜单", callback_data="menu:home")]]
+    )
+    try:
+        await query.edit_message_text(body, parse_mode=ParseMode.MARKDOWN, reply_markup=kb)
+    except Exception:
+        pass
 
 
 async def show_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -137,7 +209,7 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         )
     elif target == "help":
         await query.edit_message_text(
-            HELP, parse_mode=ParseMode.MARKDOWN, reply_markup=back_home()
+            HELP_INDEX, parse_mode=ParseMode.MARKDOWN, reply_markup=_help_keyboard()
         )
     elif target == "ledger":
         from .ledger import open_ledger_panel

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>📒 全部记账流水</h1>
+
+<div class="grid">
+  <div class="card"><div class="label">📈 累计收入</div><div class="value" style="color:#00ba7c;">{{ '%.2f' | format(total_in) }}</div></div>
+  <div class="card"><div class="label">📉 累计支出</div><div class="value" style="color:#f4212e;">{{ '%.2f' | format(total_out) }}</div></div>
+  <div class="card"><div class="label">💰 净额</div><div class="value">{{ '%.2f' | format(total_in - total_out) }}</div></div>
+  <div class="card"><div class="label">🧾 流水条数</div><div class="value">{{ entries|length }}+</div></div>
+</div>
+
+<h1 style="font-size:18px;margin-top:24px;">📋 最近 200 条</h1>
+<table>
+  <tr><th>时间</th><th>类型</th><th>金额</th><th>分类</th><th>备注</th></tr>
+  {% for e in entries %}
+  <tr>
+    <td>{{ e.occurred_at.strftime('%m-%d %H:%M') }}</td>
+    <td>{% if e.kind == 'income' %}<span class="badge badge-ok">收入</span>{% else %}<span class="badge badge-err">支出</span>{% endif %}</td>
+    <td>{{ '%.2f' | format(e.amount) }}</td>
+    <td>{{ e.category or '—' }}</td>
+    <td>{{ (e.note or '—')[:50] }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

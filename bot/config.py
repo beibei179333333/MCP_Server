@@ -56,6 +56,9 @@ class Settings:
     broadcast_batch: int = field(
         default_factory=lambda: int(os.getenv("BROADCAST_BATCH", "30"))
     )
+    broadcast_concurrency: int = field(
+        default_factory=lambda: int(os.getenv("BROADCAST_CONCURRENCY", "10"))
+    )
 
     # ---- 群组管理 ----
     enable_captcha: bool = field(

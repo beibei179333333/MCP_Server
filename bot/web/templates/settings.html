@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>⚙️ 运行时设置</h1>
+<p style="color:#8899a6;">这些配置来自 <code>/opt/telegram-bot/.env</code>。修改后请重启服务：<code>systemctl restart telegram-bot</code></p>
+
+<table>
+  <tr><th>项</th><th>值</th></tr>
+  <tr><td>管理员 IDs</td><td>{{ settings.admin_ids | join(', ') or '（空）' }}</td></tr>
+  <tr><td>时区</td><td>{{ settings.timezone }}</td></tr>
+  <tr><td>语言</td><td>{{ settings.default_lang }}</td></tr>
+  <tr><td>User-bot 启用</td><td>{% if settings.userbot_enabled %}<span class="badge badge-ok">是</span>{% else %}<span class="badge badge-err">否（缺 TG_API_ID/HASH/PHONE）</span>{% endif %}</td></tr>
+  <tr><td>群发间隔</td><td>{{ settings.broadcast_interval_ms }} ms</td></tr>
+  <tr><td>群发并发</td><td>{{ settings.broadcast_concurrency }}</td></tr>
+  <tr><td>入群验证</td><td>{% if settings.enable_captcha %}启用 ({{ settings.captcha_timeout }}s 超时){% else %}关闭{% endif %}</td></tr>
+  <tr><td>反垃圾</td><td>{% if settings.enable_anti_spam %}启用{% else %}关闭{% endif %}</td></tr>
+  <tr><td>订阅</td><td>{% if settings.subscription_enabled %}启用（试用 {{ settings.default_trial_days }} 天）{% else %}关闭{% endif %}</td></tr>
+  <tr><td>数据库</td><td><code>{{ settings.database_url }}</code></td></tr>
+  <tr><td>日志级别</td><td>{{ settings.log_level }}</td></tr>
+  <tr><td>Web 监听</td><td>{{ settings.web_host }}:{{ settings.web_port }}</td></tr>
+  <tr><td>Web 用户</td><td>{{ settings.web_username }}</td></tr>
+</table>
+
+<h1 style="font-size:18px;margin-top:24px;">🔧 常用命令速查</h1>
+<table>
+  <tr><th>操作</th><th>命令</th></tr>
+  <tr><td>看日志</td><td><code>journalctl -u telegram-bot -f</code></td></tr>
+  <tr><td>重启</td><td><code>systemctl restart telegram-bot</code></td></tr>
+  <tr><td>停止</td><td><code>systemctl stop telegram-bot</code></td></tr>
+  <tr><td>状态</td><td><code>systemctl status telegram-bot</code></td></tr>
+  <tr><td>编辑配置</td><td><code>nano /opt/telegram-bot/.env</code></td></tr>
+  <tr><td>升级到最新代码</td><td><code>cd /opt/telegram-bot && git pull && systemctl restart telegram-bot</code></td></tr>
+</table>
+{% endblock %}

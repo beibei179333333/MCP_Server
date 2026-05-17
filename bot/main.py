@@ -20,7 +20,7 @@ from telegram.ext import (
 from .config import settings
 from .database import init_db
 from .handlers import (
-    admin, autoreply, broadcast, common, forward_admin, group, ledger,
+    admin, autoreply, backup, broadcast, common, forward_admin, group, ledger,
     router, subscription,
 )
 from .logger import setup_logging
@@ -30,7 +30,17 @@ from .web.app import start_web
 
 
 async def _error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
-    logging.getLogger("bot.error").exception("更新处理失败: %s", context.error)
+    log = logging.getLogger("bot.error")
+    log.exception("更新处理失败: %s", context.error)
+    # 给用户回一条友好提示（不暴露异常细节）
+    try:
+        if isinstance(update, Update) and update.effective_message:
+            await update.effective_message.reply_text(
+                "⚠️ 出了点小问题，已经记到日志里。可以 /menu 重试，"
+                "或联系管理员（/id 查看身份信息一起报告）。"
+            )
+    except Exception:
+        pass
 
 
 def build_application() -> Application:
@@ -63,6 +73,8 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("stats", admin.stats_cmd))
     app.add_handler(CommandHandler("users", admin.users_cmd))
     app.add_handler(CommandHandler("chats", admin.chats_cmd))
+    app.add_handler(CommandHandler("backup", backup.backup_cmd))
+    app.add_handler(CommandHandler("backups", backup.backups_list))
 
     # ---- 搬运规则 ----
     app.add_handler(CommandHandler("fw_add", forward_admin.add_cmd))
@@ -77,6 +89,8 @@ def build_application() -> Application:
     app.add_handler(CommandHandler("fw_watermark", forward_admin.watermark_cmd))
     app.add_handler(CommandHandler("fw_plugins", forward_admin.plugins_show))
     app.add_handler(CommandHandler("fw_backfill", forward_admin.backfill_cmd))
+    app.add_handler(CommandHandler("fw_preview", forward_admin.preview_cmd))
+    app.add_handler(CommandHandler("qf", forward_admin.quick_forward_cmd))
 
     async def fw_reload(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         from .utils import is_admin
@@ -104,11 +118,13 @@ def build_application() -> Application:
 
     # ---- 回调（按模式分发） ----
     app.add_handler(CallbackQueryHandler(common.menu_callback, pattern=r"^menu:"))
+    app.add_handler(CallbackQueryHandler(common.help_callback, pattern=r"^help:"))
     app.add_handler(CallbackQueryHandler(ledger.ledger_callback, pattern=r"^ledger:"))
     app.add_handler(CallbackQueryHandler(broadcast.broadcast_callback, pattern=r"^bc:"))
     app.add_handler(CallbackQueryHandler(admin.admin_callback, pattern=r"^admin:"))
     app.add_handler(CallbackQueryHandler(subscription.subscription_callback, pattern=r"^sub:"))
     app.add_handler(CallbackQueryHandler(group.captcha_callback, pattern=r"^cap:"))
+    app.add_handler(CallbackQueryHandler(admin.pager_callback, pattern=r"^(ulist|clist|fwlist):"))
 
     # ---- chat 状态追踪 ----
     app.add_handler(
@@ -154,14 +170,31 @@ async def _run() -> None:
     me = await app.bot.get_me()
     log.info("Bot 已启动: @%s", me.username)
 
-    # 启动通告：通知所有管理员机器人已就绪
-    ready_msg = f"✅ 我已经准备好了，可以工作！\n机器人 @{me.username} 已成功上线 🚀"
+    # 启动通告：通知所有管理员机器人已就绪 + 附带 Web 控制台凭据
+    web_line = ""
+    if settings.web_enabled:
+        web_line = (
+            f"\n\n🖥 *Web 控制台*\n"
+            f"地址：`http://<server>:{settings.web_port}`\n"
+            f"账号：`{settings.web_username}`\n"
+            f"密码：`{settings.effective_web_password}`"
+        )
+    ready_msg = (
+        f"✅ *我已经准备好了，可以工作！*\n"
+        f"机器人 @{me.username} 已成功上线 🚀\n\n"
+        f"📚 发送 /help 查看命令\n"
+        f"🏠 发送 /menu 打开图形菜单"
+        f"{web_line}"
+    )
     if not settings.admin_ids:
-        log.warning("ADMIN_IDS 未配置，启动通告仅记录到日志：%s", ready_msg)
+        log.warning("ADMIN_IDS 未配置，启动通告仅记录到日志")
+        log.info(ready_msg)
     else:
         for admin_id in settings.admin_ids:
             try:
-                await app.bot.send_message(admin_id, ready_msg)
+                await app.bot.send_message(
+                    admin_id, ready_msg, parse_mode="Markdown"
+                )
                 log.info("已向管理员 %s 发送启动通告", admin_id)
             except Exception as e:
                 log.warning("向 %s 发送启动通告失败: %s", admin_id, e)

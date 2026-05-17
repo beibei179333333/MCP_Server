@@ -106,29 +106,38 @@ async def stats_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await show_stats(update, context)
 
 
-@admin_only
-async def users_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def _render_users(page: int):
+    from ..utils import paginate, pager_keyboard, short
     async with SessionLocal() as s:
         rows = (
             await s.execute(
-                select(User).where(User.is_blocked.is_(False)).order_by(User.last_seen.desc()).limit(50)
+                select(User).order_by(User.last_seen.desc())
             )
         ).scalars().all()
     if not rows:
-        await update.effective_message.reply_text("📭 暂无用户")
-        return
-    lines = [f"👥 *最近活跃用户*（共显示 {len(rows)}）\n"]
-    for u in rows:
-        name = " ".join(filter(None, [u.first_name, u.last_name])) or "—"
-        handle = f"@{u.username}" if u.username else f"id:{u.id}"
-        lines.append(f"• {name} · {handle}")
-    await update.effective_message.reply_text(
-        "\n".join(lines), parse_mode=ParseMode.MARKDOWN
-    )
+        return "📭 暂无用户", None
+    chunk, page, pages = paginate(rows, page, per_page=15)
+    lines = [f"👥 *用户列表* — {len(rows)} 人 · 第 {page}/{pages} 页\n"]
+    for u in chunk:
+        name = short(" ".join(filter(None, [u.first_name, u.last_name])) or "—", 24)
+        handle = f"@{u.username}" if u.username else f"`{u.id}`"
+        flag = ""
+        if u.is_blocked:
+            flag = " 🚫"
+        elif u.is_admin:
+            flag = " 👑"
+        lines.append(f"• {name} · {handle}{flag}")
+    return "\n".join(lines), pager_keyboard("ulist", page, pages)
 
 
 @admin_only
-async def chats_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def users_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    text, kb = await _render_users(1)
+    await update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN, reply_markup=kb)
+
+
+async def _render_chats(page: int):
+    from ..utils import paginate, pager_keyboard, short
     async with SessionLocal() as s:
         rows = (
             await s.execute(
@@ -136,15 +145,44 @@ async def chats_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             )
         ).scalars().all()
     if not rows:
-        await update.effective_message.reply_text("📭 机器人尚未加入任何群组")
+        return "📭 机器人尚未加入任何群组 / 频道", None
+    chunk, page, pages = paginate(rows, page, per_page=15)
+    lines = [f"💬 *关联群组 / 频道* — {len(rows)} 个 · 第 {page}/{pages} 页\n"]
+    for c in chunk:
+        handle = f"@{c.username}" if c.username else f"`{c.id}`"
+        lines.append(f"• [{c.type}] {short(c.title or '—', 30)} · {handle}")
+    return "\n".join(lines), pager_keyboard("clist", page, pages)
+
+
+@admin_only
+async def chats_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    text, kb = await _render_chats(1)
+    await update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN, reply_markup=kb)
+
+
+async def pager_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """统一处理所有 *list:<page> 翻页。"""
+    q = update.callback_query
+    await q.answer()
+    parts = q.data.split(":")
+    prefix = parts[0]
+    try:
+        page = int(parts[1])
+    except (ValueError, IndexError):
+        page = 1
+    if prefix == "ulist":
+        text, kb = await _render_users(page)
+    elif prefix == "clist":
+        text, kb = await _render_chats(page)
+    elif prefix == "fwlist":
+        from .forward_admin import _render_fwlist
+        text, kb = await _render_fwlist(page)
+    else:
         return
-    lines = [f"💬 *关联群组 / 频道*（{len(rows)}）\n"]
-    for c in rows:
-        handle = f"@{c.username}" if c.username else f"id:{c.id}"
-        lines.append(f"• [{c.type}] {c.title or '—'} · {handle}")
-    await update.effective_message.reply_text(
-        "\n".join(lines), parse_mode=ParseMode.MARKDOWN
-    )
+    try:
+        await q.edit_message_text(text, parse_mode=ParseMode.MARKDOWN, reply_markup=kb)
+    except Exception:
+        pass
 
 
 async def admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
