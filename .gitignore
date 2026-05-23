@@ -2,6 +2,7 @@
 *.session
 *.session-journal
 state.json
+state_bot.json
 __pycache__/
 *.pyc
 .venv/
