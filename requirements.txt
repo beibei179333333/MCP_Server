@@ -1,0 +1,5 @@
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# 仅旧的 Telethon 方案(clone_packs.py)需要,Bot API 方案用不到:
+telethon>=1.36.0
