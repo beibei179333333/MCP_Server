@@ -16,6 +16,25 @@
 
 ---
 
+## ☁️ 云端一键导出（GitHub Actions · 零安装 · 真实数据，手机也能用）
+
+**最省事、真实数据可用**：不用装任何东西、不用部署，直接用 GitHub 自己的服务器跑
+（它能访问该 API），跑完下载表格即可。手机浏览器也能完成全部步骤。
+
+**只需设置一次密钥：**
+1. 打开仓库 → **Settings → Secrets and variables → Actions → New repository secret**。
+2. Name 填 `GROUP_EXPORT_TOKEN`，Secret 填你的 JWT 密钥 → **Add secret**。
+
+**之后每次导出：**
+1. 打开仓库 **Actions** 标签 → 左侧选「导出群成员 / Export members」→ 右侧 **Run workflow**。
+2. 在「群链接/ID」框粘贴群链接（多个用空格 / 逗号 / 换行分隔）→ **Run workflow**。
+3. 等 1–2 分钟跑完，点进那次运行，页面底部 **Artifacts → members** 下载压缩包（含 CSV/JSON/XLSX，及被过滤名单）。
+
+> - 可选填「附加过滤参数」，例如 `--min-messages 1 --premium-only`（全部参数见下方“过滤选项”表）。
+> - 全程在浏览器里完成，密钥存为仓库 Secret（不出现在日志里）。
+
+---
+
 ## 🍎 iPhone 零安装版（打开网址即用）
 
 整套逻辑做成了**纯浏览器单页应用**，不用装任何东西。手机 Safari 直接打开：

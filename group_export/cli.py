@@ -26,6 +26,7 @@ from .api import ApiClient, ApiConfig
 from .config import resolve_base_url, resolve_token
 from .export import write
 from .filters import DEFAULT_AD_KEYWORDS, FilterConfig
+from .links import parse_group_link
 from .models import Member
 from .pipeline import run
 
@@ -103,10 +104,11 @@ def cmd_export(args) -> int:
     raw_members: List[Member] = []
 
     # 1) fetch from each group (paginated until complete)
-    for group in args.group or []:
-        records = client.fetch_members(str(group))
+    for raw_group in args.group or []:
+        group = parse_group_link(str(raw_group)) or str(raw_group)
+        records = client.fetch_members(group)
         for rec in records:
-            raw_members.append(Member.from_raw(rec, group=str(group)))
+            raw_members.append(Member.from_raw(rec, group=group))
 
     # 2) optionally merge in previously exported files
     for path in args.merge_in or []:
