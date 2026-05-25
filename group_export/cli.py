@@ -123,7 +123,16 @@ def cmd_export(args) -> int:
         filter_ads=not args.keep_ads,
         filter_bots=not args.keep_bots,
         filter_scam_fake=not args.keep_scam,
+        filter_deleted=not args.keep_deleted,
+        no_photo=args.filter_no_photo,
+        filter_random_username=args.filter_random_username,
+        premium_only=args.premium_only,
+        verified_only=args.verified_only,
+        min_messages=args.min_messages,
+        language_keep=[s for s in (args.language_keep or "").split(",") if s.strip()] or None,
         ad_keywords=_load_keywords(args.ad_keywords_file),
+        extra_ad_keywords=_load_lines(args.extra_ad_keywords_file),
+        whitelist=_load_lines(args.whitelist_file),
         ad_threshold=args.ad_threshold,
     )
     kept, removed, stats = run(raw_members, fcfg)
@@ -167,6 +176,13 @@ def _load_keywords(path):
     with open(path, "r", encoding="utf-8") as f:
         kws = [ln.strip() for ln in f if ln.strip() and not ln.startswith("#")]
     return kws or DEFAULT_AD_KEYWORDS
+
+
+def _load_lines(path):
+    if not path:
+        return None
+    with open(path, "r", encoding="utf-8") as f:
+        return [ln.strip() for ln in f if ln.strip() and not ln.startswith("#")] or None
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -213,10 +229,28 @@ def build_parser() -> argparse.ArgumentParser:
                    help="do NOT drop ad/marketing accounts.")
     e.add_argument("--keep-bots", action="store_true")
     e.add_argument("--keep-scam", action="store_true")
+    e.add_argument("--keep-deleted", action="store_true",
+                   help="do NOT drop deleted/blank accounts (no username & no name).")
+    e.add_argument("--filter-no-photo", action="store_true",
+                   help="drop accounts the API reports as having no profile photo.")
+    e.add_argument("--filter-random-username", action="store_true",
+                   help="drop auto-generated-looking usernames (e.g. user123456).")
+    e.add_argument("--premium-only", action="store_true",
+                   help="keep only Telegram Premium members.")
+    e.add_argument("--verified-only", action="store_true",
+                   help="keep only verified accounts.")
+    e.add_argument("--min-messages", type=int, default=0,
+                   help="keep only members with at least this many messages.")
+    e.add_argument("--language-keep",
+                   help="comma-separated language codes to keep (e.g. zh,en).")
     e.add_argument("--ad-threshold", type=int, default=2,
                    help="ad-score threshold for filtering (lower = stricter).")
     e.add_argument("--ad-keywords-file",
-                   help="newline-delimited custom ad keyword list.")
+                   help="newline-delimited custom ad keyword list (replaces defaults).")
+    e.add_argument("--extra-ad-keywords-file",
+                   help="newline-delimited extra ad keywords (added to defaults).")
+    e.add_argument("--whitelist-file",
+                   help="newline-delimited usernames that are never filtered.")
     e.add_argument("--dump-removed", action="store_true",
                    help="also write a .removed.csv of filtered-out members.")
     e.set_defaults(func=cmd_export)

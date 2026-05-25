@@ -42,14 +42,33 @@ class FilterConfig:
     filter_ads: bool = True
     filter_bots: bool = True
     filter_scam_fake: bool = True
-    ad_keywords: Optional[List[str]] = None
+    filter_deleted: bool = True
+    no_photo: bool = False
+    filter_random_username: bool = False
+    premium_only: bool = False
+    verified_only: bool = False
+    min_messages: int = 0
+    language_keep: Optional[List[str]] = None      # keep only these language codes
+    ad_keywords: Optional[List[str]] = None         # overrides the default base list
+    extra_ad_keywords: Optional[List[str]] = None   # appended to whichever base is used
+    whitelist: Optional[List[str]] = None           # usernames that are never filtered
     # Score threshold; a member is flagged as ad when score >= threshold.
     ad_threshold: int = 2
     # Names with at least this many emoji are treated as decorated/marketing.
     emoji_limit: int = 4
 
     def keywords(self) -> List[str]:
-        return [k.lower() for k in (self.ad_keywords or DEFAULT_AD_KEYWORDS)]
+        base = self.ad_keywords or DEFAULT_AD_KEYWORDS
+        return [k.lower() for k in list(base) + list(self.extra_ad_keywords or [])]
+
+    def whitelist_set(self) -> set:
+        return {w.lstrip("@").lower() for w in (self.whitelist or [])}
+
+    def languages(self) -> set:
+        return {l.strip().lower() for l in (self.language_keep or []) if l.strip()}
+
+
+_RANDOM_UN_RE = re.compile(r"^[a-z]?\d{5,}$|^user\d{3,}$|^[a-z]{1,2}\d{4,}$", re.I)
 
 
 def _haystack(m: Member) -> str:
@@ -84,12 +103,29 @@ def ad_score(m: Member, cfg: FilterConfig) -> int:
 
 def classify(m: Member, cfg: FilterConfig) -> Optional[str]:
     """Return a reason string if the member should be filtered out, else None."""
+    if m.username and m.username.lower() in cfg.whitelist_set():
+        return None
+    if cfg.filter_deleted and not m.username and not m.full_name:
+        return "deleted"
     if cfg.require_username and not m.username:
         return "no_username"
     if cfg.filter_bots and m.is_bot:
         return "bot"
     if cfg.filter_scam_fake and (m.is_scam or m.is_fake):
         return "scam_or_fake"
+    if cfg.verified_only and not m.is_verified:
+        return "not_verified"
+    if cfg.premium_only and not m.is_premium:
+        return "not_premium"
+    if cfg.no_photo and m.has_photo is False:
+        return "no_photo"
+    if cfg.min_messages and m.message_count < cfg.min_messages:
+        return "low_activity"
+    langs = cfg.languages()
+    if langs and m.language_code and m.language_code.lower() not in langs:
+        return "language"
+    if cfg.filter_random_username and m.username and _RANDOM_UN_RE.match(m.username):
+        return "random_username"
     if cfg.filter_ads and ad_score(m, cfg) >= cfg.ad_threshold:
         return "ad_marketing"
     return None

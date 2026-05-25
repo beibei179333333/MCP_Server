@@ -24,7 +24,22 @@ _FIELD_ALIASES: Dict[str, tuple] = {
     "join_date": ("join_date", "joinDate", "joined_at", "joinedAt", "join_time", "joinTime"),
     "last_seen": ("last_seen", "lastSeen", "last_online", "lastOnline", "last_active"),
     "message_count": ("message_count", "messageCount", "messages", "msg_count", "msgCount"),
+    "has_photo": ("has_photo", "hasPhoto", "photo", "avatar", "has_avatar", "profile_photo", "photo_url"),
 }
+
+
+def _to_photo(v: Any):
+    """Tri-state: True / False / None (unknown — field not provided)."""
+    if v in (None, ""):
+        return None
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, (int, float)):
+        return v != 0
+    s = str(v).strip().lower()
+    if s in ("0", "false", "no", "none", "null"):
+        return False
+    return True
 
 
 def _first(d: Dict[str, Any], keys: Iterable[str]) -> Any:
@@ -71,6 +86,7 @@ class Member:
     join_date: str = ""
     last_seen: str = ""
     message_count: int = 0
+    has_photo: Optional[bool] = None
     # Bookkeeping: which group(s) this member was seen in.
     groups: set = field(default_factory=set)
     # Original raw record(s), kept for debugging / re-export.
@@ -112,6 +128,7 @@ class Member:
             join_date=str(vals.get("join_date") or "").strip(),
             last_seen=str(vals.get("last_seen") or "").strip(),
             message_count=mc,
+            has_photo=_to_photo(vals.get("has_photo")),
         )
         if group:
             m.groups.add(str(group))
@@ -138,6 +155,10 @@ class Member:
                 setattr(self, attr, getattr(other, attr))
         for attr in ("is_bot", "is_premium", "is_verified", "is_scam", "is_fake"):
             setattr(self, attr, getattr(self, attr) or getattr(other, attr))
+        if self.has_photo is None:
+            self.has_photo = other.has_photo
+        elif other.has_photo is True:
+            self.has_photo = True
         self.message_count = max(self.message_count, other.message_count)
         self.groups |= other.groups
         self.raw.extend(other.raw)
@@ -146,11 +167,13 @@ class Member:
         d = asdict(self)
         d.pop("raw", None)
         d["groups"] = ",".join(sorted(self.groups))
+        d["has_photo"] = "" if self.has_photo is None else ("是" if self.has_photo else "否")
         return d
 
 
 EXPORT_COLUMNS = [
     "user_id", "username", "full_name", "first_name", "last_name",
     "phone", "is_bot", "is_premium", "is_verified", "is_scam", "is_fake",
-    "language_code", "message_count", "join_date", "last_seen", "bio", "groups",
+    "has_photo", "language_code", "message_count", "join_date", "last_seen",
+    "bio", "groups",
 ]

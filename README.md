@@ -131,16 +131,27 @@ python -m group_export export --group GROUP_A --merge-in old_members.json -o mer
 
 ## 过滤选项
 
-| 参数 | 作用 |
-|------|------|
-| （默认）| 去掉无用户名、广告/营销号、bot、scam/fake |
-| `--keep-no-username` | 保留没有用户名的号 |
-| `--keep-ads` | 保留广告/营销号 |
-| `--keep-bots` | 保留 bot |
-| `--keep-scam` | 保留 scam/fake |
-| `--ad-threshold N` | 广告判定阈值，越小越严格（默认 2） |
-| `--ad-keywords-file FILE` | 自定义广告关键词表（每行一个，`#` 开头为注释） |
-| `--dump-removed` | 额外导出 `xxx.removed.csv`，列出被过滤掉的成员及原因 |
+> 网页版（iPhone 零安装版 / 服务端版）里**每个设置下方都有中文说明和建议**，
+> 还带「↻ 一键推荐」按钮一键填好推荐过滤项。下面是命令行对应参数。
+
+| 参数 | 作用 | 默认 |
+|------|------|------|
+| `--keep-no-username` | 保留没有用户名的号 | 默认过滤 |
+| `--keep-ads` | 保留广告/营销号 | 默认过滤 |
+| `--keep-bots` | 保留 bot | 默认过滤 |
+| `--keep-scam` | 保留 scam/fake | 默认过滤 |
+| `--keep-deleted` | 保留已注销/空白账号（无用户名且无昵称） | 默认过滤 |
+| `--filter-no-photo` | 过滤无头像账号（仅接口明确返回无头像时） | 默认关 |
+| `--filter-random-username` | 过滤疑似随机用户名（如 user123456） | 默认关 |
+| `--premium-only` | 仅保留 Premium 会员 | 默认关 |
+| `--verified-only` | 仅保留官方认证号 | 默认关 |
+| `--min-messages N` | 仅保留发言数 ≥ N 的成员（活跃度） | 0 不限 |
+| `--language-keep zh,en` | 仅保留指定语言（语言未知者保留） | 不限 |
+| `--ad-threshold N` | 广告判定阈值，越小越严格 | 2 |
+| `--ad-keywords-file FILE` | 自定义广告关键词表（替换内置） | — |
+| `--extra-ad-keywords-file FILE` | 追加广告关键词（叠加内置） | — |
+| `--whitelist-file FILE` | 用户名白名单，永不过滤 | — |
+| `--dump-removed` | 额外导出 `xxx.removed.csv`（含过滤原因） | — |
 
 ## 接口手动覆盖（自动探测不准时使用）
 

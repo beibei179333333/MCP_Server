@@ -34,21 +34,22 @@
     join_date: ["join_date","joinDate","joined_at","joinedAt","join_time"],
     last_seen: ["last_seen","lastSeen","last_online","lastOnline","last_active"],
     message_count: ["message_count","messageCount","messages","msg_count","msgCount"],
+    has_photo: ["has_photo","hasPhoto","photo","avatar","has_avatar","profile_photo","photo_url"],
   };
 
   const EXPORT_COLUMNS = [
     "user_id","username","full_name","first_name","last_name","phone",
-    "is_bot","is_premium","is_verified","is_scam","is_fake","language_code",
-    "message_count","join_date","last_seen","bio","groups",
+    "is_bot","is_premium","is_verified","is_scam","is_fake","has_photo",
+    "language_code","message_count","join_date","last_seen","bio","groups",
   ];
   const TABLE_COLUMNS = ["username","full_name","user_id","message_count",
     "is_premium","language_code","groups"];
   const COLUMN_LABELS = {
     user_id:"用户ID", username:"用户名", full_name:"昵称", first_name:"名",
     last_name:"姓", phone:"电话", is_bot:"机器人", is_premium:"会员",
-    is_verified:"认证", is_scam:"诈骗", is_fake:"仿冒", language_code:"语言",
-    message_count:"消息数", join_date:"加入时间", last_seen:"最后在线",
-    bio:"简介", groups:"所属群",
+    is_verified:"认证", is_scam:"诈骗", is_fake:"仿冒", has_photo:"头像",
+    language_code:"语言", message_count:"消息数", join_date:"加入时间",
+    last_seen:"最后在线", bio:"简介", groups:"所属群",
   };
 
   function first(d, keys) {
@@ -69,6 +70,15 @@
     let s = String(v).trim();
     if (s.startsWith("@")) s = s.slice(1);
     return s;
+  }
+  // tri-state: true / false / null(unknown, field not provided)
+  function toPhoto(v) {
+    if (v === undefined || v === null || v === "") return null;
+    if (typeof v === "boolean") return v;
+    if (typeof v === "number") return v !== 0;
+    const s = String(v).trim().toLowerCase();
+    if (["0","false","no","none","null"].includes(s)) return false;
+    return true; // a url / id / "true" => has photo
   }
 
   function normalizeMember(rec, group) {
@@ -92,7 +102,7 @@
       language_code: (v.language_code == null ? "" : String(v.language_code).trim()),
       join_date: (v.join_date == null ? "" : String(v.join_date).trim()),
       last_seen: (v.last_seen == null ? "" : String(v.last_seen).trim()),
-      message_count: mc, groups: new Set(),
+      message_count: mc, has_photo: toPhoto(v.has_photo), groups: new Set(),
     };
     if (group) m.groups.add(String(group));
     return m;
@@ -123,11 +133,12 @@
     return [m.username, m.full_name, m.first_name, m.last_name, m.bio]
       .filter(Boolean).join(" ").toLowerCase();
   }
+  const RANDOM_UN_RE = /^[a-z]?\d{5,}$|^user\d{3,}$|^[a-z]{1,2}\d{4,}$/i;
   function adScore(m, cfg) {
     const text = haystack(m);
     let score = 0;
-    const kws = cfg.adKeywords || AD_KEYWORDS;
-    for (const kw of kws) if (kw && text.includes(kw.toLowerCase())) score += 1;
+    const kws = (cfg.adKeywords || AD_KEYWORDS).concat(cfg.extraAdKeywords || []);
+    for (const kw of kws) if (kw && text.includes(String(kw).toLowerCase())) score += 1;
     const blob = [m.username, m.full_name, m.bio].filter(Boolean).join(" ");
     if (URL_RE.test(blob)) score += 2;
     if (PHONE_RE.test(m.full_name) || PHONE_RE.test(m.bio)) score += 2;
@@ -137,9 +148,23 @@
     return score;
   }
   function classify(m, cfg) {
+    // 白名单：用户名在白名单里则永不过滤
+    if (cfg.whitelist && cfg.whitelist.length && m.username &&
+        cfg.whitelist.includes(m.username.toLowerCase())) return null;
+    // 已注销 / 空白账号：既无用户名也无任何昵称
+    if (cfg.filterDeleted && !m.username && !m.full_name) return "deleted";
     if (cfg.requireUsername && !m.username) return "no_username";
     if (cfg.filterBots && m.is_bot) return "bot";
     if (cfg.filterScam && (m.is_scam || m.is_fake)) return "scam_or_fake";
+    if (cfg.verifiedOnly && !m.is_verified) return "not_verified";
+    if (cfg.premiumOnly && !m.is_premium) return "not_premium";
+    if (cfg.noPhoto && m.has_photo === false) return "no_photo";  // 仅在接口明确返回“无头像”时过滤
+    if (cfg.minMessages && cfg.minMessages > 0 && m.message_count < cfg.minMessages)
+      return "low_activity";
+    if (cfg.languageKeep && cfg.languageKeep.length && m.language_code &&
+        !cfg.languageKeep.includes(m.language_code.toLowerCase())) return "language";
+    if (cfg.filterRandomUsername && m.username && RANDOM_UN_RE.test(m.username))
+      return "random_username";
     if (cfg.filterAds && adScore(m, cfg) >= (cfg.adThreshold || 2)) return "ad_marketing";
     return null;
   }
@@ -171,8 +196,11 @@
 
   function toRow(m) {
     const r = {};
-    for (const c of EXPORT_COLUMNS) r[c] = (c === "groups")
-      ? Array.from(m.groups).sort().join(",") : m[c];
+    for (const c of EXPORT_COLUMNS) {
+      if (c === "groups") r[c] = Array.from(m.groups).sort().join(",");
+      else if (c === "has_photo") r[c] = m.has_photo === null ? "" : (m.has_photo ? "是" : "否");
+      else r[c] = m[c];
+    }
     return r;
   }
   function toCSV(members, columns) {
@@ -236,12 +264,13 @@
     const out = [];
     for (let i = 0; i < n; i++) {
       const r = Math.random();
-      if (r < 0.18) out.push({ id: 90000 + i, username: "promo" + i, first_name: pick(spam), message_count: Math.floor(Math.random() * 4) });
-      else if (r < 0.30) out.push({ id: 80000 + i, first_name: pick(first), message_count: Math.floor(Math.random() * 50) });
+      if (r < 0.18) out.push({ id: 90000 + i, username: "promo" + i, first_name: pick(spam), message_count: Math.floor(Math.random() * 4), has_photo: false });
+      else if (r < 0.30) out.push({ id: 80000 + i, first_name: pick(first), message_count: Math.floor(Math.random() * 50), has_photo: Math.random() < 0.5 });
       else if (r < 0.36) out.push({ id: 70000 + i, username: "x" + i, is_scam: true, first_name: "可疑账号" });
-      else out.push({ id: 1000 + i, username: "user_" + group.slice(0, 4) + "_" + i, first_name: pick(first), is_premium: Math.random() < 0.2, language_code: pick(["zh","en","ru"]), message_count: 1 + Math.floor(Math.random() * 500) });
+      else out.push({ id: 1000 + i, username: "user_" + group.slice(0, 4) + "_" + i, first_name: pick(first), is_premium: Math.random() < 0.2, language_code: pick(["zh","en","ru"]), message_count: 1 + Math.floor(Math.random() * 500), has_photo: Math.random() < 0.85 });
     }
     out.push({ id: 1000, username: "user_" + group.slice(0, 4) + "_0", last_name: "(合并)" });
+    out.push({ id: 60001 }); // 已注销账号：无用户名无昵称
     return out;
   }
 

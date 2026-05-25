@@ -69,6 +69,49 @@ def test_filter_scam_and_bot():
     assert classify(bot, cfg) == "bot"
 
 
+def test_new_filter_options():
+    base = dict(filter_ads=True)
+    # deleted / blank
+    assert classify(Member.from_raw({"id": 5}), FilterConfig(**base)) == "deleted"
+    # min messages
+    assert classify(Member.from_raw({"id": 6, "username": "lurk", "message_count": 1}),
+                    FilterConfig(min_messages=10, **base)) == "low_activity"
+    assert classify(Member.from_raw({"id": 6, "username": "act", "message_count": 99}),
+                    FilterConfig(min_messages=10, **base)) is None
+    # premium only
+    assert classify(Member.from_raw({"id": 7, "username": "free"}),
+                    FilterConfig(premium_only=True, **base)) == "not_premium"
+    # no photo (only when explicitly false)
+    assert classify(Member.from_raw({"id": 8, "username": "np", "has_photo": False}),
+                    FilterConfig(no_photo=True, **base)) == "no_photo"
+    assert classify(Member.from_raw({"id": 8, "username": "unk"}),
+                    FilterConfig(no_photo=True, **base)) is None
+    # language keep
+    assert classify(Member.from_raw({"id": 9, "username": "ru", "language_code": "ru"}),
+                    FilterConfig(language_keep=["zh", "en"], **base)) == "language"
+    assert classify(Member.from_raw({"id": 9, "username": "zh", "language_code": "zh"}),
+                    FilterConfig(language_keep=["zh", "en"], **base)) is None
+    # whitelist overrides
+    assert classify(Member.from_raw({"id": 10, "username": "vip", "is_scam": True}),
+                    FilterConfig(whitelist=["@vip"], **base)) is None
+    # extra ad keywords
+    assert classify(Member.from_raw({"id": 11, "username": "u", "first_name": "特殊A 特殊B"}),
+                    FilterConfig(extra_ad_keywords=["特殊A", "特殊B"], **base)) == "ad_marketing"
+    # random username
+    assert classify(Member.from_raw({"id": 12, "username": "user123456"}),
+                    FilterConfig(filter_random_username=True, **base)) == "random_username"
+
+
+def test_has_photo_export():
+    m = Member.from_raw({"id": 1, "username": "a", "has_photo": "http://x/p.jpg"})
+    assert m.has_photo is True
+    assert m.to_row()["has_photo"] == "是"
+    m2 = Member.from_raw({"id": 2, "username": "b", "has_photo": False})
+    assert m2.to_row()["has_photo"] == "否"
+    m3 = Member.from_raw({"id": 3, "username": "c"})
+    assert m3.to_row()["has_photo"] == ""
+
+
 def test_extract_list_envelopes():
     # list at root
     lst, total = ApiClient._extract_list([{"id": 1}, {"id": 2}])

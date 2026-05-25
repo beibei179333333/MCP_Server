@@ -44,6 +44,7 @@ COLUMN_LABELS = {
     "last_seen": "最后在线",
     "bio": "简介",
     "groups": "所属群",
+    "has_photo": "头像",
 }
 # Columns shown in the on-screen table (full set still goes to file exports).
 TABLE_COLUMNS = ["username", "full_name", "user_id", "message_count",
@@ -80,10 +81,12 @@ def _demo_members(group: str, n: int = 25) -> List[dict]:
         r = random.random()
         if r < 0.18:                       # ad / marketing
             out.append({"id": 90000 + i, "username": f"promo{i}",
-                        "first_name": random.choice(spam_names), "message_count": random.randint(0, 3)})
+                        "first_name": random.choice(spam_names),
+                        "message_count": random.randint(0, 3), "has_photo": False})
         elif r < 0.30:                     # no username
             out.append({"id": 80000 + i, "first_name": random.choice(first),
-                        "message_count": random.randint(0, 50)})
+                        "message_count": random.randint(0, 50),
+                        "has_photo": random.random() < 0.5})
         elif r < 0.36:                     # scam flagged
             out.append({"id": 70000 + i, "username": f"x{i}", "is_scam": True,
                         "first_name": "可疑账号"})
@@ -92,9 +95,11 @@ def _demo_members(group: str, n: int = 25) -> List[dict]:
                         "first_name": random.choice(first),
                         "is_premium": random.random() < 0.2,
                         "language_code": random.choice(["zh", "en", "ru"]),
-                        "message_count": random.randint(1, 500)})
+                        "message_count": random.randint(1, 500),
+                        "has_photo": random.random() < 0.85})
     # inject a cross-group duplicate to show merge
     out.append({"id": 1000, "username": f"user_{group[:4]}_0", "last_name": "(合并)"})
+    out.append({"id": 60001})              # deleted/blank account
     return out
 
 
@@ -137,6 +142,15 @@ def _run_job(job: Job, groups: List[str], token: str, base_url: str,
             filter_ads=opts.get("filter_ads", True),
             filter_bots=opts.get("filter_bots", True),
             filter_scam_fake=opts.get("filter_scam", True),
+            filter_deleted=opts.get("filter_deleted", True),
+            no_photo=opts.get("no_photo", False),
+            filter_random_username=opts.get("filter_random_username", False),
+            premium_only=opts.get("premium_only", False),
+            verified_only=opts.get("verified_only", False),
+            min_messages=int(opts.get("min_messages") or 0),
+            language_keep=opts.get("language_keep") or None,
+            extra_ad_keywords=opts.get("extra_ad_keywords") or None,
+            whitelist=opts.get("whitelist") or None,
             ad_threshold=int(opts.get("ad_threshold") or 2),
         )
         kept, removed, stats = run(raw, fcfg)

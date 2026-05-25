@@ -56,6 +56,31 @@ eq(GE.parseGroupLink("not a link !!! 中文"), "", "link: garbage -> empty");
   ok(GE.classify(GE.normalizeMember({ id: 12, username: "mybot", is_bot: true }), cfg) === "bot", "filter bot");
 }
 
+// new filter options
+{
+  const base = { requireUsername: true, filterAds: true, filterBots: true, filterScam: true, adThreshold: 2 };
+  // deleted / blank account
+  ok(GE.classify(GE.normalizeMember({ id: 5 }), Object.assign({}, base, { filterDeleted: true })) === "deleted", "filter deleted (blank)");
+  // min messages
+  ok(GE.classify(GE.normalizeMember({ id: 6, username: "lurker", message_count: 1 }), Object.assign({}, base, { minMessages: 10 })) === "low_activity", "filter low activity");
+  ok(GE.classify(GE.normalizeMember({ id: 6, username: "chatty", message_count: 99 }), Object.assign({}, base, { minMessages: 10 })) === null, "keep active");
+  // premium only
+  ok(GE.classify(GE.normalizeMember({ id: 7, username: "free" }), Object.assign({}, base, { premiumOnly: true })) === "not_premium", "premium only filters non-premium");
+  ok(GE.classify(GE.normalizeMember({ id: 7, username: "vip", is_premium: true }), Object.assign({}, base, { premiumOnly: true })) === null, "premium only keeps premium");
+  // no photo (only when explicitly false)
+  ok(GE.classify(GE.normalizeMember({ id: 8, username: "nophoto", has_photo: false }), Object.assign({}, base, { noPhoto: true })) === "no_photo", "filter no photo");
+  ok(GE.classify(GE.normalizeMember({ id: 8, username: "unknownphoto" }), Object.assign({}, base, { noPhoto: true })) === null, "no-photo unknown -> keep");
+  // language keep
+  ok(GE.classify(GE.normalizeMember({ id: 9, username: "ru1", language_code: "ru" }), Object.assign({}, base, { languageKeep: ["zh","en"] })) === "language", "language filter");
+  ok(GE.classify(GE.normalizeMember({ id: 9, username: "zh1", language_code: "zh" }), Object.assign({}, base, { languageKeep: ["zh","en"] })) === null, "language keep");
+  // whitelist overrides everything
+  ok(GE.classify(GE.normalizeMember({ id: 10, username: "vipuser", is_scam: true }), Object.assign({}, base, { whitelist: ["vipuser"] })) === null, "whitelist overrides");
+  // extra ad keywords
+  ok(GE.classify(GE.normalizeMember({ id: 11, username: "mykeyword2", first_name: "特殊词1 特殊词2" }), Object.assign({}, base, { extraAdKeywords: ["特殊词1","特殊词2"] })) === "ad_marketing", "extra ad keywords");
+  // random username
+  ok(GE.classify(GE.normalizeMember({ id: 12, username: "user123456" }), Object.assign({}, base, { filterRandomUsername: true })) === "random_username", "random username");
+}
+
 // extractList envelopes
 {
   eq(GE.extractList([{ id: 1 }, { id: 2 }]).list.length, 2, "extract root list");

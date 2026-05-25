@@ -45,6 +45,13 @@
   .chip input{width:20px; height:20px; accent-color:var(--accent2);}
   details summary{cursor:pointer; color:var(--accent); font-size:14px; padding:6px 0;}
   .muted{color:var(--muted); font-size:13px;}
+  .field{padding:14px 0; border-bottom:1px solid var(--line);}
+  .field:last-child{border-bottom:none;}
+  .toggle{display:flex; align-items:center; gap:12px; font-size:16px; color:var(--txt); margin:0; cursor:pointer;}
+  .toggle input{width:22px; height:22px; accent-color:var(--accent2); flex:0 0 auto;}
+  .toggle .rec{margin-left:auto; font-size:11px; color:#7ee2a8; background:#143a24; border-radius:999px; padding:2px 8px;}
+  .hint{color:var(--muted); font-size:12.5px; line-height:1.5; margin:6px 0 0 34px;}
+  .hint.nopad{margin-left:0;}
   .stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:6px;}
   .stat{background:#0d1322; border:1px solid var(--line); border-radius:12px;
     padding:14px; text-align:center;}
@@ -99,28 +106,102 @@
 
   <!-- 过滤选项 -->
   <div class="card">
-    <h2>② 过滤选项</h2>
-    <div class="switches">
-      <label class="chip"><input type="checkbox" id="f_username" checked> 过滤无用户名</label>
-      <label class="chip"><input type="checkbox" id="f_ads" checked> 过滤广告/营销号</label>
-      <label class="chip"><input type="checkbox" id="f_bots" checked> 过滤机器人</label>
-      <label class="chip"><input type="checkbox" id="f_scam" checked> 过滤诈骗/仿冒</label>
-      <label class="chip"><input type="checkbox" id="f_demo"> 演示模式(免密钥)</label>
+    <h2>② 过滤选项 <span class="count-badge" id="recBtn" style="cursor:pointer;background:#143a24;color:#7ee2a8;">↻ 一键推荐</span></h2>
+    <p class="muted" style="margin:0 0 8px;">勾选项默认已按“最干净的真人名单”配好，可逐项调整。每项下方有说明。</p>
+
+    <div class="field">
+      <label class="toggle"><input type="checkbox" id="f_username" checked><span>过滤无用户名</span><span class="rec">推荐开</span></label>
+      <p class="hint">💡 没有 @用户名 的号多为机器人/小号，导出后也无法私信或@，建议开启。</p>
     </div>
-    <details style="margin-top:12px;">
-      <summary>高级设置（密钥 / 接口覆盖）</summary>
-      <label>密钥 Token（保存在本机浏览器，不上传第三方）</label>
-      <input type="password" id="token" placeholder="粘贴 JWT...">
-      <div class="row">
-        <div><label>广告判定严格度(越小越严)</label><input type="number" id="adth" value="2" min="1"></div>
-        <div><label>每页数量</label><input type="number" id="psize" value="200" min="1"></div>
+    <div class="field">
+      <label class="toggle"><input type="checkbox" id="f_ads" checked><span>过滤广告 / 营销号</span><span class="rec">推荐开</span></label>
+      <p class="hint">💡 按“关键词 + 链接 + 电话 + emoji 堆叠 + scam标记”综合打分剔除。下方可调严格度、加自定义词。</p>
+    </div>
+    <div class="field">
+      <label class="toggle"><input type="checkbox" id="f_bots" checked><span>过滤机器人 (bot)</span><span class="rec">推荐开</span></label>
+      <p class="hint">💡 去掉官方/第三方机器人账号，只留真人。</p>
+    </div>
+    <div class="field">
+      <label class="toggle"><input type="checkbox" id="f_scam" checked><span>过滤诈骗 / 仿冒号</span><span class="rec">推荐开</span></label>
+      <p class="hint">💡 剔除被 Telegram 标记 scam / fake 的账号，降低风险。</p>
+    </div>
+    <div class="field">
+      <label class="toggle"><input type="checkbox" id="f_deleted" checked><span>过滤已注销 / 空白账号</span><span class="rec">推荐开</span></label>
+      <p class="hint">💡 既没有用户名也没有昵称的，多为已注销账号(Deleted Account)，留着没意义。</p>
+    </div>
+    <div class="field">
+      <label class="toggle"><input type="checkbox" id="f_nophoto"><span>过滤无头像账号</span></label>
+      <p class="hint">💡 没设头像的多是小号/养号。仅当接口明确返回“无头像”时才过滤，不确定的会保留。</p>
+    </div>
+    <div class="field">
+      <label class="toggle"><input type="checkbox" id="f_random"><span>过滤疑似随机用户名</span></label>
+      <p class="hint">💡 形如 user123456、a88888 这类自动生成用户名，常见于批量注册号。误杀风险中等。</p>
+    </div>
+    <div class="field">
+      <label class="toggle"><input type="checkbox" id="f_premium"><span>仅保留会员 (Premium)</span></label>
+      <p class="hint">💡 只导出开了会员的用户。需接口提供会员字段，否则会全部被过滤。</p>
+    </div>
+    <div class="field">
+      <label class="toggle"><input type="checkbox" id="f_verified"><span>仅保留官方认证号</span></label>
+      <p class="hint">💡 只保留带蓝V认证的账号，名单会非常小。</p>
+    </div>
+
+    <div class="field">
+      <label>最少消息数（活跃度）</label>
+      <input type="number" id="minmsg" value="0" min="0">
+      <p class="hint nopad">💡 只保留发言数 ≥ 该值的成员。0 = 不限。想要“活人”填 1~5。需接口提供消息数。</p>
+    </div>
+    <div class="field">
+      <label>仅保留指定语言（可留空）</label>
+      <input type="text" id="langkeep" placeholder="例如 zh,en">
+      <p class="hint nopad">💡 逗号分隔语言代码(zh/en/ru…)。留空=不限；语言未知的成员会保留。</p>
+    </div>
+    <div class="field">
+      <label>广告判定严格度（数字越小越严）</label>
+      <input type="number" id="adth" value="2" min="1">
+      <p class="hint nopad">💡 默认 2 较稳妥；1 更严(可能误杀)，3~4 更宽松。先用 2 跑，再看“被过滤名单”微调。</p>
+    </div>
+    <div class="field">
+      <label>追加广告关键词（每行一个，可留空）</label>
+      <textarea id="adkw" style="min-height:70px;" placeholder="例如：&#10;招代理&#10;开户"></textarea>
+      <p class="hint nopad">💡 把你群里常见广告话术加进来，命中即加分，和内置词库叠加生效。</p>
+    </div>
+    <div class="field">
+      <label>用户名白名单（每行一个，永不过滤）</label>
+      <textarea id="whitelist" style="min-height:70px;" placeholder="例如：&#10;your_admin&#10;vip_user"></textarea>
+      <p class="hint nopad">💡 这里填的 @用户名 无论如何都保留，避免误删管理员/重要成员。</p>
+    </div>
+
+    <div class="field">
+      <label class="toggle"><input type="checkbox" id="f_demo"><span>演示模式（免密钥）</span></label>
+      <p class="hint">💡 用合成数据先预览界面和表格效果。正式导出请关闭并填好密钥。</p>
+    </div>
+
+    <details style="margin-top:6px;">
+      <summary>高级设置（密钥 / 接口，通常不用改）</summary>
+      <div class="field">
+        <label>密钥 Token</label>
+        <input type="password" id="token" placeholder="粘贴 JWT...">
+        <p class="hint nopad">💡 保存在本机浏览器，不上传第三方。也可在服务器用 GROUP_EXPORT_TOKEN 环境变量。</p>
       </div>
-      <label>接口路径(可留空自动探测)</label>
-      <input type="text" id="endpoint" placeholder="/api/group/members/export">
-      <div class="row">
-        <div><label>群参数名</label><input type="text" id="gp" placeholder="group_id"></div>
-        <div><label>分页参数名</label><input type="text" id="pp" placeholder="page"></div>
-        <div><label>每页参数名</label><input type="text" id="sp" placeholder="page_size"></div>
+      <div class="field">
+        <label>每页数量</label>
+        <input type="number" id="psize" value="200" min="1">
+        <p class="hint nopad">💡 每次翻页抓多少条。一般 200；接口报错可调小到 50~100。</p>
+      </div>
+      <div class="field">
+        <label>接口路径（留空=自动探测）</label>
+        <input type="text" id="endpoint" placeholder="/api/group/members/export">
+        <p class="hint nopad">💡 留空时读 Swagger 自动找“导出群成员”接口；自动找错了再手动填。</p>
+      </div>
+      <div class="field">
+        <label>参数名（一般留空自动识别）</label>
+        <div class="row">
+          <div><input type="text" id="gp" placeholder="群参数 group_id"></div>
+          <div><input type="text" id="pp" placeholder="分页参数 page"></div>
+          <div><input type="text" id="sp" placeholder="每页参数 page_size"></div>
+        </div>
+        <p class="hint nopad">💡 仅当自动识别不对、抓不到数据时才需手动指定，对照 Swagger 填写。</p>
       </div>
     </details>
   </div>
@@ -183,12 +264,24 @@ async function doParse(){
   return d.count;
 }
 
+function linesOf(id){
+  return $('#'+id).value.split(/[\n,，]+/).map(s=>s.trim()).filter(Boolean);
+}
 function opts(){
   return {
     require_username: $('#f_username').checked,
     filter_ads: $('#f_ads').checked,
     filter_bots: $('#f_bots').checked,
     filter_scam: $('#f_scam').checked,
+    filter_deleted: $('#f_deleted').checked,
+    no_photo: $('#f_nophoto').checked,
+    filter_random_username: $('#f_random').checked,
+    premium_only: $('#f_premium').checked,
+    verified_only: $('#f_verified').checked,
+    min_messages: +$('#minmsg').value || 0,
+    language_keep: linesOf('langkeep').map(s=>s.toLowerCase()),
+    extra_ad_keywords: linesOf('adkw'),
+    whitelist: linesOf('whitelist').map(s=>s.replace(/^@/,'').toLowerCase()),
     demo: $('#f_demo').checked,
     ad_threshold: +$('#adth').value || 2,
     page_size: +$('#psize').value || 200,
@@ -198,6 +291,19 @@ function opts(){
     size_param: $('#sp').value.trim(),
   };
 }
+const REASON_LABELS = {
+  no_username:"无用户名", ad_marketing:"广告/营销", bot:"机器人",
+  scam_or_fake:"诈骗/仿冒", deleted:"已注销/空白", no_photo:"无头像",
+  not_premium:"非会员", not_verified:"未认证", low_activity:"活跃度不足",
+  language:"语言不符", random_username:"随机用户名",
+};
+$('#recBtn').onclick = () => {
+  ['f_username','f_ads','f_bots','f_scam','f_deleted'].forEach(i=>$('#'+i).checked=true);
+  ['f_nophoto','f_random','f_premium','f_verified'].forEach(i=>$('#'+i).checked=false);
+  $('#minmsg').value=0; $('#langkeep').value=''; $('#adth').value=2;
+  const b=$('#recBtn'); const t=b.textContent; b.textContent='✓ 已恢复推荐';
+  setTimeout(()=>b.textContent=t, 1500);
+};
 
 $('#btnRun').onclick = async () => {
   $('#errBox').classList.add('hidden');
@@ -235,14 +341,20 @@ async function showResult(jobInfo){
   // stats
   const s = d.stats || {};
   const fil = s.filtered || {};
-  const filTotal = s.total_filtered || 0;
+  const others = Object.keys(fil).filter(k=>!['no_username','ad_marketing'].includes(k))
+    .reduce((acc,k)=>acc+fil[k],0);
   $('#statGrid').innerHTML = `
     <div class="stat"><b>${s.seen||0}</b><span>抓取总数</span></div>
     <div class="stat"><b style="color:#7ee2a8">${s.kept||0}</b><span>保留(导出)</span></div>
     <div class="stat"><b>${s.merged||0}</b><span>合并重复</span></div>
     <div class="stat"><b>${fil.no_username||0}</b><span>无用户名</span></div>
     <div class="stat"><b>${fil.ad_marketing||0}</b><span>广告/营销</span></div>
-    <div class="stat"><b>${(fil.scam_or_fake||0)+(fil.bot||0)}</b><span>诈骗/机器人</span></div>`;
+    <div class="stat"><b>${others}</b><span>其他过滤</span></div>`;
+  const detail = Object.keys(fil).sort().map(k=>`${REASON_LABELS[k]||k} ${fil[k]}`).join(' · ');
+  let dl = document.getElementById('filterDetail');
+  if(!dl){ dl=document.createElement('p'); dl.id='filterDetail'; dl.className='muted';
+    dl.style.margin='10px 0 0'; $('#statGrid').after(dl); }
+  dl.textContent = detail ? ('过滤明细：'+detail) : '没有成员被过滤';
   // table
   const thead = $('#tbl thead'), tbody = $('#tbl tbody');
   thead.innerHTML = '<tr>' + d.columns.map(c=>`<th>${d.labels[c]||c}</th>`).join('') + '</tr>';
