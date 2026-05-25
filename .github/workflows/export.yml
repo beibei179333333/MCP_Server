@@ -1,0 +1,69 @@
+name: 导出群成员 / Export members
+
+# 在网页里手动触发：Actions 标签页 → 选本工作流 → Run workflow → 填群链接 → 运行
+# 运行结束后在该次运行页面底部 Artifacts 里下载 members 压缩包（含 CSV/JSON/XLSX）。
+on:
+  workflow_dispatch:
+    inputs:
+      groups:
+        description: "群链接/ID（多个用空格、逗号或换行分隔）"
+        required: true
+      formats:
+        description: "导出格式：csv / json / xlsx / all"
+        required: false
+        default: "all"
+      ad_threshold:
+        description: "广告判定严格度（越小越严，默认 2）"
+        required: false
+        default: "2"
+      extra_args:
+        description: "附加过滤参数（可选），例如：--min-messages 1 --premium-only --keep-deleted"
+        required: false
+        default: ""
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 导出
+        env:
+          # 在仓库 Settings → Secrets and variables → Actions 里新增 GROUP_EXPORT_TOKEN
+          GROUP_EXPORT_TOKEN: ${{ secrets.GROUP_EXPORT_TOKEN }}
+          GROUPS_INPUT: ${{ github.event.inputs.groups }}
+          FORMATS: ${{ github.event.inputs.formats }}
+          AD_THRESHOLD: ${{ github.event.inputs.ad_threshold }}
+          EXTRA_ARGS: ${{ github.event.inputs.extra_args }}
+        run: |
+          set -e
+          if [ -z "$GROUP_EXPORT_TOKEN" ]; then
+            echo "::error::缺少密钥。请到 仓库 Settings → Secrets and variables → Actions → New repository secret，名字填 GROUP_EXPORT_TOKEN，值填你的 JWT。"
+            exit 1
+          fi
+          # 把输入按 空格/逗号/换行 拆成多个 --group 参数（用 env 传入，避免脚本注入）
+          mapfile -t GROUPS < <(printf '%s' "$GROUPS_INPUT" | tr ',\r ' '\n\n\n' | sed '/^[[:space:]]*$/d')
+          ARGS=()
+          for g in "${GROUPS[@]}"; do ARGS+=(--group "$g"); done
+          echo "共 ${#GROUPS[@]} 个群，开始导出..."
+          python -m group_export export "${ARGS[@]}" \
+            -o members --format "$FORMATS" \
+            --ad-threshold "$AD_THRESHOLD" --dump-removed $EXTRA_ARGS
+
+      - name: 上传结果（在本页底部 Artifacts 下载）
+        uses: actions/upload-artifact@v4
+        with:
+          name: members
+          if-no-files-found: warn
+          path: |
+            members.csv
+            members.json
+            members.xlsx
+            members.removed.csv

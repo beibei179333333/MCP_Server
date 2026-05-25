@@ -1,0 +1,131 @@
+"""Heuristic filters: no-username and ad/marketing-account detection."""
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from typing import List, Optional
+
+from .models import Member
+
+
+# Keywords that strongly indicate an advertising / marketing / spam account.
+# Mix of zh-CN and English terms common in Telegram marketing spam.
+DEFAULT_AD_KEYWORDS: List[str] = [
+    # zh-CN marketing / ads
+    "广告", "推广", "营销", "引流", "招商", "代理", "代充", "承接", "出售", "出粉",
+    "卖", "购买", "招聘", "兼职", "刷单", "刷量", "粉丝", "拉人", "拉群", "建群",
+    "加微", "加我", "私聊", "联系", "客服", "在线", "咨询", "办理", "接单", "接业务",
+    "博彩", "菠菜", "彩票", "棋牌", "赌", "色情", "约炮", "约", "贷款", "网赚", "赚钱",
+    "USDT", "usdt", "U商", "承兑", "跑分", "支付", "通道", "三方", "四方",
+    "飞机号", "tg号", "TG号", "协议号", "白号", "老号", "实名", "解封", "群发",
+    "机器人", "脚本", "软件", "破解", "VPN", "翻墙", "节点", "梯子",
+    # English / generic spam
+    "promo", "promotion", "marketing", "advertis", "casino", "betting", "loan",
+    "crypto", "forex", "invest", "earn money", "make money", "free money",
+    "click here", "join now", "subscribe", "follow me", "dm me", "contact me",
+    "for sale", "cheap", "discount", "telegram.me", "t.me/", "wa.me",
+    "official", "support team", "admin", "airdrop", "giveaway", "presale",
+]
+
+# Patterns that look promotional inside a display name or bio.
+_URL_RE = re.compile(r"(https?://|t\.me/|telegram\.me/|wa\.me/|@[A-Za-z0-9_]{4,})", re.I)
+_PHONE_RE = re.compile(r"(?:\+?\d[\s\-]?){9,}")
+# Run of emoji / pictographs (decorated marketing names).
+_EMOJI_RE = re.compile(
+    "[\U0001F000-\U0001FAFF\U00002600-\U000027BF\U0001F1E6-\U0001F1FF←-⇿⬀-⯿]"
+)
+
+
+@dataclass
+class FilterConfig:
+    require_username: bool = True
+    filter_ads: bool = True
+    filter_bots: bool = True
+    filter_scam_fake: bool = True
+    filter_deleted: bool = True
+    no_photo: bool = False
+    filter_random_username: bool = False
+    premium_only: bool = False
+    verified_only: bool = False
+    min_messages: int = 0
+    language_keep: Optional[List[str]] = None      # keep only these language codes
+    ad_keywords: Optional[List[str]] = None         # overrides the default base list
+    extra_ad_keywords: Optional[List[str]] = None   # appended to whichever base is used
+    whitelist: Optional[List[str]] = None           # usernames that are never filtered
+    # Score threshold; a member is flagged as ad when score >= threshold.
+    ad_threshold: int = 2
+    # Names with at least this many emoji are treated as decorated/marketing.
+    emoji_limit: int = 4
+
+    def keywords(self) -> List[str]:
+        base = self.ad_keywords or DEFAULT_AD_KEYWORDS
+        return [k.lower() for k in list(base) + list(self.extra_ad_keywords or [])]
+
+    def whitelist_set(self) -> set:
+        return {w.lstrip("@").lower() for w in (self.whitelist or [])}
+
+    def languages(self) -> set:
+        return {l.strip().lower() for l in (self.language_keep or []) if l.strip()}
+
+
+_RANDOM_UN_RE = re.compile(r"^[a-z]?\d{5,}$|^user\d{3,}$|^[a-z]{1,2}\d{4,}$", re.I)
+
+
+def _haystack(m: Member) -> str:
+    return " ".join(
+        x for x in (m.username, m.full_name, m.first_name, m.last_name, m.bio) if x
+    ).lower()
+
+
+def ad_score(m: Member, cfg: FilterConfig) -> int:
+    """Return a heuristic 'looks like an ad/marketing account' score."""
+    text = _haystack(m)
+    score = 0
+
+    kw_hits = sum(1 for kw in cfg.keywords() if kw and kw in text)
+    score += kw_hits
+
+    blob = " ".join(x for x in (m.username, m.full_name, m.bio) if x)
+    if _URL_RE.search(blob):
+        score += 2
+    if _PHONE_RE.search(m.full_name) or _PHONE_RE.search(m.bio):
+        score += 2
+
+    emoji_count = len(_EMOJI_RE.findall(m.full_name))
+    if emoji_count >= cfg.emoji_limit:
+        score += 1
+
+    if m.is_scam or m.is_fake:
+        score += 3
+
+    return score
+
+
+def classify(m: Member, cfg: FilterConfig) -> Optional[str]:
+    """Return a reason string if the member should be filtered out, else None."""
+    if m.username and m.username.lower() in cfg.whitelist_set():
+        return None
+    if cfg.filter_deleted and not m.username and not m.full_name:
+        return "deleted"
+    if cfg.require_username and not m.username:
+        return "no_username"
+    if cfg.filter_bots and m.is_bot:
+        return "bot"
+    if cfg.filter_scam_fake and (m.is_scam or m.is_fake):
+        return "scam_or_fake"
+    if cfg.verified_only and not m.is_verified:
+        return "not_verified"
+    if cfg.premium_only and not m.is_premium:
+        return "not_premium"
+    if cfg.no_photo and m.has_photo is False:
+        return "no_photo"
+    if cfg.min_messages and m.message_count < cfg.min_messages:
+        return "low_activity"
+    langs = cfg.languages()
+    if langs and m.language_code and m.language_code.lower() not in langs:
+        return "language"
+    if cfg.filter_random_username and m.username and _RANDOM_UN_RE.match(m.username):
+        return "random_username"
+    if cfg.filter_ads and ad_score(m, cfg) >= cfg.ad_threshold:
+        return "ad_marketing"
+    return None
