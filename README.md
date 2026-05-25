@@ -32,24 +32,37 @@
 用法：粘贴群链接 → 选过滤项 → 在「高级设置」填密钥 → 开始导出 → 看表格 / 下载 CSV·JSON。
 
 - **演示模式**（页面里勾选）：免密钥、免联网，先看界面和「宽松版表格」效果，一定能用。
-- **真实数据**：因为这个 API 是 HTTP 且可能限制跨域，iPhone Safari 可能拦截直连请求。
-  如果点导出报「跨域/网络」错误，请改用下面的 **托管兜底版**（真实数据 100% 可用）。
+- **真实数据**：因为这个 API 是 HTTP 且可能限制跨域，iPhone Safari 会拦截直连请求
+  （报错 `Failed to fetch`）。两种解决办法 👇
 
-### 托管兜底版（真实数据稳定可用，仍然“只用网址”，不装App）
+### 解决 “Failed to fetch”
 
-把带服务端代理的版本一键部署到免费平台，拿到一个 HTTPS 网址，手机打开即用：
+**办法一：托管兜底版（推荐，真实数据 100% 可用，最稳）**
 
-1. 手机浏览器打开 https://render.com → 用 GitHub 登录（免费，不装App）。
-2. **New +** → **Web Service** → 连接仓库 `beibei179333333/MCP_Server`。
-3. **Branch（分支）选**：`claude/group-member-export-tool-sWRs7`
-4. 两个命令框分别填：
-   - Build Command：`pip install -r requirements.txt`
-   - Start Command：`gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 600`
-   - 实例类型选 **Free**
-5. 创建后等几分钟，拿到形如 `https://group-export-xxxx.onrender.com` 的网址，手机打开即可。
-   （服务端帮你转发请求，绕开了浏览器的跨域 / HTTP 限制，真实数据可用。）
+把带「服务端代理」的版本部署到免费平台 Render，拿到一个 HTTPS 网址，手机打开即用。
+**一键部署**（手机点这个链接即可，会用 GitHub 登录，不装任何 App）：
 
-> 仓库里已带 `render.yaml`，若用 Render 的 **Blueprint** 方式可自动读取这些配置。
+👉 https://render.com/deploy?repo=https://github.com/beibei179333333/MCP_Server/tree/claude/group-member-export-tool-sWRs7
+
+1. 点上面链接 → 用 GitHub 登录 → 它会自动读取仓库里的 `render.yaml`，实例选 **Free** → **Apply / Deploy**。
+2. 等几分钟，拿到形如 `https://group-export-xxxx.onrender.com` 的网址。
+3. 手机打开那个网址（就是同一套双语界面）→ 在「高级设置」填密钥 → 导出。
+   服务端替你向 API 发请求，**彻底绕开 Safari 的跨域 / HTTP 限制**，真实数据稳定可用。
+
+> 若一键链接没生效，可手动：Render → New + → Web Service → 选仓库 `beibei179333333/MCP_Server`
+> → 分支 `claude/group-member-export-tool-sWRs7` → Start Command
+> `gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 600` → Free。
+
+**办法二：在网页里填「网络代理」（零部署，但不够稳/有安全顾虑）**
+
+打开「② 过滤选项 → 高级设置 → 网络代理」，填一个 CORS 代理（用 `{url}` 作占位符），例如：
+
+```
+https://corsproxy.io/?url={url}
+```
+
+代理在服务端帮你转发，可绕开浏览器拦截。⚠️ **注意：你的请求（包括密钥 Token）会经过这个第三方代理**，
+请用可信代理，最好是你自己部署的；否则建议用办法一。
 
 ---
 

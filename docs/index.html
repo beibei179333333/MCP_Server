@@ -187,6 +187,11 @@
         <p class="hint nopad" data-i18n="base_h"></p>
       </div>
       <div class="field">
+        <label data-i18n="proxy_l">网络代理（可选，解决跨域/HTTP拦截）</label>
+        <input type="text" id="proxy" data-i18n-ph="proxy_ph" placeholder="https://corsproxy.io/?url={url}">
+        <p class="hint nopad" data-i18n="proxy_h"></p>
+      </div>
+      <div class="field">
         <label data-i18n="psize_l">每页数量</label>
         <input type="number" id="psize" value="200" min="1">
         <p class="hint nopad" data-i18n="psize_h"></p>
@@ -263,8 +268,19 @@ function applyLang(){
 
 $('#token').value = localStorage.getItem('ge_token') || '';
 $('#base').value = localStorage.getItem('ge_base') || 'https://fun-stat-bot.net';
+$('#proxy').value = localStorage.getItem('ge_proxy') || '';
 $('#token').addEventListener('change', e => localStorage.setItem('ge_token', e.target.value.trim()));
 $('#base').addEventListener('change', e => localStorage.setItem('ge_base', e.target.value.trim()));
+$('#proxy').addEventListener('change', e => localStorage.setItem('ge_proxy', e.target.value.trim()));
+
+// Optionally route a request URL through a CORS proxy to defeat Safari's
+// cross-origin / mixed-content blocking. {url} is replaced with the encoded
+// target; if absent, the encoded target is appended.
+function wrapUrl(u){
+  const p = ($('#proxy') ? $('#proxy').value.trim() : '');
+  if(!p) return u;
+  return p.includes('{url}') ? p.replace('{url}', encodeURIComponent(u)) : (p + encodeURIComponent(u));
+}
 
 $('#btnFile').onclick = () => $('#file').click();
 $('#file').onchange = e => {
@@ -308,7 +324,7 @@ const SWAGGER_PATHS = ["/swagger/v1/swagger.json","/swagger.json","/openapi.json
 const PATH_KW = ["member","participant","成员","群成员","groupuser","group_user"];
 const EXP_KW = ["export","导出","download","list","all"];
 async function fetchJSON(url, token){
-  return fetch(url, { headers: token ? { Authorization: "Bearer " + token, Accept: "application/json" } : { Accept: "application/json" }});
+  return fetch(wrapUrl(url), { headers: token ? { Authorization: "Bearer " + token, Accept: "application/json" } : { Accept: "application/json" }});
 }
 async function discover(base, token){
   for(const p of SWAGGER_PATHS){
@@ -369,7 +385,7 @@ async function fetchMembers(base, token, group, opts, onPage){
     const url = base + endpoint + (method==="GET" ? "?"+params.toString() : "");
     let res;
     if(method==="GET") res = await fetchJSON(url, token);
-    else res = await fetch(base+endpoint, { method:"POST", headers:{ "Content-Type":"application/json", Authorization:"Bearer "+token }, body: JSON.stringify(Object.fromEntries(params)) });
+    else res = await fetch(wrapUrl(base+endpoint), { method:"POST", headers:{ "Content-Type":"application/json", Authorization:"Bearer "+token }, body: JSON.stringify(Object.fromEntries(params)) });
     if(res.status===401) throw new Error(t('err_401'));
     if(res.status===404) throw new Error(t('err_404'));
     if(!res.ok) throw new Error(t('err_http', {s:res.status}));
