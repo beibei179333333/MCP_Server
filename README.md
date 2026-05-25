@@ -16,7 +16,42 @@
 
 ---
 
-## 📱 手机网页版（推荐）
+## 🍎 iPhone 零安装版（打开网址即用）
+
+整套逻辑做成了**纯浏览器单页应用**，不用装任何东西。手机 Safari 直接打开：
+
+**👉 https://raw.githack.com/beibei179333333/MCP_Server/claude/group-member-export-tool-sWRs7/docs/index.html**
+
+> 想要更稳定的永久网址，可开启 GitHub Pages（一次性，手机也能操作）：
+> 仓库 **Settings → Pages → Source 选 Deploy from a branch →
+> 分支选 `claude/group-member-export-tool-sWRs7`、文件夹选 `/docs` → Save**，
+> 稍等一两分钟即可访问 `https://beibei179333333.github.io/MCP_Server/`。
+
+用法：粘贴群链接 → 选过滤项 → 在「高级设置」填密钥 → 开始导出 → 看表格 / 下载 CSV·JSON。
+
+- **演示模式**（页面里勾选）：免密钥、免联网，先看界面和「宽松版表格」效果，一定能用。
+- **真实数据**：因为这个 API 是 HTTP 且可能限制跨域，iPhone Safari 可能拦截直连请求。
+  如果点导出报「跨域/网络」错误，请改用下面的 **托管兜底版**（真实数据 100% 可用）。
+
+### 托管兜底版（真实数据稳定可用，仍然“只用网址”，不装App）
+
+把带服务端代理的版本一键部署到免费平台，拿到一个 HTTPS 网址，手机打开即用：
+
+1. 手机浏览器打开 https://render.com → 用 GitHub 登录（免费，不装App）。
+2. **New +** → **Web Service** → 连接仓库 `beibei179333333/MCP_Server`。
+3. **Branch（分支）选**：`claude/group-member-export-tool-sWRs7`
+4. 两个命令框分别填：
+   - Build Command：`pip install -r requirements.txt`
+   - Start Command：`gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 600`
+   - 实例类型选 **Free**
+5. 创建后等几分钟，拿到形如 `https://group-export-xxxx.onrender.com` 的网址，手机打开即可。
+   （服务端帮你转发请求，绕开了浏览器的跨域 / HTTP 限制，真实数据可用。）
+
+> 仓库里已带 `render.yaml`，若用 Render 的 **Blueprint** 方式可自动读取这些配置。
+
+---
+
+## 📱 手机网页版（电脑/Termux 运行服务端）
 
 在你自己的电脑上启动服务，手机连同一 WiFi 即可用浏览器操作：
 
