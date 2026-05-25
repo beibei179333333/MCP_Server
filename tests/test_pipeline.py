@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from group_export.api import ApiClient, ApiConfig
 from group_export.export import write_csv, write_json
 from group_export.filters import FilterConfig, ad_score, classify
+from group_export.links import parse_group_link, parse_many
 from group_export.models import Member
 from group_export.pipeline import run
 
@@ -123,6 +124,22 @@ def test_export_roundtrip(tmp_path=None):
         data = json.load(f)
     assert data[0]["username"] == "a"
     assert os.path.getsize(cpath) > 0
+
+
+def test_parse_group_link():
+    assert parse_group_link("https://t.me/somegroup") == "somegroup"
+    assert parse_group_link("https://t.me/somegroup/123") == "somegroup"
+    assert parse_group_link("@somegroup") == "somegroup"
+    assert parse_group_link("-1001234567890") == "-1001234567890"
+    assert parse_group_link("t.me/+AbCdEf123") == "+AbCdEf123"
+    assert parse_group_link("https://t.me/joinchat/AbCdEf") == "joinchat/AbCdEf"
+    assert parse_group_link("not a link !!! 中文") == ""   # garbage skipped
+
+
+def test_parse_many_dedup_and_skip():
+    groups, skipped = parse_many("https://t.me/g1\n@g1\n-100123, t.me/g2\nbad line!!!")
+    assert groups == ["g1", "-100123", "g2"]    # @g1 deduped against g1
+    assert skipped == ["bad line!!!"]
 
 
 def _run_all():

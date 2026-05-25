@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>群成员导出工具</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --line:#27304a; --txt:#e7ecf5;
+    --muted:#9aa6c0; --accent:#3b82f6; --accent2:#22c55e; --danger:#ef4444;
+    --cell-pad-y:16px; --cell-pad-x:20px;   /* 宽松版单元格内边距 */
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",Roboto,sans-serif;
+    font-size:16px; line-height:1.6; padding:0 0 60px;}
+  header{position:sticky; top:0; z-index:20; background:#121829ee;
+    backdrop-filter:blur(8px); padding:16px 18px; border-bottom:1px solid var(--line);}
+  header h1{font-size:19px; margin:0; font-weight:700;}
+  header p{margin:4px 0 0; color:var(--muted); font-size:13px;}
+  .wrap{max-width:1100px; margin:0 auto; padding:16px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:18px; margin-bottom:16px;}
+  .card h2{font-size:15px; margin:0 0 12px; color:var(--muted); font-weight:600;
+    letter-spacing:.5px;}
+  label{display:block; font-size:14px; color:var(--muted); margin:10px 0 6px;}
+  textarea,input[type=text],input[type=number],input[type=password],select{
+    width:100%; background:#0d1322; border:1px solid var(--line); color:var(--txt);
+    border-radius:12px; padding:14px; font-size:16px; outline:none;}
+  textarea{min-height:150px; resize:vertical; line-height:1.5;}
+  textarea:focus,input:focus,select:focus{border-color:var(--accent);}
+  .row{display:flex; gap:12px; flex-wrap:wrap;}
+  .row>div{flex:1 1 140px;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:16px; font-size:17px; font-weight:600; border:none;
+    border-radius:14px; color:#fff; background:var(--accent); cursor:pointer;
+    margin-top:14px;}
+  .btn:active{transform:scale(.99);}
+  .btn.green{background:var(--accent2);}
+  .btn.ghost{background:#222b42; color:var(--txt);}
+  .btn:disabled{opacity:.5;}
+  .switches{display:flex; flex-wrap:wrap; gap:10px;}
+  .chip{display:flex; align-items:center; gap:8px; background:#0d1322;
+    border:1px solid var(--line); border-radius:999px; padding:10px 14px; font-size:14px;}
+  .chip input{width:20px; height:20px; accent-color:var(--accent2);}
+  details summary{cursor:pointer; color:var(--accent); font-size:14px; padding:6px 0;}
+  .muted{color:var(--muted); font-size:13px;}
+  .stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:6px;}
+  .stat{background:#0d1322; border:1px solid var(--line); border-radius:12px;
+    padding:14px; text-align:center;}
+  .stat b{display:block; font-size:22px; margin-bottom:2px;}
+  .stat span{color:var(--muted); font-size:12px;}
+  .bar{height:10px; background:#0d1322; border-radius:999px; overflow:hidden; margin:10px 0;}
+  .bar>i{display:block; height:100%; width:0; background:var(--accent2); transition:width .3s;}
+  /* ---- 宽松版表格 ---- */
+  .table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;
+    border:1px solid var(--line); border-radius:14px;}
+  table{border-collapse:separate; border-spacing:0; width:100%; min-width:720px;}
+  th,td{padding:var(--cell-pad-y) var(--cell-pad-x); text-align:left;
+    font-size:15px; white-space:nowrap; border-bottom:1px solid var(--line);}
+  th{position:sticky; top:0; background:#1b2236; color:var(--muted);
+    font-weight:600; z-index:5;}
+  tbody tr:nth-child(even){background:#141b2b;}
+  tbody tr:active{background:#1d2740;}
+  td.name{max-width:280px; white-space:normal;}      /* 昵称可换行，宽松显示 */
+  .tag{display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px;
+    background:#1d2740; color:var(--muted);}
+  .tag.on{background:#143a24; color:#7ee2a8;}
+  .pill{font-variant-numeric:tabular-nums;}
+  .toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;}
+  .toolbar .btn{width:auto; flex:1 1 120px; margin-top:0; padding:13px 14px; font-size:15px;}
+  .hidden{display:none;}
+  .err{color:#ffb4b4; background:#3a1620; border:1px solid #5a2230; padding:12px;
+    border-radius:12px; margin-top:10px;}
+  .count-badge{background:var(--accent); color:#fff; border-radius:999px;
+    padding:2px 10px; font-size:13px; margin-left:8px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>群成员导出工具</h1>
+  <p>批量粘贴群链接 · 自动去重合并 · 过滤广告号/无用户名 · 表格导出</p>
+</header>
+
+<div class="wrap">
+
+  <!-- 群链接输入 -->
+  <div class="card">
+    <h2>① 批量群链接 <span id="parsedBadge" class="count-badge hidden">0</span></h2>
+    <label>每行一个，支持 https://t.me/xxx、@xxx、-100开头ID（也支持逗号分隔）</label>
+    <textarea id="links" placeholder="https://t.me/group1&#10;@group2&#10;-1001234567890"></textarea>
+    <div class="row">
+      <div><button class="btn ghost" id="btnFile">📂 上传 .txt 文件</button></div>
+      <div><button class="btn ghost" id="btnParse">🔍 解析预览</button></div>
+    </div>
+    <input type="file" id="file" accept=".txt,.csv" class="hidden">
+    <div id="parseInfo" class="muted" style="margin-top:8px;"></div>
+  </div>
+
+  <!-- 过滤选项 -->
+  <div class="card">
+    <h2>② 过滤选项</h2>
+    <div class="switches">
+      <label class="chip"><input type="checkbox" id="f_username" checked> 过滤无用户名</label>
+      <label class="chip"><input type="checkbox" id="f_ads" checked> 过滤广告/营销号</label>
+      <label class="chip"><input type="checkbox" id="f_bots" checked> 过滤机器人</label>
+      <label class="chip"><input type="checkbox" id="f_scam" checked> 过滤诈骗/仿冒</label>
+      <label class="chip"><input type="checkbox" id="f_demo"> 演示模式(免密钥)</label>
+    </div>
+    <details style="margin-top:12px;">
+      <summary>高级设置（密钥 / 接口覆盖）</summary>
+      <label>密钥 Token（保存在本机浏览器，不上传第三方）</label>
+      <input type="password" id="token" placeholder="粘贴 JWT...">
+      <div class="row">
+        <div><label>广告判定严格度(越小越严)</label><input type="number" id="adth" value="2" min="1"></div>
+        <div><label>每页数量</label><input type="number" id="psize" value="200" min="1"></div>
+      </div>
+      <label>接口路径(可留空自动探测)</label>
+      <input type="text" id="endpoint" placeholder="/api/group/members/export">
+      <div class="row">
+        <div><label>群参数名</label><input type="text" id="gp" placeholder="group_id"></div>
+        <div><label>分页参数名</label><input type="text" id="pp" placeholder="page"></div>
+        <div><label>每页参数名</label><input type="text" id="sp" placeholder="page_size"></div>
+      </div>
+    </details>
+  </div>
+
+  <!-- 开始 -->
+  <div class="card">
+    <h2>③ 开始导出</h2>
+    <button class="btn green" id="btnRun">🚀 开始全自动导出</button>
+    <div id="progressBox" class="hidden" style="margin-top:14px;">
+      <div class="muted" id="statusMsg">准备中…</div>
+      <div class="bar"><i id="barFill"></i></div>
+      <div class="muted" id="progDetail"></div>
+    </div>
+    <div id="errBox" class="err hidden"></div>
+  </div>
+
+  <!-- 结果 -->
+  <div class="card hidden" id="resultCard">
+    <h2>④ 结果</h2>
+    <div class="stat-grid" id="statGrid"></div>
+    <div class="toolbar" style="margin-top:14px;">
+      <button class="btn" data-fmt="csv">⬇️ CSV</button>
+      <button class="btn" data-fmt="xlsx">⬇️ Excel</button>
+      <button class="btn" data-fmt="json">⬇️ JSON</button>
+    </div>
+    <div class="table-scroll">
+      <table id="tbl"><thead></thead><tbody></tbody></table>
+    </div>
+    <p class="muted" id="tblNote" style="margin-top:10px;"></p>
+  </div>
+
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let JOB = null, POLL = null;
+
+// token persistence
+$('#token').value = localStorage.getItem('ge_token') || '';
+$('#token').addEventListener('change', e => localStorage.setItem('ge_token', e.target.value.trim()));
+
+$('#btnFile').onclick = () => $('#file').click();
+$('#file').onchange = e => {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => { $('#links').value = (($('#links').value+'\n')||'') + r.result; doParse(); };
+  r.readAsText(f);
+};
+$('#btnParse').onclick = doParse;
+
+async function doParse(){
+  const text = $('#links').value;
+  const res = await fetch('/api/parse', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({text})});
+  const d = await res.json();
+  const b = $('#parsedBadge'); b.textContent = d.count; b.classList.remove('hidden');
+  let msg = `识别到 <b>${d.count}</b> 个群`;
+  if(d.skipped && d.skipped.length) msg += `，<span style="color:#ffb4b4">${d.skipped.length} 行无法识别</span>`;
+  $('#parseInfo').innerHTML = msg;
+  return d.count;
+}
+
+function opts(){
+  return {
+    require_username: $('#f_username').checked,
+    filter_ads: $('#f_ads').checked,
+    filter_bots: $('#f_bots').checked,
+    filter_scam: $('#f_scam').checked,
+    demo: $('#f_demo').checked,
+    ad_threshold: +$('#adth').value || 2,
+    page_size: +$('#psize').value || 200,
+    endpoint: $('#endpoint').value.trim(),
+    group_param: $('#gp').value.trim(),
+    page_param: $('#pp').value.trim(),
+    size_param: $('#sp').value.trim(),
+  };
+}
+
+$('#btnRun').onclick = async () => {
+  $('#errBox').classList.add('hidden');
+  const text = $('#links').value.trim();
+  if(!text){ showErr('请先粘贴群链接'); return; }
+  $('#btnRun').disabled = true;
+  $('#progressBox').classList.remove('hidden');
+  $('#resultCard').classList.add('hidden');
+  try{
+    const res = await fetch('/api/export', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({text, token: $('#token').value.trim(), options: opts()})});
+    const d = await res.json();
+    if(!res.ok){ showErr(d.error || '启动失败'); $('#btnRun').disabled=false; return; }
+    JOB = d.job_id;
+    POLL = setInterval(poll, 1000); poll();
+  }catch(e){ showErr(''+e); $('#btnRun').disabled=false; }
+};
+
+async function poll(){
+  if(!JOB) return;
+  const res = await fetch('/api/job/'+JOB);
+  const d = await res.json();
+  $('#statusMsg').textContent = d.message || d.status;
+  const pct = d.groups_total ? Math.round(d.groups_done/d.groups_total*100) : (d.status==='done'?100:5);
+  $('#barFill').style.width = pct + '%';
+  $('#progDetail').textContent =
+    `群 ${d.groups_done}/${d.groups_total} · 已抓取 ${d.raw_count} 条`;
+  if(d.status === 'done'){ clearInterval(POLL); $('#btnRun').disabled=false; showResult(d); }
+  else if(d.status === 'error'){ clearInterval(POLL); $('#btnRun').disabled=false; showErr(d.error); }
+}
+
+async function showResult(jobInfo){
+  const res = await fetch('/api/job/'+JOB+'/result');
+  const d = await res.json();
+  // stats
+  const s = d.stats || {};
+  const fil = s.filtered || {};
+  const filTotal = s.total_filtered || 0;
+  $('#statGrid').innerHTML = `
+    <div class="stat"><b>${s.seen||0}</b><span>抓取总数</span></div>
+    <div class="stat"><b style="color:#7ee2a8">${s.kept||0}</b><span>保留(导出)</span></div>
+    <div class="stat"><b>${s.merged||0}</b><span>合并重复</span></div>
+    <div class="stat"><b>${fil.no_username||0}</b><span>无用户名</span></div>
+    <div class="stat"><b>${fil.ad_marketing||0}</b><span>广告/营销</span></div>
+    <div class="stat"><b>${(fil.scam_or_fake||0)+(fil.bot||0)}</b><span>诈骗/机器人</span></div>`;
+  // table
+  const thead = $('#tbl thead'), tbody = $('#tbl tbody');
+  thead.innerHTML = '<tr>' + d.columns.map(c=>`<th>${d.labels[c]||c}</th>`).join('') + '</tr>';
+  const fmtCell = (c,v) => {
+    if(c==='username') return v ? '@'+v : '<span class="muted">—</span>';
+    if(c==='is_premium') return (v===true||v==='True') ? '<span class="tag on">会员</span>' : '';
+    if(c==='message_count') return `<span class="pill">${v||0}</span>`;
+    if(c==='full_name') return v||'';
+    return (v===''||v==null) ? '<span class="muted">—</span>' : v;
+  };
+  tbody.innerHTML = d.rows.map(r => '<tr>' + d.columns.map(c =>
+      `<td class="${c==='full_name'?'name':''}">${fmtCell(c, r[c])}</td>`).join('') + '</tr>').join('');
+  $('#tblNote').textContent = `共 ${d.rows.length} 行（屏幕仅显示常用列，下载文件含全部字段）`;
+  // downloads
+  document.querySelectorAll('.toolbar .btn').forEach(b=>{
+    b.onclick = () => window.location = '/api/job/'+JOB+'/download/'+b.dataset.fmt;
+  });
+  $('#resultCard').classList.remove('hidden');
+  $('#resultCard').scrollIntoView({behavior:'smooth'});
+}
+
+function showErr(m){ const e=$('#errBox'); e.textContent='⚠️ '+m; e.classList.remove('hidden'); }
+</script>
+</body>
+</html>

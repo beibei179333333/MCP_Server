@@ -155,6 +155,12 @@ def cmd_export(args) -> int:
     return 0
 
 
+def cmd_serve(args) -> int:
+    from .webapp import serve
+    serve(host=args.host, port=args.port)
+    return 0
+
+
 def _load_keywords(path):
     if not path:
         return None
@@ -175,6 +181,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     d = sub.add_parser("discover", help="list swagger endpoints.")
     d.set_defaults(func=cmd_discover)
+
+    s = sub.add_parser("serve", help="启动手机网页版（批量群链接导出）。")
+    s.add_argument("--host", default="0.0.0.0")
+    s.add_argument("--port", type=int, default=8000)
+    s.set_defaults(func=cmd_serve)
 
     e = sub.add_parser("export", help="export + clean group members.")
     e.add_argument("--group", action="append",
