@@ -8,7 +8,7 @@
   :root{
     --bg:#0f1420; --card:#171e2e; --line:#27304a; --txt:#e7ecf5;
     --muted:#9aa6c0; --accent:#3b82f6; --accent2:#22c55e; --danger:#ef4444;
-    --cell-pad-y:16px; --cell-pad-x:20px;   /* 宽松版单元格内边距 */
+    --cell-pad-y:16px; --cell-pad-x:20px;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   body{margin:0; background:var(--bg); color:var(--txt);
@@ -18,6 +18,10 @@
     backdrop-filter:blur(8px); padding:16px 18px; border-bottom:1px solid var(--line);}
   header h1{font-size:19px; margin:0; font-weight:700;}
   header p{margin:4px 0 0; color:var(--muted); font-size:13px;}
+  .langsw{position:absolute; top:12px; right:14px; display:flex; gap:6px;}
+  .langsw button{background:#222b42; color:var(--muted); border:1px solid var(--line);
+    border-radius:999px; padding:6px 12px; font-size:13px; cursor:pointer;}
+  .langsw button.active{background:var(--accent); color:#fff; border-color:var(--accent);}
   .wrap{max-width:1100px; margin:0 auto; padding:16px;}
   .card{background:var(--card); border:1px solid var(--line); border-radius:16px;
     padding:18px; margin-bottom:16px;}
@@ -39,7 +43,6 @@
   .btn.green{background:var(--accent2);}
   .btn.ghost{background:#222b42; color:var(--txt);}
   .btn:disabled{opacity:.5;}
-  .switches{display:flex; flex-wrap:wrap; gap:10px;}
   .chip{display:flex; align-items:center; gap:8px; background:#0d1322;
     border:1px solid var(--line); border-radius:999px; padding:10px 14px; font-size:14px;}
   .chip input{width:20px; height:20px; accent-color:var(--accent2);}
@@ -59,7 +62,6 @@
   .stat span{color:var(--muted); font-size:12px;}
   .bar{height:10px; background:#0d1322; border-radius:999px; overflow:hidden; margin:10px 0;}
   .bar>i{display:block; height:100%; width:0; background:var(--accent2); transition:width .3s;}
-  /* ---- 宽松版表格 ---- */
   .table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;
     border:1px solid var(--line); border-radius:14px;}
   table{border-collapse:separate; border-spacing:0; width:100%; min-width:720px;}
@@ -69,7 +71,7 @@
     font-weight:600; z-index:5;}
   tbody tr:nth-child(even){background:#141b2b;}
   tbody tr:active{background:#1d2740;}
-  td.name{max-width:280px; white-space:normal;}      /* 昵称可换行，宽松显示 */
+  td.name{max-width:280px; white-space:normal;}
   .tag{display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px;
     background:#1d2740; color:var(--muted);}
   .tag.on{background:#143a24; color:#7ee2a8;}
@@ -85,147 +87,147 @@
 </head>
 <body>
 <header>
-  <h1>群成员导出工具</h1>
-  <p>批量粘贴群链接 · 自动去重合并 · 过滤广告号/无用户名 · 表格导出</p>
+  <div class="langsw">
+    <button id="lang_zh" onclick="setLang('zh')">中文</button>
+    <button id="lang_vi" onclick="setLang('vi')">Tiếng Việt</button>
+  </div>
+  <h1 data-i18n="app_title">群成员导出工具</h1>
+  <p data-i18n="app_sub">批量粘贴群链接 · 自动去重合并 · 过滤广告号/无用户名 · 表格导出</p>
 </header>
 
 <div class="wrap">
 
-  <!-- 群链接输入 -->
   <div class="card">
-    <h2>① 批量群链接 <span id="parsedBadge" class="count-badge hidden">0</span></h2>
-    <label>每行一个，支持 https://t.me/xxx、@xxx、-100开头ID（也支持逗号分隔）</label>
+    <h2><span data-i18n="c1_h">① 批量群链接</span> <span id="parsedBadge" class="count-badge hidden">0</span></h2>
+    <label data-i18n="c1_label">每行一个，支持 https://t.me/xxx、@xxx、-100开头ID（也支持逗号分隔）</label>
     <textarea id="links" placeholder="https://t.me/group1&#10;@group2&#10;-1001234567890"></textarea>
     <div class="row">
-      <div><button class="btn ghost" id="btnFile">📂 上传 .txt 文件</button></div>
-      <div><button class="btn ghost" id="btnParse">🔍 解析预览</button></div>
+      <div><button class="btn ghost" id="btnFile" data-i18n="btn_file">📂 上传 .txt 文件</button></div>
+      <div><button class="btn ghost" id="btnParse" data-i18n="btn_parse">🔍 解析预览</button></div>
     </div>
     <input type="file" id="file" accept=".txt,.csv" class="hidden">
     <div id="parseInfo" class="muted" style="margin-top:8px;"></div>
   </div>
 
-  <!-- 过滤选项 -->
   <div class="card">
-    <h2>② 过滤选项 <span class="count-badge" id="recBtn" style="cursor:pointer;background:#143a24;color:#7ee2a8;">↻ 一键推荐</span></h2>
-    <p class="muted" style="margin:0 0 8px;">勾选项默认已按“最干净的真人名单”配好，可逐项调整。每项下方有说明。</p>
+    <h2><span data-i18n="c2_h">② 过滤选项</span> <span class="count-badge" id="recBtn" data-i18n="rec_btn" style="cursor:pointer;background:#143a24;color:#7ee2a8;">↻ 一键推荐</span></h2>
+    <p class="muted" style="margin:0 0 8px;" data-i18n="c2_intro">勾选项默认已按“最干净的真人名单”配好，可逐项调整。每项下方有说明。</p>
 
     <div class="field">
-      <label class="toggle"><input type="checkbox" id="f_username" checked><span>过滤无用户名</span><span class="rec">推荐开</span></label>
-      <p class="hint">💡 没有 @用户名 的号多为机器人/小号，导出后也无法私信或@，建议开启。</p>
+      <label class="toggle"><input type="checkbox" id="f_username" checked><span data-i18n="f_username_l">过滤无用户名</span><span class="rec" data-i18n="rec_badge">推荐开</span></label>
+      <p class="hint" data-i18n="f_username_h"></p>
     </div>
     <div class="field">
-      <label class="toggle"><input type="checkbox" id="f_ads" checked><span>过滤广告 / 营销号</span><span class="rec">推荐开</span></label>
-      <p class="hint">💡 按“关键词 + 链接 + 电话 + emoji 堆叠 + scam标记”综合打分剔除。下方可调严格度、加自定义词。</p>
+      <label class="toggle"><input type="checkbox" id="f_ads" checked><span data-i18n="f_ads_l">过滤广告 / 营销号</span><span class="rec" data-i18n="rec_badge">推荐开</span></label>
+      <p class="hint" data-i18n="f_ads_h"></p>
     </div>
     <div class="field">
-      <label class="toggle"><input type="checkbox" id="f_bots" checked><span>过滤机器人 (bot)</span><span class="rec">推荐开</span></label>
-      <p class="hint">💡 去掉官方/第三方机器人账号，只留真人。</p>
+      <label class="toggle"><input type="checkbox" id="f_bots" checked><span data-i18n="f_bots_l">过滤机器人 (bot)</span><span class="rec" data-i18n="rec_badge">推荐开</span></label>
+      <p class="hint" data-i18n="f_bots_h"></p>
     </div>
     <div class="field">
-      <label class="toggle"><input type="checkbox" id="f_scam" checked><span>过滤诈骗 / 仿冒号</span><span class="rec">推荐开</span></label>
-      <p class="hint">💡 剔除被 Telegram 标记 scam / fake 的账号，降低风险。</p>
+      <label class="toggle"><input type="checkbox" id="f_scam" checked><span data-i18n="f_scam_l">过滤诈骗 / 仿冒号</span><span class="rec" data-i18n="rec_badge">推荐开</span></label>
+      <p class="hint" data-i18n="f_scam_h"></p>
     </div>
     <div class="field">
-      <label class="toggle"><input type="checkbox" id="f_deleted" checked><span>过滤已注销 / 空白账号</span><span class="rec">推荐开</span></label>
-      <p class="hint">💡 既没有用户名也没有昵称的，多为已注销账号(Deleted Account)，留着没意义。</p>
+      <label class="toggle"><input type="checkbox" id="f_deleted" checked><span data-i18n="f_deleted_l">过滤已注销 / 空白账号</span><span class="rec" data-i18n="rec_badge">推荐开</span></label>
+      <p class="hint" data-i18n="f_deleted_h"></p>
     </div>
     <div class="field">
-      <label class="toggle"><input type="checkbox" id="f_nophoto"><span>过滤无头像账号</span></label>
-      <p class="hint">💡 没设头像的多是小号/养号。仅当接口明确返回“无头像”时才过滤，不确定的会保留。</p>
+      <label class="toggle"><input type="checkbox" id="f_nophoto"><span data-i18n="f_nophoto_l">过滤无头像账号</span></label>
+      <p class="hint" data-i18n="f_nophoto_h"></p>
     </div>
     <div class="field">
-      <label class="toggle"><input type="checkbox" id="f_random"><span>过滤疑似随机用户名</span></label>
-      <p class="hint">💡 形如 user123456、a88888 这类自动生成用户名，常见于批量注册号。误杀风险中等。</p>
+      <label class="toggle"><input type="checkbox" id="f_random"><span data-i18n="f_random_l">过滤疑似随机用户名</span></label>
+      <p class="hint" data-i18n="f_random_h"></p>
     </div>
     <div class="field">
-      <label class="toggle"><input type="checkbox" id="f_premium"><span>仅保留会员 (Premium)</span></label>
-      <p class="hint">💡 只导出开了会员的用户。需接口提供会员字段，否则会全部被过滤。</p>
+      <label class="toggle"><input type="checkbox" id="f_premium"><span data-i18n="f_premium_l">仅保留会员 (Premium)</span></label>
+      <p class="hint" data-i18n="f_premium_h"></p>
     </div>
     <div class="field">
-      <label class="toggle"><input type="checkbox" id="f_verified"><span>仅保留官方认证号</span></label>
-      <p class="hint">💡 只保留带蓝V认证的账号，名单会非常小。</p>
+      <label class="toggle"><input type="checkbox" id="f_verified"><span data-i18n="f_verified_l">仅保留官方认证号</span></label>
+      <p class="hint" data-i18n="f_verified_h"></p>
     </div>
 
     <div class="field">
-      <label>最少消息数（活跃度）</label>
+      <label data-i18n="minmsg_l">最少消息数（活跃度）</label>
       <input type="number" id="minmsg" value="0" min="0">
-      <p class="hint nopad">💡 只保留发言数 ≥ 该值的成员。0 = 不限。想要“活人”填 1~5。需接口提供消息数。</p>
+      <p class="hint nopad" data-i18n="minmsg_h"></p>
     </div>
     <div class="field">
-      <label>仅保留指定语言（可留空）</label>
-      <input type="text" id="langkeep" placeholder="例如 zh,en">
-      <p class="hint nopad">💡 逗号分隔语言代码(zh/en/ru…)。留空=不限；语言未知的成员会保留。</p>
+      <label data-i18n="lang_l">仅保留指定语言（可留空）</label>
+      <input type="text" id="langkeep" data-i18n-ph="langkeep_ph" placeholder="例如 zh,en">
+      <p class="hint nopad" data-i18n="lang_h"></p>
     </div>
     <div class="field">
-      <label>广告判定严格度（数字越小越严）</label>
+      <label data-i18n="adth_l">广告判定严格度（数字越小越严）</label>
       <input type="number" id="adth" value="2" min="1">
-      <p class="hint nopad">💡 默认 2 较稳妥；1 更严(可能误杀)，3~4 更宽松。先用 2 跑，再看“被过滤名单”微调。</p>
+      <p class="hint nopad" data-i18n="adth_h"></p>
     </div>
     <div class="field">
-      <label>追加广告关键词（每行一个，可留空）</label>
-      <textarea id="adkw" style="min-height:70px;" placeholder="例如：&#10;招代理&#10;开户"></textarea>
-      <p class="hint nopad">💡 把你群里常见广告话术加进来，命中即加分，和内置词库叠加生效。</p>
+      <label data-i18n="adkw_l">追加广告关键词（每行一个，可留空）</label>
+      <textarea id="adkw" style="min-height:70px;" data-i18n-ph="adkw_ph"></textarea>
+      <p class="hint nopad" data-i18n="adkw_h"></p>
     </div>
     <div class="field">
-      <label>用户名白名单（每行一个，永不过滤）</label>
-      <textarea id="whitelist" style="min-height:70px;" placeholder="例如：&#10;your_admin&#10;vip_user"></textarea>
-      <p class="hint nopad">💡 这里填的 @用户名 无论如何都保留，避免误删管理员/重要成员。</p>
+      <label data-i18n="wl_l">用户名白名单（每行一个，永不过滤）</label>
+      <textarea id="whitelist" style="min-height:70px;" data-i18n-ph="wl_ph"></textarea>
+      <p class="hint nopad" data-i18n="wl_h"></p>
     </div>
 
     <div class="field">
-      <label class="toggle"><input type="checkbox" id="f_demo"><span>演示模式（免密钥）</span></label>
-      <p class="hint">💡 用合成数据先预览界面和表格效果。正式导出请关闭并填好密钥。</p>
+      <label class="toggle"><input type="checkbox" id="f_demo"><span data-i18n="demo_l">演示模式（免密钥）</span></label>
+      <p class="hint" data-i18n="demo_h"></p>
     </div>
 
     <details style="margin-top:6px;">
-      <summary>高级设置（密钥 / 接口，通常不用改）</summary>
+      <summary data-i18n="adv_summary">高级设置（密钥 / 接口，通常不用改）</summary>
       <div class="field">
-        <label>密钥 Token</label>
-        <input type="password" id="token" placeholder="粘贴 JWT...">
-        <p class="hint nopad">💡 保存在本机浏览器，不上传第三方。也可在服务器用 GROUP_EXPORT_TOKEN 环境变量。</p>
+        <label data-i18n="token_l">密钥 Token</label>
+        <input type="password" id="token" data-i18n-ph="token_ph" placeholder="粘贴 JWT...">
+        <p class="hint nopad" data-i18n="token_h"></p>
       </div>
       <div class="field">
-        <label>每页数量</label>
+        <label data-i18n="psize_l">每页数量</label>
         <input type="number" id="psize" value="200" min="1">
-        <p class="hint nopad">💡 每次翻页抓多少条。一般 200；接口报错可调小到 50~100。</p>
+        <p class="hint nopad" data-i18n="psize_h"></p>
       </div>
       <div class="field">
-        <label>接口路径（留空=自动探测）</label>
-        <input type="text" id="endpoint" placeholder="/api/group/members/export">
-        <p class="hint nopad">💡 留空时读 Swagger 自动找“导出群成员”接口；自动找错了再手动填。</p>
+        <label data-i18n="ep_l">接口路径（留空=自动探测）</label>
+        <input type="text" id="endpoint" data-i18n-ph="ep_ph" placeholder="/api/group/members/export">
+        <p class="hint nopad" data-i18n="ep_h"></p>
       </div>
       <div class="field">
-        <label>参数名（一般留空自动识别）</label>
+        <label data-i18n="param_l">参数名（一般留空自动识别）</label>
         <div class="row">
-          <div><input type="text" id="gp" placeholder="群参数 group_id"></div>
-          <div><input type="text" id="pp" placeholder="分页参数 page"></div>
-          <div><input type="text" id="sp" placeholder="每页参数 page_size"></div>
+          <div><input type="text" id="gp" data-i18n-ph="gp_ph" placeholder="群参数 group_id"></div>
+          <div><input type="text" id="pp" data-i18n-ph="pp_ph" placeholder="分页参数 page"></div>
+          <div><input type="text" id="sp" data-i18n-ph="sp_ph" placeholder="每页参数 page_size"></div>
         </div>
-        <p class="hint nopad">💡 仅当自动识别不对、抓不到数据时才需手动指定，对照 Swagger 填写。</p>
+        <p class="hint nopad" data-i18n="param_h"></p>
       </div>
     </details>
   </div>
 
-  <!-- 开始 -->
   <div class="card">
-    <h2>③ 开始导出</h2>
-    <button class="btn green" id="btnRun">🚀 开始全自动导出</button>
+    <h2 data-i18n="c3_h">③ 开始导出</h2>
+    <button class="btn green" id="btnRun" data-i18n="btn_run">🚀 开始全自动导出</button>
     <div id="progressBox" class="hidden" style="margin-top:14px;">
-      <div class="muted" id="statusMsg">准备中…</div>
+      <div class="muted" id="statusMsg"></div>
       <div class="bar"><i id="barFill"></i></div>
       <div class="muted" id="progDetail"></div>
     </div>
     <div id="errBox" class="err hidden"></div>
   </div>
 
-  <!-- 结果 -->
   <div class="card hidden" id="resultCard">
-    <h2>④ 结果</h2>
+    <h2 data-i18n="c4_h">④ 结果</h2>
     <div class="stat-grid" id="statGrid"></div>
     <div class="toolbar" style="margin-top:14px;">
-      <button class="btn" data-fmt="csv">⬇️ CSV</button>
-      <button class="btn" data-fmt="xlsx">⬇️ Excel</button>
-      <button class="btn" data-fmt="json">⬇️ JSON</button>
+      <button class="btn" data-fmt="csv" data-i18n="dl_csv">⬇️ CSV</button>
+      <button class="btn" data-fmt="xlsx" data-i18n="dl_xlsx">⬇️ Excel</button>
+      <button class="btn" data-fmt="json" data-i18n="dl_json">⬇️ JSON</button>
     </div>
     <div class="table-scroll">
       <table id="tbl"><thead></thead><tbody></tbody></table>
@@ -235,11 +237,29 @@
 
 </div>
 
+<script src="i18n.js"></script>
 <script>
 const $ = s => document.querySelector(s);
-let JOB = null, POLL = null;
+let JOB = null, POLL = null, RUNNING = false;
+let LANG = localStorage.getItem('ge_lang') || ((navigator.language||'').toLowerCase().startsWith('vi') ? 'vi' : 'zh');
+if(!['zh','vi'].includes(LANG)) LANG='zh';
+function t(key, vars){
+  let s = (I18N[LANG] && I18N[LANG][key] != null) ? I18N[LANG][key] : (I18N.zh[key] != null ? I18N.zh[key] : key);
+  if(vars) for(const k in vars) s = s.split('{'+k+'}').join(vars[k]);
+  return s;
+}
+function setLang(lang){ LANG = (lang==='vi')?'vi':'zh'; localStorage.setItem('ge_lang', LANG); applyLang(); }
+function applyLang(){
+  document.documentElement.lang = (LANG==='vi') ? 'vi' : 'zh-CN';
+  document.title = t('app_title');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder = t(el.dataset.i18nPh); });
+  $('#lang_zh').classList.toggle('active', LANG==='zh');
+  $('#lang_vi').classList.toggle('active', LANG==='vi');
+  if(!RUNNING) $('#statusMsg').textContent = t('st_ready');
+  if($('#links').value.trim()) doParse();
+}
 
-// token persistence
 $('#token').value = localStorage.getItem('ge_token') || '';
 $('#token').addEventListener('change', e => localStorage.setItem('ge_token', e.target.value.trim()));
 
@@ -247,128 +267,103 @@ $('#btnFile').onclick = () => $('#file').click();
 $('#file').onchange = e => {
   const f = e.target.files[0]; if(!f) return;
   const r = new FileReader();
-  r.onload = () => { $('#links').value = (($('#links').value+'\n')||'') + r.result; doParse(); };
+  r.onload = () => { $('#links').value = ($('#links').value ? $('#links').value+'\n' : '') + r.result; doParse(); };
   r.readAsText(f);
 };
 $('#btnParse').onclick = doParse;
 
 async function doParse(){
   const text = $('#links').value;
-  const res = await fetch('/api/parse', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({text})});
+  const res = await fetch('/api/parse', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text})});
   const d = await res.json();
   const b = $('#parsedBadge'); b.textContent = d.count; b.classList.remove('hidden');
-  let msg = `识别到 <b>${d.count}</b> 个群`;
-  if(d.skipped && d.skipped.length) msg += `，<span style="color:#ffb4b4">${d.skipped.length} 行无法识别</span>`;
+  let msg = t('parse_found', {n:'<b>'+d.count+'</b>'});
+  if(d.skipped && d.skipped.length) msg += t('parse_skip', {n:'<span style="color:#ffb4b4">'+d.skipped.length+'</span>'});
   $('#parseInfo').innerHTML = msg;
   return d.count;
 }
 
-function linesOf(id){
-  return $('#'+id).value.split(/[\n,，]+/).map(s=>s.trim()).filter(Boolean);
-}
+function linesOf(id){ return $('#'+id).value.split(/[\n,，]+/).map(s=>s.trim()).filter(Boolean); }
 function opts(){
   return {
-    require_username: $('#f_username').checked,
-    filter_ads: $('#f_ads').checked,
-    filter_bots: $('#f_bots').checked,
-    filter_scam: $('#f_scam').checked,
-    filter_deleted: $('#f_deleted').checked,
-    no_photo: $('#f_nophoto').checked,
-    filter_random_username: $('#f_random').checked,
-    premium_only: $('#f_premium').checked,
-    verified_only: $('#f_verified').checked,
-    min_messages: +$('#minmsg').value || 0,
+    require_username: $('#f_username').checked, filter_ads: $('#f_ads').checked,
+    filter_bots: $('#f_bots').checked, filter_scam: $('#f_scam').checked,
+    filter_deleted: $('#f_deleted').checked, no_photo: $('#f_nophoto').checked,
+    filter_random_username: $('#f_random').checked, premium_only: $('#f_premium').checked,
+    verified_only: $('#f_verified').checked, min_messages: +$('#minmsg').value || 0,
     language_keep: linesOf('langkeep').map(s=>s.toLowerCase()),
     extra_ad_keywords: linesOf('adkw'),
     whitelist: linesOf('whitelist').map(s=>s.replace(/^@/,'').toLowerCase()),
-    demo: $('#f_demo').checked,
-    ad_threshold: +$('#adth').value || 2,
-    page_size: +$('#psize').value || 200,
-    endpoint: $('#endpoint').value.trim(),
-    group_param: $('#gp').value.trim(),
-    page_param: $('#pp').value.trim(),
-    size_param: $('#sp').value.trim(),
+    demo: $('#f_demo').checked, ad_threshold: +$('#adth').value || 2,
+    page_size: +$('#psize').value || 200, endpoint: $('#endpoint').value.trim(),
+    group_param: $('#gp').value.trim(), page_param: $('#pp').value.trim(), size_param: $('#sp').value.trim(),
   };
 }
-const REASON_LABELS = {
-  no_username:"无用户名", ad_marketing:"广告/营销", bot:"机器人",
-  scam_or_fake:"诈骗/仿冒", deleted:"已注销/空白", no_photo:"无头像",
-  not_premium:"非会员", not_verified:"未认证", low_activity:"活跃度不足",
-  language:"语言不符", random_username:"随机用户名",
-};
 $('#recBtn').onclick = () => {
   ['f_username','f_ads','f_bots','f_scam','f_deleted'].forEach(i=>$('#'+i).checked=true);
   ['f_nophoto','f_random','f_premium','f_verified'].forEach(i=>$('#'+i).checked=false);
   $('#minmsg').value=0; $('#langkeep').value=''; $('#adth').value=2;
-  const b=$('#recBtn'); const t=b.textContent; b.textContent='✓ 已恢复推荐';
-  setTimeout(()=>b.textContent=t, 1500);
+  const b=$('#recBtn'); b.textContent=t('rec_done'); setTimeout(()=>b.textContent=t('rec_btn'), 1500);
 };
 
 $('#btnRun').onclick = async () => {
   $('#errBox').classList.add('hidden');
   const text = $('#links').value.trim();
-  if(!text){ showErr('请先粘贴群链接'); return; }
-  $('#btnRun').disabled = true;
+  if(!text){ showErr(t('err_paste')); return; }
+  RUNNING = true; $('#btnRun').disabled = true;
   $('#progressBox').classList.remove('hidden');
   $('#resultCard').classList.add('hidden');
   try{
     const res = await fetch('/api/export', {method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({text, token: $('#token').value.trim(), options: opts()})});
     const d = await res.json();
-    if(!res.ok){ showErr(d.error || '启动失败'); $('#btnRun').disabled=false; return; }
+    if(!res.ok){ showErr(d.error || t('err_start_fail')); RUNNING=false; $('#btnRun').disabled=false; return; }
     JOB = d.job_id;
     POLL = setInterval(poll, 1000); poll();
-  }catch(e){ showErr(''+e); $('#btnRun').disabled=false; }
+  }catch(e){ showErr(''+e); RUNNING=false; $('#btnRun').disabled=false; }
 };
 
 async function poll(){
   if(!JOB) return;
   const res = await fetch('/api/job/'+JOB);
   const d = await res.json();
-  $('#statusMsg').textContent = d.message || d.status;
+  $('#statusMsg').textContent = d.status==='done' ? t('st_done') : (d.status==='error' ? '' : t('st_running'));
   const pct = d.groups_total ? Math.round(d.groups_done/d.groups_total*100) : (d.status==='done'?100:5);
   $('#barFill').style.width = pct + '%';
-  $('#progDetail').textContent =
-    `群 ${d.groups_done}/${d.groups_total} · 已抓取 ${d.raw_count} 条`;
-  if(d.status === 'done'){ clearInterval(POLL); $('#btnRun').disabled=false; showResult(d); }
-  else if(d.status === 'error'){ clearInterval(POLL); $('#btnRun').disabled=false; showErr(d.error); }
+  $('#progDetail').textContent = t('prog_detail', {a:d.groups_done, b:d.groups_total, n:d.raw_count});
+  if(d.status === 'done'){ clearInterval(POLL); RUNNING=false; $('#btnRun').disabled=false; showResult(); }
+  else if(d.status === 'error'){ clearInterval(POLL); RUNNING=false; $('#btnRun').disabled=false; showErr(d.error||''); }
 }
 
-async function showResult(jobInfo){
+async function showResult(){
   const res = await fetch('/api/job/'+JOB+'/result');
   const d = await res.json();
-  // stats
   const s = d.stats || {};
   const fil = s.filtered || {};
-  const others = Object.keys(fil).filter(k=>!['no_username','ad_marketing'].includes(k))
-    .reduce((acc,k)=>acc+fil[k],0);
+  const others = Object.keys(fil).filter(k=>!['no_username','ad_marketing'].includes(k)).reduce((acc,k)=>acc+fil[k],0);
   $('#statGrid').innerHTML = `
-    <div class="stat"><b>${s.seen||0}</b><span>抓取总数</span></div>
-    <div class="stat"><b style="color:#7ee2a8">${s.kept||0}</b><span>保留(导出)</span></div>
-    <div class="stat"><b>${s.merged||0}</b><span>合并重复</span></div>
-    <div class="stat"><b>${fil.no_username||0}</b><span>无用户名</span></div>
-    <div class="stat"><b>${fil.ad_marketing||0}</b><span>广告/营销</span></div>
-    <div class="stat"><b>${others}</b><span>其他过滤</span></div>`;
-  const detail = Object.keys(fil).sort().map(k=>`${REASON_LABELS[k]||k} ${fil[k]}`).join(' · ');
+    <div class="stat"><b>${s.seen||0}</b><span>${t('stat_seen')}</span></div>
+    <div class="stat"><b style="color:#7ee2a8">${s.kept||0}</b><span>${t('stat_kept')}</span></div>
+    <div class="stat"><b>${s.merged||0}</b><span>${t('stat_merged')}</span></div>
+    <div class="stat"><b>${fil.no_username||0}</b><span>${t('stat_nouser')}</span></div>
+    <div class="stat"><b>${fil.ad_marketing||0}</b><span>${t('stat_ad')}</span></div>
+    <div class="stat"><b>${others}</b><span>${t('stat_other')}</span></div>`;
+  const detail = Object.keys(fil).sort().map(k=>`${t('reason_'+k)} ${fil[k]}`).join(' · ');
   let dl = document.getElementById('filterDetail');
-  if(!dl){ dl=document.createElement('p'); dl.id='filterDetail'; dl.className='muted';
-    dl.style.margin='10px 0 0'; $('#statGrid').after(dl); }
-  dl.textContent = detail ? ('过滤明细：'+detail) : '没有成员被过滤';
-  // table
+  if(!dl){ dl=document.createElement('p'); dl.id='filterDetail'; dl.className='muted'; dl.style.margin='10px 0 0'; $('#statGrid').after(dl); }
+  dl.textContent = detail ? (t('filter_detail_prefix')+detail) : t('filter_none');
   const thead = $('#tbl thead'), tbody = $('#tbl tbody');
-  thead.innerHTML = '<tr>' + d.columns.map(c=>`<th>${d.labels[c]||c}</th>`).join('') + '</tr>';
+  thead.innerHTML = '<tr>' + d.columns.map(c=>`<th>${t('col_'+c)}</th>`).join('') + '</tr>';
   const fmtCell = (c,v) => {
     if(c==='username') return v ? '@'+v : '<span class="muted">—</span>';
-    if(c==='is_premium') return (v===true||v==='True') ? '<span class="tag on">会员</span>' : '';
+    if(c==='is_premium') return (v===true||v==='True') ? `<span class="tag on">${t('premium_tag')}</span>` : '';
     if(c==='message_count') return `<span class="pill">${v||0}</span>`;
     if(c==='full_name') return v||'';
     return (v===''||v==null) ? '<span class="muted">—</span>' : v;
   };
   tbody.innerHTML = d.rows.map(r => '<tr>' + d.columns.map(c =>
       `<td class="${c==='full_name'?'name':''}">${fmtCell(c, r[c])}</td>`).join('') + '</tr>').join('');
-  $('#tblNote').textContent = `共 ${d.rows.length} 行（屏幕仅显示常用列，下载文件含全部字段）`;
-  // downloads
+  $('#tblNote').textContent = t('tbl_note', {n:d.rows.length});
   document.querySelectorAll('.toolbar .btn').forEach(b=>{
     b.onclick = () => window.location = '/api/job/'+JOB+'/download/'+b.dataset.fmt;
   });
@@ -377,6 +372,8 @@ async function showResult(jobInfo){
 }
 
 function showErr(m){ const e=$('#errBox'); e.textContent='⚠️ '+m; e.classList.remove('hidden'); }
+
+applyLang();
 </script>
 </body>
 </html>

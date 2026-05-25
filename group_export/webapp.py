@@ -187,6 +187,10 @@ def create_app() -> Flask:
     def index():
         return send_from_directory(WEB_DIR, "index.html")
 
+    @app.get("/i18n.js")
+    def i18n_js():
+        return send_from_directory(WEB_DIR, "i18n.js", mimetype="application/javascript")
+
     @app.post("/api/parse")
     def api_parse():
         data = request.get_json(force=True, silent=True) or {}
