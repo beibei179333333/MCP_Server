@@ -1,0 +1,17 @@
+# secrets — never commit the API token
+token.txt
+.env
+*.token
+
+# generated exports
+members.*
+*.removed.csv
+out/
+exports/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
