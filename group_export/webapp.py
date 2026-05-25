@@ -239,6 +239,7 @@ def create_app() -> Flask:
 
 def serve(host: str = "0.0.0.0", port: int = 8000) -> None:
     app = create_app()
+    port = int(os.environ.get("PORT", port))
     import socket
     try:
         ip = socket.gethostbyname(socket.gethostname())

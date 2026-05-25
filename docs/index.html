@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>群成员导出工具</title>
+<style>
+  :root{
+    --bg:#0f1420; --card:#171e2e; --line:#27304a; --txt:#e7ecf5;
+    --muted:#9aa6c0; --accent:#3b82f6; --accent2:#22c55e; --danger:#ef4444;
+    --cell-pad-y:16px; --cell-pad-x:20px;          /* 宽松版单元格内边距 */
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,"PingFang SC","Helvetica Neue",Roboto,sans-serif;
+    font-size:16px; line-height:1.6; padding:0 0 60px;}
+  header{position:sticky; top:0; z-index:20; background:#121829ee;
+    backdrop-filter:blur(8px); padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;
+    border-bottom:1px solid var(--line);}
+  header h1{font-size:19px; margin:0; font-weight:700;}
+  header p{margin:4px 0 0; color:var(--muted); font-size:13px;}
+  .wrap{max-width:1100px; margin:0 auto; padding:16px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:18px; margin-bottom:16px;}
+  .card h2{font-size:15px; margin:0 0 12px; color:var(--muted); font-weight:600; letter-spacing:.5px;}
+  label{display:block; font-size:14px; color:var(--muted); margin:10px 0 6px;}
+  textarea,input[type=text],input[type=number],input[type=password],select{
+    width:100%; background:#0d1322; border:1px solid var(--line); color:var(--txt);
+    border-radius:12px; padding:14px; font-size:16px; outline:none;}
+  textarea{min-height:150px; resize:vertical; line-height:1.5;}
+  textarea:focus,input:focus,select:focus{border-color:var(--accent);}
+  .row{display:flex; gap:12px; flex-wrap:wrap;}
+  .row>div{flex:1 1 140px;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:16px; font-size:17px; font-weight:600; border:none;
+    border-radius:14px; color:#fff; background:var(--accent); cursor:pointer; margin-top:14px;}
+  .btn:active{transform:scale(.99);}
+  .btn.green{background:var(--accent2);}
+  .btn.ghost{background:#222b42; color:var(--txt);}
+  .btn:disabled{opacity:.5;}
+  .switches{display:flex; flex-wrap:wrap; gap:10px;}
+  .chip{display:flex; align-items:center; gap:8px; background:#0d1322;
+    border:1px solid var(--line); border-radius:999px; padding:10px 14px; font-size:14px;}
+  .chip input{width:20px; height:20px; accent-color:var(--accent2);}
+  details summary{cursor:pointer; color:var(--accent); font-size:14px; padding:6px 0;}
+  .muted{color:var(--muted); font-size:13px;}
+  .stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:6px;}
+  .stat{background:#0d1322; border:1px solid var(--line); border-radius:12px; padding:14px; text-align:center;}
+  .stat b{display:block; font-size:22px; margin-bottom:2px;}
+  .stat span{color:var(--muted); font-size:12px;}
+  .bar{height:10px; background:#0d1322; border-radius:999px; overflow:hidden; margin:10px 0;}
+  .bar>i{display:block; height:100%; width:0; background:var(--accent2); transition:width .3s;}
+  /* ---- 宽松版表格 ---- */
+  .table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--line); border-radius:14px;}
+  table{border-collapse:separate; border-spacing:0; width:100%; min-width:720px;}
+  th,td{padding:var(--cell-pad-y) var(--cell-pad-x); text-align:left; font-size:15px;
+    white-space:nowrap; border-bottom:1px solid var(--line);}
+  th{position:sticky; top:0; background:#1b2236; color:var(--muted); font-weight:600; z-index:5;}
+  tbody tr:nth-child(even){background:#141b2b;}
+  td.name{max-width:280px; white-space:normal;}
+  .tag{display:inline-block; padding:3px 10px; border-radius:999px; font-size:12px; background:#1d2740; color:var(--muted);}
+  .tag.on{background:#143a24; color:#7ee2a8;}
+  .pill{font-variant-numeric:tabular-nums;}
+  .toolbar{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;}
+  .toolbar .btn{width:auto; flex:1 1 120px; margin-top:0; padding:13px 14px; font-size:15px;}
+  .hidden{display:none;}
+  .err{color:#ffb4b4; background:#3a1620; border:1px solid #5a2230; padding:12px; border-radius:12px; margin-top:10px;}
+  .note{background:#102a1c; border:1px solid #1d4a31; color:#a9e6c2; padding:12px; border-radius:12px; font-size:13px;}
+  .count-badge{background:var(--accent); color:#fff; border-radius:999px; padding:2px 10px; font-size:13px; margin-left:8px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>群成员导出工具</h1>
+  <p>批量粘贴群链接 · 自动去重合并 · 过滤广告号/无用户名 · 表格导出</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>① 批量群链接 <span id="parsedBadge" class="count-badge hidden">0</span></h2>
+    <label>每行一个，支持 https://t.me/xxx、@xxx、-100开头ID（也支持逗号分隔）</label>
+    <textarea id="links" placeholder="https://t.me/group1&#10;@group2&#10;-1001234567890"></textarea>
+    <div class="row">
+      <div><button class="btn ghost" id="btnFile">📂 上传 .txt 文件</button></div>
+      <div><button class="btn ghost" id="btnParse">🔍 解析预览</button></div>
+    </div>
+    <input type="file" id="file" accept=".txt,.csv" class="hidden">
+    <div id="parseInfo" class="muted" style="margin-top:8px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>② 过滤选项</h2>
+    <div class="switches">
+      <label class="chip"><input type="checkbox" id="f_username" checked> 过滤无用户名</label>
+      <label class="chip"><input type="checkbox" id="f_ads" checked> 过滤广告/营销号</label>
+      <label class="chip"><input type="checkbox" id="f_bots" checked> 过滤机器人</label>
+      <label class="chip"><input type="checkbox" id="f_scam" checked> 过滤诈骗/仿冒</label>
+      <label class="chip"><input type="checkbox" id="f_demo"> 演示模式(免密钥/免联网)</label>
+    </div>
+    <details style="margin-top:12px;">
+      <summary>高级设置（密钥 / 接口）</summary>
+      <label>密钥 Token（仅保存在本机浏览器，不上传任何第三方）</label>
+      <input type="password" id="token" placeholder="粘贴 JWT...">
+      <label>接口域名 Base URL</label>
+      <input type="text" id="base" placeholder="https://fun-stat-bot.net">
+      <div class="row">
+        <div><label>广告严格度(越小越严)</label><input type="number" id="adth" value="2" min="1"></div>
+        <div><label>每页数量</label><input type="number" id="psize" value="200" min="1"></div>
+      </div>
+      <label>接口路径(留空自动探测)</label>
+      <input type="text" id="endpoint" placeholder="/api/group/members/export">
+      <div class="row">
+        <div><label>群参数名</label><input type="text" id="gp" placeholder="group_id"></div>
+        <div><label>分页参数名</label><input type="text" id="pp" placeholder="page"></div>
+        <div><label>每页参数名</label><input type="text" id="sp" placeholder="page_size"></div>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>③ 开始导出</h2>
+    <button class="btn green" id="btnRun">🚀 开始全自动导出</button>
+    <div id="progressBox" class="hidden" style="margin-top:14px;">
+      <div class="muted" id="statusMsg">准备中…</div>
+      <div class="bar"><i id="barFill"></i></div>
+      <div class="muted" id="progDetail"></div>
+    </div>
+    <div id="errBox" class="err hidden"></div>
+  </div>
+
+  <div class="card hidden" id="resultCard">
+    <h2>④ 结果</h2>
+    <div class="stat-grid" id="statGrid"></div>
+    <div class="toolbar" style="margin-top:14px;">
+      <button class="btn" id="dlCsv">⬇️ CSV(Excel可开)</button>
+      <button class="btn" id="dlJson">⬇️ JSON</button>
+    </div>
+    <div class="table-scroll"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+    <p class="muted" id="tblNote" style="margin-top:10px;"></p>
+  </div>
+
+</div>
+
+<script src="core.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+let LAST = null;
+
+$('#token').value = localStorage.getItem('ge_token') || '';
+$('#base').value = localStorage.getItem('ge_base') || 'https://fun-stat-bot.net';
+$('#token').addEventListener('change', e => localStorage.setItem('ge_token', e.target.value.trim()));
+$('#base').addEventListener('change', e => localStorage.setItem('ge_base', e.target.value.trim()));
+
+$('#btnFile').onclick = () => $('#file').click();
+$('#file').onchange = e => {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => { $('#links').value = ($('#links').value ? $('#links').value+'\n' : '') + r.result; doParse(); };
+  r.readAsText(f);
+};
+$('#btnParse').onclick = doParse;
+
+function doParse(){
+  const { groups, skipped } = GE.parseMany($('#links').value);
+  const b = $('#parsedBadge'); b.textContent = groups.length; b.classList.remove('hidden');
+  let msg = `识别到 <b>${groups.length}</b> 个群`;
+  if(skipped.length) msg += `，<span style="color:#ffb4b4">${skipped.length} 行无法识别</span>`;
+  $('#parseInfo').innerHTML = msg;
+  return groups;
+}
+
+function filterCfg(){
+  return {
+    requireUsername: $('#f_username').checked,
+    filterAds: $('#f_ads').checked,
+    filterBots: $('#f_bots').checked,
+    filterScam: $('#f_scam').checked,
+    adThreshold: +$('#adth').value || 2,
+  };
+}
+
+// ---- browser API client (subject to CORS / mixed-content) ----
+const SWAGGER_PATHS = ["/swagger/v1/swagger.json","/swagger.json","/openapi.json","/v1/swagger.json","/api/swagger.json"];
+const PATH_KW = ["member","participant","成员","群成员","groupuser","group_user"];
+const EXP_KW = ["export","导出","download","list","all"];
+
+async function fetchJSON(url, token){
+  const res = await fetch(url, { headers: token ? { Authorization: "Bearer " + token, Accept: "application/json" } : { Accept: "application/json" }});
+  return res;
+}
+async function discover(base, token){
+  for(const p of SWAGGER_PATHS){
+    try{
+      const res = await fetchJSON(base + p, token);
+      if(!res.ok) continue;
+      const spec = await res.json();
+      if(spec && (spec.paths || spec.openapi || spec.swagger)) return spec;
+    }catch(e){ /* CORS/mixed-content/network */ }
+  }
+  return null;
+}
+function pickEndpoint(spec){
+  let best=null, bestScore=-1;
+  for(const path in (spec.paths||{})){
+    const ops = spec.paths[path]; if(typeof ops!=='object') continue;
+    for(const method in ops){
+      if(!["get","post"].includes(method.toLowerCase())) continue;
+      const op = ops[method]||{};
+      const hay = [path, op.operationId||"", op.summary||"", op.description||"", (op.tags||[]).join(" ")].join(" ").toLowerCase();
+      let s=0;
+      if(PATH_KW.some(k=>hay.includes(k))) s+=3;
+      if(EXP_KW.some(k=>hay.includes(k))) s+=2;
+      if(hay.includes("group")||hay.includes("群")||hay.includes("chat")) s+=1;
+      if(s>bestScore){ bestScore=s; best={path, method:method.toUpperCase(), op}; }
+    }
+  }
+  return bestScore>0 ? best : null;
+}
+function detectParams(op){
+  const names={}; (op.parameters||[]).forEach(p=>{ if(p&&p.name) names[p.name.toLowerCase()]=p.name; });
+  const out={};
+  for(const c of ["page","pageindex","page_index","pagenumber","page_number"]) if(names[c]){out.page=names[c];out.offset=false;break;}
+  if(!out.page) for(const c of ["offset","skip","start"]) if(names[c]){out.page=names[c];out.offset=true;break;}
+  for(const c of ["page_size","pagesize","size","limit","count","per_page","take"]) if(names[c]){out.size=names[c];break;}
+  for(const c of ["group_id","groupid","chat_id","chatid","group","chat","id","gid"]) if(names[c]){out.group=names[c];break;}
+  return out;
+}
+
+async function fetchMembers(base, token, group, opts, onPage){
+  let endpoint=opts.endpoint, method=opts.method||"GET";
+  let gp=opts.group_param, pp=opts.page_param, sp=opts.size_param;
+  let offsetMode=false, startAt=1;
+  if(!endpoint){
+    const spec = await discover(base, token);
+    if(spec){
+      const found = pickEndpoint(spec);
+      if(found){ endpoint=found.path; method=found.method;
+        const d=detectParams(found.op);
+        if(!pp&&d.page){pp=d.page; offsetMode=!!d.offset; startAt=d.offset?0:1;}
+        if(!sp&&d.size) sp=d.size;
+        if(!gp&&d.group) gp=d.group;
+      }
+    }
+  }
+  if(!endpoint) throw new Error("未能自动找到导出接口，请在高级设置里填写「接口路径」。");
+  const size = +opts.page_size || 200;
+  const results=[]; let page=startAt, total=null, emptyHit=false;
+  while(true){
+    const params = new URLSearchParams();
+    params.set(gp||"group_id", group);
+    if(sp) params.set(sp, size);
+    if(pp) params.set(pp, page);
+    const url = base + endpoint + (method==="GET" ? "?"+params.toString() : "");
+    let res;
+    if(method==="GET") res = await fetchJSON(url, token);
+    else res = await fetch(base+endpoint, { method:"POST", headers:{ "Content-Type":"application/json", Authorization:"Bearer "+token }, body: JSON.stringify(Object.fromEntries(params)) });
+    if(res.status===401) throw new Error("401 密钥无效或过期。");
+    if(res.status===404) throw new Error("404 接口不存在，请检查「接口路径」。");
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const data = await res.json();
+    const { list, total: t } = GE.extractList(data);
+    if(t!=null) total=t;
+    results.push(...list);
+    if(onPage) onPage(results.length, total);
+    if(!pp) break;
+    if(list.length===0){ if(emptyHit) break; emptyHit=true; }
+    if(total!=null && results.length>=total) break;
+    if(sp && list.length<size) break;
+    page += offsetMode ? size : 1;
+  }
+  return results;
+}
+
+$('#btnRun').onclick = async () => {
+  $('#errBox').classList.add('hidden');
+  const groups = doParse();
+  if(!groups.length){ showErr('请先粘贴有效的群链接'); return; }
+  const demo = $('#f_demo').checked;
+  const token = $('#token').value.trim();
+  const base = ($('#base').value.trim() || 'https://fun-stat-bot.net').replace(/\/+$/,'');
+  if(!demo && !token){ showErr('缺少密钥(Token)。请在高级设置里填写，或勾选演示模式。'); return; }
+
+  $('#btnRun').disabled = true;
+  $('#progressBox').classList.remove('hidden');
+  $('#resultCard').classList.add('hidden');
+  const opts = {
+    page_size:+$('#psize').value||200, endpoint:$('#endpoint').value.trim(),
+    group_param:$('#gp').value.trim(), page_param:$('#pp').value.trim(), size_param:$('#sp').value.trim(),
+  };
+  const raw=[]; let done=0;
+  try{
+    for(const g of groups){
+      $('#statusMsg').textContent = `正在抓取群：${g}`;
+      let recs;
+      if(demo){ recs = GE.demoMembers(g); }
+      else { recs = await fetchMembers(base, token, g, opts, (n,total)=>{
+        $('#progDetail').textContent = `群 ${done+1}/${groups.length} · 已抓取 ${raw.length+n} 条` + (total?` / ${total}`:'');
+      }); }
+      for(const r of recs) raw.push(GE.normalizeMember(r, g));
+      done++;
+      $('#barFill').style.width = Math.round(done/groups.length*100)+'%';
+      $('#progDetail').textContent = `群 ${done}/${groups.length} · 已抓取 ${raw.length} 条`;
+    }
+    $('#statusMsg').textContent = '去重 / 合并 / 过滤中…';
+    const { kept, stats } = GE.runPipeline(raw, filterCfg());
+    LAST = kept;
+    showResult(kept, stats);
+    $('#statusMsg').textContent = '完成';
+  }catch(e){
+    let m = ''+(e && e.message || e);
+    if(/Failed to fetch|NetworkError|Load failed/i.test(m))
+      m += '（多半是浏览器跨域/HTTP拦截。请改用"托管兜底版"，或先用演示模式预览。详见说明。）';
+    showErr(m);
+  }finally{ $('#btnRun').disabled=false; }
+};
+
+function showResult(kept, stats){
+  const f = stats.filtered||{};
+  $('#statGrid').innerHTML = `
+    <div class="stat"><b>${stats.seen||0}</b><span>抓取总数</span></div>
+    <div class="stat"><b style="color:#7ee2a8">${stats.kept||0}</b><span>保留(导出)</span></div>
+    <div class="stat"><b>${stats.merged||0}</b><span>合并重复</span></div>
+    <div class="stat"><b>${f.no_username||0}</b><span>无用户名</span></div>
+    <div class="stat"><b>${f.ad_marketing||0}</b><span>广告/营销</span></div>
+    <div class="stat"><b>${(f.scam_or_fake||0)+(f.bot||0)}</b><span>诈骗/机器人</span></div>`;
+  const cols = GE.TABLE_COLUMNS;
+  $('#tbl thead').innerHTML = '<tr>'+cols.map(c=>`<th>${GE.COLUMN_LABELS[c]||c}</th>`).join('')+'</tr>';
+  const fmt=(c,m)=>{
+    const row=GE.toRow(m); let v=row[c];
+    if(c==='username') return v?'@'+v:'<span class="muted">—</span>';
+    if(c==='is_premium') return v?'<span class="tag on">会员</span>':'';
+    if(c==='message_count') return `<span class="pill">${v||0}</span>`;
+    return (v===''||v==null)?'<span class="muted">—</span>':v;
+  };
+  $('#tbl tbody').innerHTML = kept.map(m=>'<tr>'+cols.map(c=>`<td class="${c==='full_name'?'name':''}">${fmt(c,m)}</td>`).join('')+'</tr>').join('');
+  $('#tblNote').textContent = `共 ${kept.length} 行（屏幕仅显示常用列，下载的 CSV/JSON 含全部字段）`;
+  $('#resultCard').classList.remove('hidden');
+  $('#resultCard').scrollIntoView({behavior:'smooth'});
+}
+
+function download(name, text, mime){
+  const blob = new Blob([text], { type: mime+';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+$('#dlCsv').onclick = () => { if(LAST) download('群成员.csv', GE.toCSV(LAST), 'text/csv'); };
+$('#dlJson').onclick = () => { if(LAST) download('群成员.json', GE.toJSON(LAST), 'application/json'); };
+
+function showErr(m){ const e=$('#errBox'); e.textContent='⚠️ '+m; e.classList.remove('hidden'); }
+</script>
+</body>
+</html>

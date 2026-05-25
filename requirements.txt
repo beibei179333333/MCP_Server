@@ -1,3 +1,4 @@
 requests>=2.28
 openpyxl>=3.1
 flask>=3.0
+gunicorn>=21.2
