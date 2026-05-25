@@ -66,6 +66,24 @@ https://corsproxy.io/?url={url}
 
 ---
 
+## 💻 电脑版（Windows · 真实数据直接可用，最省心）
+
+在自己电脑上跑，浏览器开 `localhost`，由电脑替你请求 API，**没有手机那种跨域/HTTP 拦截**，真实数据直接可用。
+
+1. **装 Python**：到 https://www.python.org/downloads/ 下载安装，
+   安装第一步务必勾选 **“Add Python to PATH”**，然后一路下一步装完。
+2. **下载项目**：点这个链接下载压缩包，下载后右键 → 全部解压缩：
+   https://github.com/beibei179333333/MCP_Server/archive/refs/heads/claude/group-member-export-tool-sWRs7.zip
+3. 进解压出来的文件夹，**双击 `run.bat`**。
+   首次会自动安装依赖，然后启动服务并自动打开浏览器 `http://localhost:8000`
+   （若没自动打开，手动在浏览器输入这个地址）。
+4. 在网页 **② 过滤选项 → 高级设置** 里粘贴你的 **密钥(Token)** → 粘贴群链接 → 开始导出 → 下载 CSV / Excel / JSON。
+
+> - 右上角可切换 **中文 / 越南语**。
+> - 停止：关闭那个黑色命令行窗口即可；下次用再双击 `run.bat`。
+> - 若 Windows 弹 “已保护你的电脑”，点 **更多信息 → 仍要运行**（因为 .bat 没有数字签名，正常现象）。
+> - 命令行用法：`run.bat discover` 看接口、`run.bat test` 跑测试。
+
 ## 📱 手机网页版（电脑/Termux 运行服务端）
 
 在你自己的电脑上启动服务，手机连同一 WiFi 即可用浏览器操作：
