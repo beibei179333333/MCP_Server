@@ -1,3 +1,8 @@
+> 🆕 **Telegram 领取监控（关键词自动点击）**：盯着屏幕，一出现「领取」就自动点鼠标，
+> 人不在电脑前也不漏领。Windows 双击 `monitor.bat` 即用，详见 **[docs/tg_monitor.md](docs/tg_monitor.md)**。
+
+---
+
 # 群成员全自动导出 / 清洗工具 (group_export)
 
 基于 `fun-stat-bot.net` 的 API，自动导出群成员列表，并完成：

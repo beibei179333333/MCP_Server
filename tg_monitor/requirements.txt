@@ -1,0 +1,18 @@
+# tg_monitor 运行所需依赖（在你自己的电脑上安装）
+# 一次性安装：  pip install -r tg_monitor/requirements.txt
+
+# 截屏（快）
+mss>=9.0
+numpy>=1.24
+
+# 自动移动 / 点击鼠标
+pyautogui>=0.9.54
+
+# OCR 文字识别（中文效果好，首次会自动下载模型，需联网一次）
+easyocr>=1.7
+
+# 备选 OCR：若你更想用 Tesseract，取消下面这行的注释并自行安装 Tesseract 程序+chi_sim 语言包
+# pytesseract>=0.3.10
+
+# 说明：tkinter 图形界面是 Python 自带的，一般无需安装。
+#       Linux 上若提示缺 tkinter：sudo apt install python3-tk
