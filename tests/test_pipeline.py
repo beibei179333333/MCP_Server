@@ -14,6 +14,7 @@ from group_export.filters import FilterConfig, ad_score, classify
 from group_export.links import parse_group_link, parse_many
 from group_export.models import Member
 from group_export.pipeline import run
+from group_export.risk import assess, format_report
 
 
 def test_normalization_varied_fields():
@@ -183,6 +184,70 @@ def test_parse_many_dedup_and_skip():
     groups, skipped = parse_many("https://t.me/g1\n@g1\n-100123, t.me/g2\nbad line!!!")
     assert groups == ["g1", "-100123", "g2"]    # @g1 deduped against g1
     assert skipped == ["bad line!!!"]
+
+
+def test_risk_scam_is_high():
+    m = Member.from_raw({"id": 1, "username": "x", "is_scam": True})
+    r = assess(m)
+    assert r.level == "high" and r.found is True
+    assert any("scam" in s.label for s in r.signals)
+
+
+def test_risk_marketing_account_flagged():
+    m = Member.from_raw({"id": 2, "username": "promo",
+                         "first_name": "广告推广 USDT t.me/xyz 电话13800138000"})
+    r = assess(m)
+    assert r.level in ("high", "medium")
+    assert any(s.kind == "risk" for s in r.signals)
+
+
+def test_risk_verified_caps_to_low():
+    # Even with some spam-ish text, an officially verified account caps at low.
+    m = Member.from_raw({"id": 3, "username": "official", "is_verified": True,
+                         "first_name": "广告 t.me/x"})
+    r = assess(m)
+    assert r.level == "low"
+    assert any("verified" in s.label or "认证" in s.label for s in r.signals)
+
+
+def test_risk_clean_account_is_low():
+    m = Member.from_raw({"id": 4, "username": "jane_real", "first_name": "Jane",
+                         "message_count": 120, "has_photo": True})
+    r = assess(m)
+    assert r.level == "low"
+    assert r.score == 0
+
+
+def test_risk_not_found():
+    r = assess(None)
+    assert r.found is False and r.level == "unknown"
+    # format_report should not crash and should carry the disclaimer.
+    out = format_report(r)
+    assert "未知" in out and "尽职调查" in out
+
+
+def test_lookup_account_via_fake_session():
+    from group_export.api import ApiClient, ApiConfig
+
+    class FakeResp:
+        status_code = 200
+        headers = {"Content-Type": "application/json"}
+        def __init__(self, payload): self._p = payload
+        def json(self): return self._p
+
+    cfg = ApiConfig(base_url="http://x", token="t",
+                    lookup_endpoint="/user/info", account_param="username",
+                    verbose=False)
+    client = ApiClient(cfg)
+
+    def fake_request(method, url, **kw):
+        un = kw.get("params", {}).get("username")
+        return FakeResp({"data": {"username": un, "is_scam": True, "id": 7}})
+
+    client.session.request = fake_request  # type: ignore
+    rec = client.lookup_account("@badguy")
+    assert rec and rec["username"] == "badguy" and rec["is_scam"] is True
+    assert assess(Member.from_raw(rec)).level == "high"
 
 
 def _run_all():

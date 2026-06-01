@@ -31,6 +31,15 @@ SWAGGER_CANDIDATES = [
 PATH_KEYWORDS = ["member", "participant", "成员", "群成员", "groupuser", "group_user"]
 EXPORT_KEYWORDS = ["export", "导出", "download", "list", "all"]
 
+# Keywords used to score how likely a path is a "look up one account" op
+# (for the anti-fraud risk check). Single-user info / profile / search.
+LOOKUP_PATH_KEYWORDS = ["user", "account", "profile", "成员", "info", "detail",
+                        "lookup", "search", "check", "whois", "query", "用户"]
+# Candidate parameter names that carry the single-account identifier.
+ACCOUNT_PARAM_CANDIDATES = ("username", "user_name", "userName", "handle",
+                            "user_id", "userId", "id", "uid", "account",
+                            "q", "query", "search", "keyword", "phone")
+
 # Response envelope keys that may wrap the member array.
 ENVELOPE_KEYS = ["data", "items", "result", "results", "list", "members",
                  "rows", "records", "users", "participants", "content"]
@@ -46,6 +55,10 @@ class ApiConfig:
     endpoint: Optional[str] = None          # e.g. "/api/group/members/export"
     method: str = "GET"
     group_param: Optional[str] = None        # query/body param carrying the group id
+    # Single-account lookup overrides (for the anti-fraud risk check).
+    lookup_endpoint: Optional[str] = None    # e.g. "/api/user/info"
+    lookup_method: str = "GET"
+    account_param: Optional[str] = None      # param carrying the account identifier
     page_param: Optional[str] = None         # e.g. "page" / "offset"
     size_param: Optional[str] = None         # e.g. "page_size" / "limit"
     page_size: int = 200
@@ -150,6 +163,60 @@ class ApiClient:
         if best and best_score > 0:
             self._log(f"selected endpoint: {best[1]} {best[0]} (score {best_score})")
             return best
+        return None
+
+    def discover_lookup_endpoint(self) -> Optional[Tuple[str, str, dict]]:
+        """Return (path, method, operation) best matching 'look up one account'.
+
+        Prefers single-resource paths (with a path parameter or a search/info
+        verb) over the bulk member-export op, so the risk check can query one
+        account instead of dumping a whole group.
+        """
+        spec = self.fetch_spec()
+        if not spec or "paths" not in spec:
+            return None
+        best = None
+        best_score = -1
+        for path, ops in spec["paths"].items():
+            if not isinstance(ops, dict):
+                continue
+            for method, op in ops.items():
+                if method.lower() not in ("get", "post"):
+                    continue
+                hay = " ".join(str(x) for x in (
+                    path, op.get("operationId", ""), op.get("summary", ""),
+                    op.get("description", ""), " ".join(op.get("tags", []) or []),
+                )).lower()
+                score = 0
+                if any(k in hay for k in LOOKUP_PATH_KEYWORDS):
+                    score += 2
+                if any(k in hay for k in ("info", "detail", "profile", "whois",
+                                          "lookup", "check")):
+                    score += 2
+                if "search" in hay or "query" in hay:
+                    score += 1
+                # A path parameter (e.g. /user/{id}) strongly suggests single lookup.
+                if "{" in path:
+                    score += 2
+                # Penalise the bulk export op so it isn't picked here.
+                if any(k in hay for k in EXPORT_KEYWORDS) and "{" not in path:
+                    score -= 2
+                if score > best_score:
+                    best_score = score
+                    best = (path, method.upper(), op or {})
+        if best and best_score > 0:
+            self._log(f"selected lookup endpoint: {best[1]} {best[0]} (score {best_score})")
+            return best
+        return None
+
+    @staticmethod
+    def _detect_account_param(op: dict) -> Optional[str]:
+        params = op.get("parameters", []) or []
+        names = {p.get("name", "").lower(): p.get("name") for p in params
+                 if isinstance(p, dict)}
+        for cand in ACCOUNT_PARAM_CANDIDATES:
+            if cand.lower() in names:
+                return names[cand.lower()]
         return None
 
     @staticmethod
@@ -328,3 +395,95 @@ class ApiClient:
 
         self._log(f"fetch complete: {len(results)} raw records")
         return results
+
+    # ---- single-account lookup (anti-fraud risk check) ----------------------
+    def _resolve_lookup(self) -> Tuple[Optional[str], str, Optional[str]]:
+        """Return (endpoint, method, account_param), discovering if unset."""
+        cfg = self.cfg
+        if cfg.lookup_endpoint:
+            return cfg.lookup_endpoint, cfg.lookup_method, cfg.account_param
+        found = self.discover_lookup_endpoint()
+        if not found:
+            return None, cfg.lookup_method, cfg.account_param
+        path, method, op = found
+        account_param = cfg.account_param or self._detect_account_param(op)
+        return path, method, account_param
+
+    @staticmethod
+    def _norm(s: Any) -> str:
+        return str(s or "").strip().lstrip("@").lower()
+
+    def _pick_account_record(self, records: List[dict], account: str) -> Optional[dict]:
+        """From a list response, pick the record best matching the query."""
+        want = self._norm(account)
+        if not records:
+            return None
+        for rec in records:
+            for key in ("username", "user_name", "userName", "handle", "login"):
+                if self._norm(rec.get(key)) == want:
+                    return rec
+            for key in ("user_id", "userId", "id", "uid", "tg_id", "telegram_id"):
+                if self._norm(rec.get(key)) == want:
+                    return rec
+        # No exact match: only trust a single-result response.
+        return records[0] if len(records) == 1 else None
+
+    def lookup_account(self, account: str) -> Optional[dict]:
+        """Look up one account's record for a risk check. Best-effort.
+
+        Returns the raw record dict, or ``None`` if no endpoint is reachable or
+        the account isn't found. The reliable, offline path is to check against
+        an already-exported member file instead (see the ``check`` CLI command).
+        """
+        endpoint, method, account_param = self._resolve_lookup()
+        if not endpoint:
+            self._log("no single-account lookup endpoint resolved; "
+                      "use --from-file to check against exported data instead.")
+            return None
+
+        ident = str(account).strip().lstrip("@")
+        params = dict(self.cfg.extra_params)
+        # Support templated paths like /user/{username} or /user/{id}.
+        if "{" in endpoint:
+            import re as _re
+            endpoint = _re.sub(r"\{[^}]+\}", ident, endpoint)
+        elif account_param:
+            params[account_param] = ident
+        else:
+            params["username"] = ident
+
+        url = self.base_url + endpoint
+        self._log(f"looking up account={ident} via {method} {endpoint}")
+        if method.upper() == "GET":
+            resp = self._request("GET", url, params=params)
+        else:
+            resp = self._request("POST", url, json=params)
+
+        if resp.status_code == 401:
+            raise RuntimeError("401 Unauthorized — token invalid or expired.")
+        if resp.status_code == 404:
+            return None
+        if resp.status_code >= 400:
+            raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:300]}")
+
+        try:
+            payload = resp.json()
+        except ValueError:
+            return None
+        # A single-object envelope ({"data": {...}}) or a list of candidates.
+        if isinstance(payload, dict):
+            for key in ENVELOPE_KEYS:
+                val = payload.get(key)
+                if isinstance(val, dict):
+                    return val
+                if isinstance(val, list):
+                    return self._pick_account_record(
+                        [x for x in val if isinstance(x, dict)], account)
+            # The dict itself looks like the user record.
+            if any(k in payload for k in ("username", "user_id", "userId", "id")):
+                return payload
+            return None
+        if isinstance(payload, list):
+            return self._pick_account_record(
+                [x for x in payload if isinstance(x, dict)], account)
+        return None

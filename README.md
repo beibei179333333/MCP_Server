@@ -183,6 +183,45 @@ python -m group_export export --group GROUP_A --merge-in old_members.json -o mer
 
 ---
 
+## 🛡️ 反诈风险核查（查一个号像不像诈骗 / 营销号）
+
+要和某个 Telegram 账号打交道前，可以先**核查它的风险**：工具根据公开 / 群组元数据
+和数据源自带的 `scam / fake / verified` 标记，给出一个**启发式风险等级**（高风险 / 可疑 /
+低风险），并逐条说明判断依据，帮你**防范被骗**。
+
+> ⚠️ 这是**风险提示**，不是对某个真实人物身份的认定，也不能替代你自己的尽职调查；
+> **请勿用于骚扰、人肉或追踪他人。** 它只看「这个号像不像骗子 / 营销号」，
+> 不去挖掘任何人的真实身份、住址、关联账号等隐私信息。
+
+**离线核查（推荐，最稳，无需密钥）**——对照你之前导出的成员文件：
+
+```bash
+python -m group_export check @someone --from-file members.json
+# 也可一次对照多个文件：--from-file a.json --from-file b.csv
+python -m group_export check @someone --from-file members.json --json   # JSON 输出
+```
+
+**联网核查**——直接问 API（需要密钥；接口会自动探测，必要时用下面参数手动指定）：
+
+```bash
+export GROUP_EXPORT_TOKEN="<你的JWT>"
+python -m group_export check @someone
+# 接口探测不准时手动指定：
+python -m group_export check @someone \
+  --lookup-endpoint /api/user/info --account-param username --lookup-method GET
+```
+
+退出码可用于脚本：`0` 低风险 / 未查到，`1` 可疑，`2` 高风险。
+
+判断依据（每条都会在结果里列出）：
+
+- 数据源标记 `scam` / `fake` → 直接判高风险；标记 `verified` → 上限封到低风险；
+- 名称 / 简介命中广告营销关键词、带推广链接 / 外部 `@handle` / 电话、堆叠 emoji；
+- 无用户名（匿名）、疑似随机用户名、无头像等「小号」特征；
+- 正面信号：群里发言多、Premium 会员、官方认证等（会降低风险评分）。
+
+---
+
 ## 过滤选项
 
 > 网页版（iPhone 零安装版 / 服务端版）里**每个设置下方都有中文说明和建议**，

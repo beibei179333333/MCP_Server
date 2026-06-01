@@ -28,7 +28,8 @@ from .export import write
 from .filters import DEFAULT_AD_KEYWORDS, FilterConfig
 from .links import parse_group_link
 from .models import Member
-from .pipeline import run
+from .pipeline import dedup_merge, run
+from .risk import assess, format_report
 
 
 def _load_members_from_file(path: str) -> List[Member]:
@@ -166,6 +167,70 @@ def cmd_export(args) -> int:
     return 0
 
 
+def _find_account(members: List[Member], account: str) -> Member:
+    """Find one account in a member list by @username, user_id, or display name."""
+    want = account.strip().lstrip("@").lower()
+    for m in members:
+        if m.username and m.username.lower() == want:
+            return m
+    for m in members:
+        if m.user_id and m.user_id.lower() == want:
+            return m
+    for m in members:
+        if m.full_name and m.full_name.lower() == want:
+            return m
+    return None
+
+
+def cmd_check(args) -> int:
+    """Anti-fraud risk check for a single Telegram account."""
+    fcfg = FilterConfig(
+        ad_keywords=_load_keywords(args.ad_keywords_file),
+        extra_ad_keywords=_load_lines(args.extra_ad_keywords_file),
+        ad_threshold=args.ad_threshold,
+    )
+
+    member = None
+    # Offline path: search one or more previously exported files (reliable).
+    if args.from_file:
+        pool: List[Member] = []
+        for path in args.from_file:
+            pool.extend(_load_members_from_file(path))
+        pool, _ = dedup_merge(pool)
+        member = _find_account(pool, args.account)
+    else:
+        # Live path: best-effort single-account lookup against the API.
+        token = resolve_token(args.token)
+        if not token:
+            raise SystemExit(
+                "No token. Either pass --from-file <exported.json> to check "
+                "offline, or provide --token / GROUP_EXPORT_TOKEN for a live lookup."
+            )
+        base_url = resolve_base_url(args.base_url)
+        cfg = ApiConfig(
+            base_url=base_url, token=token,
+            lookup_endpoint=args.lookup_endpoint,
+            lookup_method=args.lookup_method,
+            account_param=args.account_param,
+            extra_params=dict(p.split("=", 1) for p in (args.param or [])),
+            verbose=not args.quiet,
+        )
+        rec = ApiClient(cfg).lookup_account(args.account)
+        if rec is not None:
+            member = Member.from_raw(rec)
+
+    report = assess(member, fcfg)
+    if not report.found:
+        report.account = report.account or args.account
+
+    if args.json:
+        print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2))
+    else:
+        print(format_report(report))
+    # Exit code reflects risk: 0 low/unknown, 1 medium, 2 high — handy in scripts.
+    return {"high": 2, "medium": 1}.get(report.level, 0)
+
+
 def cmd_serve(args) -> int:
     from .webapp import serve
     serve(host=args.host, port=args.port)
@@ -204,6 +269,29 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--host", default="0.0.0.0")
     s.add_argument("--port", type=int, default=8000)
     s.set_defaults(func=cmd_serve)
+
+    c = sub.add_parser(
+        "check",
+        help="反诈风险核查：查一个 Telegram 账号像不像诈骗/营销号。",
+    )
+    c.add_argument("account", help="要核查的账号：@用户名 / 数字 user_id / 昵称。")
+    c.add_argument("--from-file", action="append",
+                   help="对照已导出的 .json/.csv 离线核查（可重复；无需密钥）。")
+    c.add_argument("--json", action="store_true", help="以 JSON 输出结果。")
+    # live lookup overrides
+    c.add_argument("--lookup-endpoint", help="单账号查询接口路径（跳过自动探测）。")
+    c.add_argument("--lookup-method", default="GET", choices=["GET", "POST"])
+    c.add_argument("--account-param", help="账号标识的参数名（如 username / user_id）。")
+    c.add_argument("--param", action="append",
+                   help="追加任意查询参数 key=value（可重复）。")
+    # heuristic tuning (shared with export)
+    c.add_argument("--ad-threshold", type=int, default=2,
+                   help="广告判定阈值，越小越严格。")
+    c.add_argument("--ad-keywords-file",
+                   help="自定义广告关键词表（替换内置）。")
+    c.add_argument("--extra-ad-keywords-file",
+                   help="追加广告关键词（叠加内置）。")
+    c.set_defaults(func=cmd_check)
 
     e = sub.add_parser("export", help="export + clean group members.")
     e.add_argument("--group", action="append",
