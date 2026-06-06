@@ -1,0 +1,49 @@
+# Telegram custom-emoji sticker sets to rename.
+#
+# One sticker-set "name" per line (the short name in the addemoji link,
+# i.e. the part after https://t.me/addemoji/ ).
+# Blank lines and lines starting with "#" are ignored.
+# The text in parentheses is just a note of the original ("原 tieNN") set.
+#
+# All of these are owned by the bot @pindaobianjiqibot, so renaming them
+# requires THAT bot's token (see README.md).
+
+beibei56_by_pindaobianjiqibot   # 原 tie60
+beibei57_by_pindaobianjiqibot   # 原 tie61
+beibei58_by_pindaobianjiqibot   # 原 tie62
+beibei59_by_pindaobianjiqibot   # 原 tie63
+beibei60_by_pindaobianjiqibot   # 原 tie64
+beibei61_by_pindaobianjiqibot   # 原 tie66
+beibei62_by_pindaobianjiqibot   # 原 tie47
+beibei63_by_pindaobianjiqibot   # 原 tie48
+beibei64_by_pindaobianjiqibot   # 原 tie49
+beibei66_by_pindaobianjiqibot   # 原 tie51
+beibei67_by_pindaobianjiqibot   # 原 tie52
+beibei68_by_pindaobianjiqibot   # 原 tie53
+beibei69_by_pindaobianjiqibot   # 原 tie54
+beibei70_by_pindaobianjiqibot   # 原 tie55
+beibei71_by_pindaobianjiqibot   # 原 tie37
+beibei72_by_pindaobianjiqibot   # 原 tie38
+beibei73_by_pindaobianjiqibot   # 原 tie39
+beibei74_by_pindaobianjiqibot   # 原 tie40
+beibei75_by_pindaobianjiqibot   # 原 tie41
+beibei76_by_pindaobianjiqibot   # 原 tie42
+beibei77_by_pindaobianjiqibot   # 原 tie43
+beibei78_by_pindaobianjiqibot   # 原 tie44
+beibei79_by_pindaobianjiqibot   # 原 tie45
+beibei81_by_pindaobianjiqibot   # 原 tie28
+beibei82_by_pindaobianjiqibot   # 原 tie29
+beibei83_by_pindaobianjiqibot   # 原 tie30
+beibei84_by_pindaobianjiqibot   # 原 tie31
+beibei85_by_pindaobianjiqibot   # 原 tie32
+beibei86_by_pindaobianjiqibot   # 原 tie33
+beibei87_by_pindaobianjiqibot   # 原 tie34
+beibei88_by_pindaobianjiqibot   # 原 tie35
+beibei89_by_pindaobianjiqibot   # 原 tie36
+beibei90_by_pindaobianjiqibot   # 原 tie18
+beibei91_by_pindaobianjiqibot   # 原 tie19
+beibei92_by_pindaobianjiqibot   # 原 tie20
+beibei93_by_pindaobianjiqibot   # 原 tie21
+beibei94_by_pindaobianjiqibot   # 原 tie22
+beibei95_by_pindaobianjiqibot   # 原 tie24
+beibei96_by_pindaobianjiqibot   # 原 tie25
