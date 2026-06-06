@@ -1,0 +1,235 @@
+# ================================================================
+# SMM 自动增长方案配置文件 v3.0
+# 场景：10 个 Telegram 频道，30 天渐进增长
+# 策略：主力服务（粉丝/浏览/反应）+ 辅助服务（评论/分享/多地区粉丝/Premium 粉丝）
+#
+# ⚠️ API key 不写进仓库：下面用 ${ENV} 占位符，运行前先 export 对应环境变量
+#    （见 smm_growth/README.md）。dry_run=true 时不需要 key 也能演练。
+# ================================================================
+
+start_date: "2026-06-02"
+duration_days: 30
+posts_per_day: 50
+
+# ── 频道列表 ──
+channels:
+  - name: "🔥 东南亚头条·实时曝光"
+    link: "https://t.me/Hpaydq"
+  - name: "📢 全网大事件·真相曝光"
+    link: "https://t.me/Wanbiaoge"
+  - name: "🌏 西港金边·新闻现场"
+    link: "https://t.me/iphone17pro"
+  - name: "🚨 全网骗子·曝光台"
+    link: "https://t.me/dashijianqun"
+  - name: "📡 全球新闻·实时播报"
+    link: "https://t.me/dashijianwang"
+  - name: "🇰🇭 柬埔寨·西港华人圈"
+    link: "https://t.me/dashijiangg"
+  - name: "🌐 全球新闻·曝光第一线"
+    link: "https://t.me/VietNAMVPNVN"
+  - name: "💥 东南亚大事件·爆料中心"
+    link: "https://t.me/dashijianz"
+  - name: "全球热搜大事件"
+    link: "https://t.me/FeiJishentou"
+  - name: "东南亚大事件"
+    link: "https://t.me/iphone17plus512G"
+
+# ── SMM 面板 API（key 从环境变量读取）──
+panels:
+  smmfollows:
+    url: "https://smmfollows.com/api/v2"
+    key: "${SMMFOLLOWS_API_KEY}"
+  smmstone:
+    url: "https://smmstone.com/api/v2"
+    key: "${SMMSTONE_API_KEY}"
+  fenba:
+    url: "https://fenba.vip/api/v2"
+    key: "${FENBA_API_KEY}"
+
+# ================================================================
+# 增长曲线（数量随天数渐进；缺省回退到内置默认）
+#   curve: linear | ease_in | ease_out | s_curve
+#   jitter_pct: 每天数量上下浮动比例（确定性，可复现）
+# ================================================================
+growth:
+  members:                 # 每天给每个频道新增的粉丝数
+    start: 15
+    end: 60
+    curve: "ease_in"
+    jitter_pct: 0.15
+  views_per_post:          # AUTO 浏览：每帖目标浏览量
+    start: 200
+    end: 1500
+    curve: "linear"
+    jitter_pct: 0.10
+  reactions_per_post:      # AUTO 反应：每帖目标反应数
+    start: 20
+    end: 150
+    curve: "linear"
+    jitter_pct: 0.10
+
+# ================================================================
+# 主力服务（粉丝每天 / 浏览·反应 AUTO 每 7 天续单）
+# ================================================================
+services:
+  members:
+    primary:
+      panel: "smmfollows"
+      service_id: 14916
+      description: "Telegram Members | HQ | Non Drop | Refill 30D"
+      rate_per_1k: 0.690
+      min_order: 10
+      max_order: 200000
+      is_auto: false
+    backup:
+      panel: "smmfollows"
+      service_id: 10735
+      description: "Telegram Members | HQ | Refill 180D"
+      rate_per_1k: 0.780
+      min_order: 10
+      max_order: 1000000
+      is_auto: false
+
+  views:
+    primary:
+      panel: "smmfollows"
+      service_id: 15233
+      description: "Telegram Auto Post Views | 🇨🇳 Chinese | HQ | AUTO"
+      rate_per_1k: 0.070
+      min_order: 10
+      max_order: 200000
+      is_auto: true
+    backup:
+      panel: "smmfollows"
+      service_id: 15232
+      description: "Telegram Auto Post Views | Russian | HQ | include Statistics | SuperFast | No Refill"
+      rate_per_1k: 0.070
+      min_order: 10
+      max_order: 200000
+      is_auto: true
+
+  reactions:
+    primary:
+      panel: "smmfollows"
+      service_id: 17574
+      description: "Telegram Auto Posts Reactions [👍❤️🔥🎉👏] | Future & Old Posts | HQ | AUTO"
+      rate_per_1k: 0.090
+      min_order: 10
+      max_order: 1000000
+      is_auto: true
+    backup:
+      panel: "smmfollows"
+      service_id: 17581
+      description: "Telegram Auto Posts Reactions [👍] | Future & Old Posts | HQ | AUTO"
+      rate_per_1k: 0.110
+      min_order: 10
+      max_order: 200000
+      is_auto: true
+
+# ================================================================
+# 辅助服务（增强真实感）
+# ================================================================
+addon_services:
+  comment:
+    enabled: true
+    daily_qty: 10
+    primary:
+      panel: "smmfollows"
+      service_id: 16476
+      description: "Telegram Comments | Random | HQ | No Drop | Refill Lifetime"
+      rate_per_1k: 1.540
+      min_order: 10
+      max_order: 25000
+    backup:
+      panel: "smmfollows"
+      service_id: 16477
+      description: "Telegram Comments | Custom | HQ | No Drop | Refill Lifetime"
+      rate_per_1k: 12.830
+      min_order: 5
+      max_order: 20000
+
+  share:
+    enabled: true
+    daily_qty: 15
+    primary:
+      panel: "smmfollows"
+      service_id: 16480
+      description: "Telegram Post Shares | HQ | No Drop | Refill Lifetime"
+      rate_per_1k: 0.020
+      min_order: 10
+      max_order: 100000
+    backup:
+      panel: "smmfollows"
+      service_id: 12653
+      description: "Telegram Mix SEO Views + Reaction + Shares | 12 country | Real"
+      rate_per_1k: 0.270
+      min_order: 15
+      max_order: 1000000
+
+  regional_members:
+    enabled: true
+    schedule: "weekly"
+    qty_per_region_per_week: 35
+    regions:
+      chinese:
+        panel: "smmstone"
+        service_id: 8723
+        description: "TG Chinese Members | 30D Non Drop | HQ"
+        rate_per_1k: 0.990
+        min_order: 100
+        max_order: 100000
+      russian:
+        panel: "smmstone"
+        service_id: 8455
+        description: "Telegram 25D Non Drop Russian Members | HQ"
+        rate_per_1k: 2.230
+        min_order: 10
+        max_order: 50000
+      indian:
+        panel: "smmstone"
+        service_id: 6978
+        description: "TG Indian Members | Non Drop 30D | HQ"
+        rate_per_1k: 0.830
+        min_order: 10
+        max_order: 100000
+      arabic:
+        panel: "smmfollows"
+        service_id: 15267
+        description: "Telegram Members | Arabic | HQ | 30D No Drop"
+        rate_per_1k: 1.540
+        min_order: 10
+        max_order: 50000
+      western:
+        panel: "smmfollows"
+        service_id: 15229
+        description: "Telegram Members | USA | Real Looking | HQ | 30D Non Drop"
+        rate_per_1k: 0.830
+        min_order: 100
+        max_order: 80000
+
+  premium_members:
+    enabled: true
+    schedule: "weekly"
+    qty_per_week: 35
+    primary:
+      panel: "smmstone"
+      service_id: 11333
+      description: "Telegram Premium Member | 7D Non Drop | HQ | $2.86/1K"
+      rate_per_1k: 2.860
+      min_order: 50
+      max_order: 100000
+    backup:
+      panel: "smmstone"
+      service_id: 11338
+      description: "Telegram Premium Member | 7D Non Drop | HQ | Fast | $3.11/1K"
+      rate_per_1k: 3.110
+      min_order: 50
+      max_order: 40000
+
+# ── 执行控制 ──
+execution:
+  dry_run: true                  # ⚠️ 首次保持 true，确认无误后用 `run --execute` 真正下单
+  delay_between_orders: 3        # 每次下单间隔（秒）
+  delay_between_channels: 10     # 每个频道间隔（秒）
+  max_retries: 3
+  retry_delay: 5

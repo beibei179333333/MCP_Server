@@ -3,6 +3,12 @@ token.txt
 .env
 *.token
 
+# smm_growth secrets / local overrides & generated schedules
+smm_growth/*.local.yaml
+smm_secrets.*
+schedule*.csv
+posts*.txt
+
 # generated exports
 members.*
 *.removed.csv
