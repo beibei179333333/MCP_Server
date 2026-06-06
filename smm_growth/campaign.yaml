@@ -81,6 +81,7 @@ services:
       min_order: 10
       max_order: 200000
       is_auto: false
+      quality: "standard"          # 30 天补量
     backup:
       panel: "smmfollows"
       service_id: 10735
@@ -89,6 +90,7 @@ services:
       min_order: 10
       max_order: 1000000
       is_auto: false
+      quality: "high"              # 180 天补量 → prefer_quality 时优先用
 
   views:
     primary:
@@ -99,6 +101,7 @@ services:
       min_order: 10
       max_order: 200000
       is_auto: true
+      quality: "high"              # 中文 HQ，已是优质档
     backup:
       panel: "smmfollows"
       service_id: 15232
@@ -107,6 +110,7 @@ services:
       min_order: 10
       max_order: 200000
       is_auto: true
+      quality: "standard"          # No Refill
 
   reactions:
     primary:
@@ -117,6 +121,7 @@ services:
       min_order: 10
       max_order: 1000000
       is_auto: true
+      quality: "high"              # 多种表情，更自然
     backup:
       panel: "smmfollows"
       service_id: 17581
@@ -125,6 +130,7 @@ services:
       min_order: 10
       max_order: 200000
       is_auto: true
+      quality: "standard"          # 仅 👍
 
 # ================================================================
 # 辅助服务（增强真实感）
@@ -140,6 +146,7 @@ addon_services:
       rate_per_1k: 1.540
       min_order: 10
       max_order: 25000
+      quality: "high"              # No Drop + 终身补量，且无需自备文案
     backup:
       panel: "smmfollows"
       service_id: 16477
@@ -147,6 +154,7 @@ addon_services:
       rate_per_1k: 12.830
       min_order: 5
       max_order: 20000
+      quality: "standard"          # 自定义文案，需自备内容、单价高 8 倍
 
   share:
     enabled: true
@@ -158,6 +166,7 @@ addon_services:
       rate_per_1k: 0.020
       min_order: 10
       max_order: 100000
+      quality: "high"              # 专用分享，No Drop
     backup:
       panel: "smmfollows"
       service_id: 12653
@@ -165,6 +174,7 @@ addon_services:
       rate_per_1k: 0.270
       min_order: 15
       max_order: 1000000
+      quality: "standard"          # 混合包
 
   regional_members:
     enabled: true
@@ -218,6 +228,7 @@ addon_services:
       rate_per_1k: 2.860
       min_order: 50
       max_order: 100000
+      quality: "high"              # 同为 HQ Non Drop，单价更低
     backup:
       panel: "smmstone"
       service_id: 11338
@@ -225,10 +236,12 @@ addon_services:
       rate_per_1k: 3.110
       min_order: 50
       max_order: 40000
+      quality: "standard"          # 更快但更贵
 
 # ── 执行控制 ──
 execution:
   dry_run: true                  # ⚠️ 首次保持 true，确认无误后用 `run --execute` 真正下单
+  prefer_quality: true           # 各类目优先使用 quality:"high" 的服务档位（提高质量门槛）
   delay_between_orders: 3        # 每次下单间隔（秒）
   delay_between_channels: 10     # 每个频道间隔（秒）
   max_retries: 3

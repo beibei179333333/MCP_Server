@@ -73,6 +73,7 @@ class ServiceSpec:
     min_order: int = 1
     max_order: int = 1_000_000
     is_auto: bool = False
+    quality: str = "standard"            # high | standard —— 质量档位
 
     def clamp(self, qty: int) -> int:
         return max(self.min_order, min(self.max_order, qty))
@@ -105,6 +106,17 @@ class ServiceGroup:
             out.append(self.backup)
         return out
 
+    def ranked(self, prefer_quality: bool) -> List[ServiceSpec]:
+        """下单优先顺序（第 0 个为本次实际使用的「主」服务）。
+
+        prefer_quality=True 时把质量档为 high 的排到前面（稳定排序，保留原顺序作次序），
+        从而「整体提高质量门槛」；False 时维持配置里的 primary→backup 顺序。
+        """
+        specs = self.candidates()
+        if not prefer_quality:
+            return specs
+        return sorted(specs, key=lambda s: 0 if s.quality == "high" else 1)
+
 
 @dataclass
 class Channel:
@@ -119,6 +131,7 @@ class Execution:
     delay_between_channels: float = 10.0
     max_retries: int = 3
     retry_delay: float = 5.0
+    prefer_quality: bool = False         # True=各类目优先使用 high 档服务
 
 
 @dataclass
@@ -174,6 +187,7 @@ def _spec(panel: str, raw: Dict[str, Any]) -> ServiceSpec:
         min_order=int(raw.get("min_order", 1)),
         max_order=int(raw.get("max_order", 1_000_000)),
         is_auto=bool(raw.get("is_auto", False)),
+        quality=str(raw.get("quality", "standard")),
     )
 
 
@@ -258,6 +272,7 @@ def parse_campaign(data: Dict[str, Any]) -> Campaign:
         delay_between_channels=float(ex.get("delay_between_channels", 10)),
         max_retries=int(ex.get("max_retries", 3)),
         retry_delay=float(ex.get("retry_delay", 5)),
+        prefer_quality=bool(ex.get("prefer_quality", False)),
     )
 
     g = data.get("growth") or {}

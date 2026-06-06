@@ -168,6 +168,34 @@ def test_out_of_range_returns_empty():
     assert planner.orders_for_day(c, 14) == []
 
 
+def test_prefer_quality_promotes_high_tier():
+    cfg = _mini_config()
+    # members: 主(1)=standard 便宜，备(2)=high 贵 -> prefer_quality 应优先用 2
+    cfg["services"]["members"]["primary"].update(quality="standard", rate_per_1k=0.69)
+    cfg["services"]["members"]["backup"].update(quality="high", rate_per_1k=0.78)
+    cfg["execution"]["prefer_quality"] = True
+    c = parse_campaign(cfg)
+    o = next(o for o in planner.orders_for_day(c, 0)
+             if o.category == "members" and o.channel.name == "A")
+    assert o.lead.service_id == 2 and o.lead.quality == "high"
+    assert o.specs[0].service_id == 2 and o.specs[1].service_id == 1  # 优质排前
+    # 关掉 prefer_quality -> 维持配置顺序，主=1
+    cfg["execution"]["prefer_quality"] = False
+    c2 = parse_campaign(cfg)
+    o2 = next(o for o in planner.orders_for_day(c2, 0)
+              if o.category == "members" and o.channel.name == "A")
+    assert o2.lead.service_id == 1
+
+
+def test_real_campaign_quality_upgrade_members():
+    c = load_campaign(CONFIG_PATH, environ={"SMMFOLLOWS_API_KEY": "K"})
+    assert c.execution.prefer_quality is True
+    o = next(o for o in planner.orders_for_day(c, 1)  # 非每周日，只有 members 是 channel 粉丝
+             if o.category == "members")
+    # 粉丝应升级到 180D 补量档(10735)
+    assert o.lead.service_id == 10735 and o.lead.quality == "high"
+
+
 # --------------------------------------------------------------------- panel client
 def test_panel_dryrun_add_builds_payload_no_network():
     p = Panel(name="P", url="http://p/api/v2", key="secret")

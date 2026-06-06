@@ -55,7 +55,7 @@ def _print_orders(orders: List[PlannedOrder]) -> None:
         kind = "帖子" if o.needs_post_link else "频道"
         lbl = f"/{o.label}" if o.label else ""
         print(f"  {o.category:17}{lbl:9} qty={o.quantity:<7} "
-              f"[{kind}] svc={o.group.primary.service_id:<6} "
+              f"[{kind}] svc={o.lead.service_id:<6} "
               f"≈${o.est_cost:.4f}  {o.channel.name}")
 
 
@@ -106,8 +106,8 @@ def _write_schedule_csv(orders: List[PlannedOrder], path: str) -> None:
                     "link_kind", "panel", "service_id", "quantity", "est_cost_usd"])
         for o in orders:
             w.writerow([o.day, o.order_date, o.category, o.label, o.channel.name,
-                        o.channel.link, o.link_kind, o.group.primary.panel,
-                        o.group.primary.service_id, o.quantity,
+                        o.channel.link, o.link_kind, o.lead.panel,
+                        o.lead.service_id, o.quantity,
                         f"{o.est_cost:.4f}"])
 
 

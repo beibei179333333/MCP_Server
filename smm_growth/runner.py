@@ -42,7 +42,7 @@ def _place(order: PlannedOrder, link: str, clients: Dict[str, PanelClient],
            verbose: bool) -> OrderResult:
     """对一笔计划下单尝试主服务，失败则尝试备用服务，返回最后结果。"""
     last: Optional[OrderResult] = None
-    for i, spec in enumerate(order.group.candidates()):
+    for i, spec in enumerate(order.specs or order.group.candidates()):
         client = clients.get(spec.panel)
         if client is None:
             last = OrderResult(ok=False, panel=spec.panel, service_id=spec.service_id,

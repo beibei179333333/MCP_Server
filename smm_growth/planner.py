@@ -11,11 +11,11 @@
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, timedelta
 from typing import List, Optional
 
-from .config import Campaign, Channel, ServiceGroup
+from .config import Campaign, Channel, ServiceGroup, ServiceSpec
 
 WEEKLY_PERIOD = 7
 
@@ -28,13 +28,19 @@ class PlannedOrder:
     category: str               # members / views / reactions / comment / ...
     label: str                  # 备注，例如地区名
     channel: Channel
-    group: ServiceGroup         # 含主/备服务，执行时择一
-    quantity: int               # 已裁剪到主服务上下限
+    group: ServiceGroup         # 原始服务组（保留备查）
+    quantity: int               # 已裁剪到「实际使用服务」的上下限
     link_kind: str              # channel | post
+    specs: List[ServiceSpec] = field(default_factory=list)  # 下单优先顺序，[0]为主
+
+    @property
+    def lead(self) -> ServiceSpec:
+        """本次实际使用的主服务（含优质优先排序后的结果）。"""
+        return self.specs[0] if self.specs else self.group.primary
 
     @property
     def est_cost(self) -> float:
-        return self.group.primary.cost(self.quantity)
+        return self.lead.cost(self.quantity)
 
     @property
     def needs_post_link(self) -> bool:
@@ -47,20 +53,17 @@ def _is_weekly_day(day: int) -> bool:
 
 def members_quantity(c: Campaign, day: int, channel: Channel) -> int:
     gc = c.growth("members")
-    qty = gc.amount(day, c.duration_days, seed=f"{channel.link}|members|{day}")
-    return c.members.primary.clamp(qty)
+    return gc.amount(day, c.duration_days, seed=f"{channel.link}|members|{day}")
 
 
 def views_quantity(c: Campaign, day: int, channel: Channel) -> int:
     gc = c.growth("views_per_post")
-    qty = gc.amount(day, c.duration_days, seed=f"{channel.link}|views|{day}")
-    return c.views.primary.clamp(qty)
+    return gc.amount(day, c.duration_days, seed=f"{channel.link}|views|{day}")
 
 
 def reactions_quantity(c: Campaign, day: int, channel: Channel) -> int:
     gc = c.growth("reactions_per_post")
-    qty = gc.amount(day, c.duration_days, seed=f"{channel.link}|reactions|{day}")
-    return c.reactions.primary.clamp(qty)
+    return gc.amount(day, c.duration_days, seed=f"{channel.link}|reactions|{day}")
 
 
 def orders_for_day(c: Campaign, day: int) -> List[PlannedOrder]:
@@ -69,16 +72,18 @@ def orders_for_day(c: Campaign, day: int) -> List[PlannedOrder]:
         return []
     order_date = c.start_date + timedelta(days=day)
     weekly = _is_weekly_day(day)
+    prefer = c.execution.prefer_quality
     out: List[PlannedOrder] = []
 
     def add(category: str, group: Optional[ServiceGroup], channel: Channel,
             qty: int, label: str = "") -> None:
         if group is None or not group.enabled or qty <= 0:
             return
+        specs = group.ranked(prefer)          # [0] 为实际使用的主服务
         out.append(PlannedOrder(
             day=day, order_date=order_date, category=category, label=label,
-            channel=channel, group=group, quantity=group.primary.clamp(qty),
-            link_kind=group.link_kind,
+            channel=channel, group=group, quantity=specs[0].clamp(qty),
+            link_kind=group.link_kind, specs=specs,
         ))
 
     for ch in c.channels:
