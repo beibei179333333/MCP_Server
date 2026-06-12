@@ -42,39 +42,42 @@ class DemoProvider:
     def _live_match(self) -> Match:
         total = max(60, self.cfg.demo_seconds_per_match)
         elapsed = time.time() - self._anchor()
-        f = elapsed / total  # 0..1+ progress fraction
+        cycle = int(elapsed // total)            # which replay we're on
+        f = (elapsed % total) / total            # 0..1 progress within this cycle
 
-        # scripted scoreline + status by progress fraction
-        if f < 0.08:
-            status, hs, as_ = TIMED, None, None
-        elif f < 0.15:
-            status, hs, as_ = IN_PLAY, 0, 0
-        elif f < 0.40:
-            status, hs, as_ = IN_PLAY, 1, 0
-        elif f < 0.50:
-            status, hs, as_ = IN_PLAY, 1, 1
-        elif f < 0.60:
-            status, hs, as_ = PAUSED, 1, 1
+        # scripted scoreline + status by progress fraction. The match loops
+        # every `total` seconds so notifications are easy to observe in demo
+        # mode regardless of when you /start. (Real data never loops.)
+        if f < 0.05:
+            status, hs, as_ = TIMED, None, None       # pre-kickoff
+        elif f < 0.12:
+            status, hs, as_ = IN_PLAY, 0, 0           # kickoff
+        elif f < 0.35:
+            status, hs, as_ = IN_PLAY, 1, 0           # goal (home)
+        elif f < 0.45:
+            status, hs, as_ = IN_PLAY, 1, 1           # goal (away)
+        elif f < 0.55:
+            status, hs, as_ = PAUSED, 1, 1            # half-time
         elif f < 0.75:
             status, hs, as_ = IN_PLAY, 1, 1
-        elif f < 1.0:
-            status, hs, as_ = IN_PLAY, 2, 1
+        elif f < 0.88:
+            status, hs, as_ = IN_PLAY, 2, 1           # goal (home)
         else:
-            status, hs, as_ = FINISHED, 2, 1
+            status, hs, as_ = FINISHED, 2, 1          # full-time hold
 
         minute = None
         if status in (IN_PLAY, PAUSED):
             minute = int(min(90, max(1, f * 90)))
         winner = None
         ht_h = ht_a = None
-        if f >= 0.5:
+        if f >= 0.45:
             ht_h, ht_a = 1, 1
         if status == FINISHED:
             winner = "HOME_TEAM"
 
-        kickoff = datetime.fromtimestamp(self._anchor(), tz=timezone.utc) + timedelta(
-            seconds=total * 0.08
-        )
+        kickoff = datetime.fromtimestamp(
+            self._anchor() + cycle * total, tz=timezone.utc
+        ) + timedelta(seconds=total * 0.05)
         return Match(
             id="demo-live-1",
             utc_date=kickoff,
