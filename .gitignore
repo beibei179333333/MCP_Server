@@ -9,6 +9,11 @@ members.*
 out/
 exports/
 
+# worldcup bot — local DB
+worldcup_bot.db
+worldcup_bot.db-journal
+data/
+
 # python
 __pycache__/
 *.pyc
