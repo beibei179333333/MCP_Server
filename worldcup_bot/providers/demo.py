@@ -135,6 +135,25 @@ class DemoProvider:
                 home="Portugal", away="Netherlands", stage="GROUP_STAGE",
                 group="GROUP_C", matchday=1, home_tla="POR", away_tla="NED",
             ),
+            # knockout bracket samples (placeholders until results decide them)
+            Match(id="demo-r32-1", utc_date=now + timedelta(days=16), status=TIMED,
+                  home="Winner Group A", away="3rd B/E/F", stage="LAST_32",
+                  venue="Los Angeles"),
+            Match(id="demo-r16-1", utc_date=now + timedelta(days=22), status=TIMED,
+                  home="Winner R32-1", away="Winner R32-2", stage="LAST_16",
+                  venue="Dallas"),
+            Match(id="demo-qf-1", utc_date=now + timedelta(days=27), status=TIMED,
+                  home="Winner R16-1", away="Winner R16-2", stage="QUARTER_FINALS",
+                  venue="Kansas City"),
+            Match(id="demo-sf-1", utc_date=now + timedelta(days=31), status=TIMED,
+                  home="Winner QF-1", away="Winner QF-2", stage="SEMI_FINALS",
+                  venue="Arlington"),
+            Match(id="demo-3rd", utc_date=now + timedelta(days=35), status=TIMED,
+                  home="Loser SF-1", away="Loser SF-2", stage="THIRD_PLACE",
+                  venue="Miami"),
+            Match(id="demo-final", utc_date=now + timedelta(days=36), status=TIMED,
+                  home="Winner SF-1", away="Winner SF-2", stage="FINAL",
+                  venue="MetLife Stadium, NJ"),
         ]
         return matches
 

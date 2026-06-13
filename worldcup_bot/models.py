@@ -48,6 +48,7 @@ class Match:
     home_tla: str = ""
     away_tla: str = ""
     minute: Optional[int] = None          # live minute when known
+    venue: str = ""                       # stadium / city when known
     extra: dict = field(default_factory=dict)
 
     # ---- convenience ----------------------------------------------------
@@ -121,4 +122,5 @@ def from_football_data(item: dict) -> Match:
         matchday=item.get("matchday"),
         home_tla=home_team.get("tla") or "",
         away_tla=away_team.get("tla") or "",
+        venue=item.get("venue") or "",
     )

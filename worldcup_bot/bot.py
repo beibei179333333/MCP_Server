@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from . import formatting as F
 from .config import Config
-from .i18n import t
+from .i18n import STAGE_ORDER, stage_name, t
 from .models import LIVE_STATES, Match
 from .notifier import NotificationEngine
 from .providers import build_provider
@@ -56,6 +56,10 @@ class WorldCupBot:
         except TelegramError as exc:
             log.warning("reply to %s failed: %s", chat_id, exc)
 
+    def _reply_chunks(self, chat_id: str, chunks: list[str]) -> None:
+        for part in chunks:
+            self._reply(chat_id, part)
+
     # ---- keyboards ------------------------------------------------------
     def _settings_keyboard(self, chat_id: str) -> dict:
         sub = self.storage.get_subscriber(chat_id) or {}
@@ -73,6 +77,17 @@ class WorldCupBot:
             {"text": "🇨🇳 中文", "callback_data": "lang:zh"},
             {"text": "🇬🇧 English", "callback_data": "lang:en"},
         ]]}
+
+    def _schedule_keyboard(self, lang: str) -> dict:
+        rows, row = [], []
+        for code, emoji in STAGE_ORDER:
+            row.append({"text": f"{emoji} {stage_name(code, lang)}",
+                        "callback_data": f"sched:{code}"})
+            if len(row) == 2:
+                rows.append(row); row = []
+        if row:
+            rows.append(row)
+        return {"inline_keyboard": rows}
 
     # ---- command handlers ----------------------------------------------
     def cmd_start(self, chat_id: str, _args: str) -> None:
@@ -133,6 +148,20 @@ class WorldCupBot:
         self._reply(chat_id, F.match_list(t("matches_title", lang), window[:25],
                                           self.cfg.timezone, lang, t("no_matches", lang)))
 
+    def cmd_schedule(self, chat_id: str, args: str) -> None:
+        lang = self._lang(chat_id)
+        arg = (args or "").strip().upper()
+        # /schedule final -> jump straight to that round
+        if arg:
+            alias = {"R32": "LAST_32", "R16": "LAST_16", "QF": "QUARTER_FINALS",
+                     "SF": "SEMI_FINALS", "GROUP": "GROUP_STAGE",
+                     "GROUPS": "GROUP_STAGE", "FINAL": "FINAL"}.get(arg, arg)
+            self._reply_chunks(chat_id, F.stage_schedule(
+                self._matches(), alias, self.cfg.timezone, lang))
+            return
+        self._reply(chat_id, t("schedule_overview", lang),
+                    reply_markup=self._schedule_keyboard(lang))
+
     def cmd_standings(self, chat_id: str, _args: str) -> None:
         lang = self._lang(chat_id)
         try:
@@ -181,7 +210,7 @@ class WorldCupBot:
         "start": cmd_start, "help": cmd_help,
         "subscribe": cmd_subscribe, "unsubscribe": cmd_unsubscribe, "stop": cmd_unsubscribe,
         "today": cmd_today, "live": cmd_live, "next": cmd_next,
-        "matches": cmd_matches, "schedule": cmd_matches,
+        "matches": cmd_matches, "schedule": cmd_schedule, "fixtures": cmd_schedule,
         "standings": cmd_standings, "groups": cmd_standings,
         "settings": cmd_settings, "lang": cmd_lang, "language": cmd_lang,
         "whoami": cmd_whoami, "broadcast": cmd_broadcast,
@@ -212,6 +241,13 @@ class WorldCupBot:
         chat_id = str(chat.get("id"))
         message_id = msg.get("message_id")
         cq_id = cq.get("id")
+        if data.startswith("sched:"):
+            code = data[6:]
+            lang = self._lang(chat_id)
+            self.tg.answer_callback(cq_id, stage_name(code, lang))
+            self._reply_chunks(chat_id, F.stage_schedule(
+                self._matches(), code, self.cfg.timezone, lang))
+            return
         if data.startswith("set:"):
             field = data[4:]
             new_val = self.storage.toggle_setting(chat_id, field)

@@ -11,7 +11,7 @@ except ImportError:  # pragma: no cover
     ZoneInfo = None  # type: ignore
 
 from .flags import flag
-from .i18n import stage_name, t
+from .i18n import canonical_stage, stage_name, t
 from .models import Match
 
 
@@ -68,6 +68,51 @@ def match_list(title: str, matches: list[Match], tzname: str, lang: str = "zh",
     lines = [title, ""]
     lines += [match_line(m, tzname, lang) for m in matches]
     return "\n".join(lines)
+
+
+def schedule_line(m: Match, tzname: str, lang: str = "zh") -> str:
+    """One fixture line for the schedule view (time · teams · venue/result)."""
+    when = fmt_time(m.utc_date, tzname, lang)
+    if m.is_finished and m.has_score:
+        body = score_line(m) + ("  ✅")
+    elif m.is_live:
+        minute = f" ⏱{m.minute}'" if m.minute else ""
+        body = score_line(m) + f"  🔴{minute}"
+    else:
+        body = teams_line(m)
+    venue = f"  📍{_e(m.venue)}" if m.venue else ""
+    grp = ""
+    if m.group:
+        grp = " · " + m.group.replace("_", " ").title()
+    return f"🕒 {when}{grp}\n   {body}{venue}"
+
+
+def stage_schedule(matches: list[Match], stage_code: str, tzname: str,
+                   lang: str = "zh") -> list[str]:
+    """All fixtures of one stage, sorted by date, returned as message chunks
+    (each < ~3500 chars to stay under Telegram's 4096 limit)."""
+    target = canonical_stage(stage_code)
+    sel = [m for m in matches if canonical_stage(m.stage) == target]
+    sel.sort(key=lambda m: (m.utc_date or datetime.max.replace(tzinfo=timezone.utc),
+                            m.group or ""))
+    title = f"{stage_name(stage_code, lang)}"
+    if not sel:
+        return [f"<b>{title}</b>\n\n" + t("sched_stage_empty", lang)]
+
+    header = f"<b>{title}</b> · {len(sel)} 场\n"
+    chunks: list[str] = []
+    buf = [header]
+    size = len(header)
+    for m in sel:
+        line = schedule_line(m, tzname, lang) + "\n"
+        if size + len(line) > 3500:
+            chunks.append("".join(buf))
+            buf = [header]
+            size = len(header)
+        buf.append(line)
+        size += len(line)
+    chunks.append("".join(buf))
+    return chunks
 
 
 def standings_block(groups: list[dict], lang: str = "zh") -> str:
