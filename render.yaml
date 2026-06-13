@@ -9,3 +9,25 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.9"
+
+  # G789 scenario-skill Telegram bot — long-polling worker (no inbound port).
+  - type: worker
+    name: g789-telegram-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m g789_bot
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false          # set in the Render dashboard (secret)
+      - key: ANTHROPIC_API_KEY
+        sync: false          # set in the Render dashboard (secret)
+      - key: ANTHROPIC_MODEL
+        value: "claude-opus-4-8"
+      - key: G789_EFFORT
+        value: "medium"
+      # Optional: hide categories, e.g. "黄,赌"
+      - key: G789_BLOCKED_CATEGORIES
+        value: ""

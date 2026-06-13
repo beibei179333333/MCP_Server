@@ -2,3 +2,7 @@ requests>=2.28
 openpyxl>=3.1
 flask>=3.0
 gunicorn>=21.2
+
+# G789 scenario-skill Telegram bot (g789_bot)
+python-telegram-bot>=21,<23
+anthropic>=0.49
