@@ -1,3 +1,10 @@
+> 🤖 **本仓库还包含一个独立项目：[G789 场景技能 Telegram 机器人 (`g789_bot/`)](g789_bot/README.md)** —
+> 把全部 500 个 G789 场景技能（S-001…S-500）部署成可直接运行的 Telegram 聊天机器人，由 Claude 驱动。
+> 快速开始：`pip install -r requirements.txt` → 设 `TELEGRAM_BOT_TOKEN` 和 `ANTHROPIC_API_KEY` → `python -m g789_bot`。
+> 离线自检：`python -m g789_bot --selftest`。详见 [`g789_bot/README.md`](g789_bot/README.md)。
+
+---
+
 # 群成员全自动导出 / 清洗工具 (group_export)
 
 基于 `fun-stat-bot.net` 的 API，自动导出群成员列表，并完成：
