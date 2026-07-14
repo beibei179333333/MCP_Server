@@ -46,12 +46,16 @@ jobs:
           ls -la
           for f in *.cherri; do [ -f "$f" ] && { echo "=== $f ==="; cat "$f"; }; done
 
-      - name: Write fallback Cherri source
+      - name: Write main Cherri source
         run: |
-          cat > fallback.cherri <<'EOF'
+          cat > main.cherri <<'EOF'
+          #include 'actions/web'
+          #define color violet
+          #define glyph magicWand
+
           openURL("scriptable:///run/AI%E6%99%BA%E8%83%BD%E8%B7%AF%E7%94%B1%E5%BC%95%E6%93%8E")
           EOF
-          cat fallback.cherri
+          cat main.cherri
 
       - name: Compile + sign via HubSign
         run: |
@@ -59,14 +63,21 @@ jobs:
             local src="$1"
             echo "### compiling $src"
             rm -f AI-Router-signed.shortcut
-            cherri "$src" -s=anyone --hubsign --no-ansi -o=AI-Router-signed.shortcut 2>&1 || return 1
+            cherri "$src" -s=anyone --hubsign --no-ansi -o=AI-Router-signed.shortcut 2>&1
+            local rc=$?
+            echo "(cherri exit=$rc)"
+            ls -la *.shortcut 2>/dev/null || true
+            # 有的版本可能忽略 -o=，兜底找默认命名的产物
+            if [ ! -f AI-Router-signed.shortcut ] && [ -f "${src%.cherri}.shortcut" ]; then
+              cp "${src%.cherri}.shortcut" AI-Router-signed.shortcut
+            fi
             [ -f AI-Router-signed.shortcut ] || return 1
             echo "--- magic bytes ---"
             head -c 16 AI-Router-signed.shortcut | xxd
             head -c 4 AI-Router-signed.shortcut | grep -q "AEA1"
           }
           OK=""
-          for src in $(ls *.cherri | grep -v '^fallback.cherri$') fallback.cherri; do
+          for src in main.cherri $(ls *.cherri | grep -v '^main.cherri$'); do
             [ -f "$src" ] || continue
             if try_compile "$src"; then OK="$src"; break; fi
             echo "!!! $src failed, trying next"
