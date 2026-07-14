@@ -1,7 +1,10 @@
 name: Sign iOS Shortcut
 
-# 在 macOS 运行器上用苹果官方 `shortcuts sign` 给快捷指令签名，
-# 产出 iPhone 可直接导入的 .shortcut 文件，并发布到 GitHub Release。
+# 目标：产出 iPhone 可直接导入的已签名 .shortcut 文件。
+# 策略：
+#   1) try-sign：在多个 macOS 版本上尝试苹果官方 `shortcuts sign`
+#   2) recon：抓取社区签名服务（RoutineHub signer / Cherri HubSign）文档，
+#      打印到日志供分析，寻找可编程调用的签名端点
 on:
   push:
     branches:
@@ -15,10 +18,21 @@ permissions:
   contents: write
 
 jobs:
-  sign:
-    runs-on: macos-latest
+  try-sign:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, macos-15]
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+
+      - name: System info
+        run: |
+          sw_vers
+          shortcuts --help 2>&1 | head -20 || true
+          shortcuts sign --help 2>&1 || true
 
       - name: Sign shortcut (mode anyone)
         run: |
@@ -31,7 +45,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AI-Router-signed
+          name: AI-Router-signed-${{ matrix.os }}
           path: AI-Router.shortcut
 
       - name: Publish to release
@@ -40,6 +54,26 @@ jobs:
         run: |
           gh release create shortcut-signed \
             --title "AI 智能路由引擎 · 已签名快捷指令" \
-            --notes "iPhone Safari 直接下载本文件，打开即可导入快捷指令 App。内部动作：通过 URL Scheme 运行 Scriptable 脚本「AI智能路由引擎」。" \
+            --notes "iPhone Safari 直接下载本文件，打开即可导入快捷指令 App。" \
             --target "${GITHUB_SHA}" || true
           gh release upload shortcut-signed AI-Router.shortcut --clobber
+
+  recon:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch community signing docs
+        run: |
+          fetch() {
+            echo "================================================================"
+            echo "### $1"
+            echo "================================================================"
+            curl -sL --max-time 40 -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15" "$1" -o page.html || { echo "FETCH FAILED"; return 0; }
+            echo "--- links containing sign/hub/api ---"
+            grep -oiE '(href|src|action)="[^"]*"' page.html | grep -iE 'sign|hub|api' | sort -u | head -40 || true
+            echo "--- visible text (stripped) ---"
+            sed -e 's/<script[^>]*>.*<\/script>//gI' -e 's/<[^>]*>/ /g' page.html | tr -s ' \n' ' \n' | grep -vE '^\s*$' | head -120 || true
+          }
+          fetch "https://cherrilang.org/compiler/signing.html"
+          fetch "https://blog.routinehub.co/how-to-sign-a-shortcut-file-from-cherri/"
+          fetch "https://routinehub.co/signer"
+          fetch "https://zachary7829.github.io/blog/shortcuts/fileformat.html"
