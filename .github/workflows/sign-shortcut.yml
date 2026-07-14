@@ -31,20 +31,17 @@ jobs:
           go install github.com/electrikmilk/cherri@latest
           echo "$HOME/go/bin" >> "$GITHUB_PATH"
 
-      - name: Show action reference (for fallback source corrections)
+      - name: Show HubSign flag handling in Cherri source
         continue-on-error: true
         run: |
-          cherri --action=url --no-ansi 2>&1 | head -40 || true
-          cherri --action=open --no-ansi 2>&1 | head -60 || true
-
-      - name: Import existing shortcut into Cherri source
-        continue-on-error: true
-        run: |
-          cp "scriptable/AI智能路由引擎.shortcut" input.shortcut
-          cherri --import=input.shortcut --no-ansi 2>&1 || true
-          echo "--- workspace after import ---"
-          ls -la
-          for f in *.cherri; do [ -f "$f" ] && { echo "=== $f ==="; cat "$f"; }; done
+          git clone --depth 1 https://github.com/electrikmilk/cherri /tmp/cherri-src
+          echo "=== hubsign / signing call sites (non-test) ==="
+          grep -rn -iE "hubsign|signing" /tmp/cherri-src --include="*.go" | grep -v _test | head -30 || true
+          F=$(grep -rl -i "hubsign" /tmp/cherri-src --include="*.go" | grep -v _test | head -1)
+          if [ -n "$F" ]; then
+            echo "=== $F (hubsign region) ==="
+            grep -n -i -B5 -A40 "hubsign" "$F" | head -120
+          fi
 
       - name: Write main Cherri source
         run: |
@@ -59,31 +56,43 @@ jobs:
 
       - name: Compile + sign via HubSign
         run: |
-          try_compile() {
-            local src="$1"
-            echo "### compiling $src"
-            rm -f AI-Router-signed.shortcut
-            cherri "$src" -s=anyone --hubsign --no-ansi -o=AI-Router-signed.shortcut 2>&1
-            local rc=$?
-            echo "(cherri exit=$rc)"
-            ls -la *.shortcut 2>/dev/null || true
-            # 有的版本可能忽略 -o=，兜底找默认命名的产物
-            if [ ! -f AI-Router-signed.shortcut ] && [ -f "${src%.cherri}.shortcut" ]; then
-              cp "${src%.cherri}.shortcut" AI-Router-signed.shortcut
-            fi
-            [ -f AI-Router-signed.shortcut ] || return 1
-            echo "--- magic bytes ---"
-            head -c 16 AI-Router-signed.shortcut | xxd
-            head -c 4 AI-Router-signed.shortcut | grep -q "AEA1"
+          # 在所有产物里找 AEA1 魔数（已签名的 Apple Encrypted Archive）
+          find_signed() {
+            for f in *.shortcut; do
+              [ -f "$f" ] || continue
+              if head -c 4 "$f" | grep -q "AEA1"; then echo "$f"; return 0; fi
+            done
+            return 1
           }
-          OK=""
-          for src in main.cherri $(ls *.cherri | grep -v '^main.cherri$'); do
-            [ -f "$src" ] || continue
-            if try_compile "$src"; then OK="$src"; break; fi
-            echo "!!! $src failed, trying next"
-          done
-          if [ -z "$OK" ]; then echo "all sources failed to produce a signed shortcut"; exit 1; fi
-          echo "signed successfully from: $OK"
+          attempt() {
+            echo "### attempt: cherri $*"
+            rm -f main.shortcut main_unsigned.shortcut out.shortcut
+            timeout 120 cherri "$@" 2>&1
+            echo "(exit=$?)"
+            ls -la *.shortcut 2>/dev/null || true
+          }
+          # 参数解析行为不明：多种写法逐一尝试（长/短标志、标志在文件前/后）
+          attempt main.cherri --share=anyone --hubsign --no-ansi
+          SIGNED=$(find_signed) || true
+          if [ -z "$SIGNED" ]; then
+            attempt --share=anyone --hubsign --no-ansi main.cherri
+            SIGNED=$(find_signed) || true
+          fi
+          if [ -z "$SIGNED" ]; then
+            attempt main.cherri -s=anyone --hubsign
+            SIGNED=$(find_signed) || true
+          fi
+          if [ -z "$SIGNED" ]; then
+            attempt main.cherri --share=anyone --output=out.shortcut --hubsign --no-ansi
+            SIGNED=$(find_signed) || true
+          fi
+          if [ -z "$SIGNED" ]; then
+            echo "no AEA1-signed output produced by any invocation"
+            exit 1
+          fi
+          echo "signed file: $SIGNED"
+          cp "$SIGNED" AI-Router-signed.shortcut
+          head -c 16 AI-Router-signed.shortcut | xxd
           ls -la AI-Router-signed.shortcut
           echo "SIGNED_OK=1" >> "$GITHUB_ENV"
 
