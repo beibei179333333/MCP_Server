@@ -1,8 +1,9 @@
 name: Sign iOS Shortcut
 
 # 目标：产出 iPhone 可直接导入的已签名 .shortcut 文件。
-# 路线：macOS 官方 `shortcuts sign` 需要登录 iCloud（CI 上不可行），
-# 改用 RoutineHub 的 HubSign 签名服务（Cherri 编译器在非 Mac 平台的官方签名通道）。
+# 路线：Apple `shortcuts sign` 在 CI 上因 iCloud 登录要求不可用；
+# 改走 Cherri 编译器内置的 HubSign 远程签名通道（--hubsign）。
+# HubSign 裸 HTTP 端点有 Cloudflare 防护，必须通过 cherri 客户端调用。
 on:
   push:
     branches:
@@ -16,30 +17,6 @@ permissions:
   contents: write
 
 jobs:
-  hubsign-probe:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Probe HubSign API shapes
-        run: |
-          U="https://hubsign.routinehub.services/sign"
-          probe() {
-            echo "=== $1 ==="
-            shift
-            curl -sS --max-time 60 "$@" -o resp.bin -w "HTTP %{http_code}  type=%{content_type}  size=%{size_download}\n" || echo "(curl failed)"
-            echo "--- first bytes ---"
-            head -c 300 resp.bin | xxd | head -12 || true
-            echo "--- as text ---"
-            head -c 500 resp.bin || true
-            echo; echo
-          }
-          probe "GET"                 -X GET  "$U"
-          probe "POST multipart file"      -X POST "$U" -F "file=@scriptable/AI智能路由引擎.shortcut"
-          probe "POST multipart shortcut"  -X POST "$U" -F "shortcut=@scriptable/AI智能路由引擎.shortcut"
-          probe "POST raw body"            -X POST "$U" -H "Content-Type: application/octet-stream" --data-binary "@scriptable/AI智能路由引擎.shortcut"
-
   cherri-sign:
     runs-on: ubuntu-latest
     steps:
@@ -53,43 +30,51 @@ jobs:
         run: |
           go install github.com/electrikmilk/cherri@latest
           echo "$HOME/go/bin" >> "$GITHUB_PATH"
-          "$HOME/go/bin/cherri" --help 2>&1 | head -60 || true
 
-      - name: Show Cherri signing client code (reference)
+      - name: Show action reference (for fallback source corrections)
         continue-on-error: true
         run: |
-          git clone --depth 1 https://github.com/electrikmilk/cherri /tmp/cherri-src
-          grep -rn -iE "hubsign|signing.?server|/sign" /tmp/cherri-src --include="*.go" | head -30 || true
-          F=$(grep -rl -iE "hubsign|signing.?server" /tmp/cherri-src --include="*.go" | head -1)
-          [ -n "$F" ] && sed -n '1,160p' "$F"
+          cherri --action=url --no-ansi 2>&1 | head -40 || true
+          cherri --action=open --no-ansi 2>&1 | head -60 || true
 
       - name: Import existing shortcut into Cherri source
+        continue-on-error: true
         run: |
-          cp "scriptable/AI智能路由引擎.shortcut" router.shortcut
-          cherri --import router.shortcut 2>&1 || true
+          cp "scriptable/AI智能路由引擎.shortcut" input.shortcut
+          cherri --import=input.shortcut --no-ansi 2>&1 || true
           echo "--- workspace after import ---"
           ls -la
           for f in *.cherri; do [ -f "$f" ] && { echo "=== $f ==="; cat "$f"; }; done
 
+      - name: Write fallback Cherri source
+        run: |
+          cat > fallback.cherri <<'EOF'
+          openURL("scriptable:///run/AI%E6%99%BA%E8%83%BD%E8%B7%AF%E7%94%B1%E5%BC%95%E6%93%8E")
+          EOF
+          cat fallback.cherri
+
       - name: Compile + sign via HubSign
         run: |
-          SRC=$(ls *.cherri 2>/dev/null | head -1)
-          if [ -z "$SRC" ]; then echo "no .cherri produced by import"; exit 1; fi
-          cherri "$SRC" --share=anyone --no-ansi 2>&1 || cherri "$SRC" -s=anyone 2>&1
-          echo "--- workspace after compile ---"
-          ls -la
-          OUT=$(ls *.shortcut 2>/dev/null | grep -v '^router.shortcut$' | head -1)
-          if [ -z "$OUT" ]; then echo "no output shortcut"; exit 1; fi
-          echo "candidate: $OUT"
-          head -c 16 "$OUT" | xxd
-          # 已签名的快捷指令是 Apple Encrypted Archive，前 4 字节魔数为 AEA1
-          if head -c 4 "$OUT" | grep -q "AEA1"; then
-            cp "$OUT" "AI-Router-signed.shortcut"
-            echo "SIGNED_OK=1" >> "$GITHUB_ENV"
-          else
-            echo "output is NOT AEA-signed"
-            exit 1
-          fi
+          try_compile() {
+            local src="$1"
+            echo "### compiling $src"
+            rm -f AI-Router-signed.shortcut
+            cherri "$src" -s=anyone --hubsign --no-ansi -o=AI-Router-signed.shortcut 2>&1 || return 1
+            [ -f AI-Router-signed.shortcut ] || return 1
+            echo "--- magic bytes ---"
+            head -c 16 AI-Router-signed.shortcut | xxd
+            head -c 4 AI-Router-signed.shortcut | grep -q "AEA1"
+          }
+          OK=""
+          for src in $(ls *.cherri | grep -v '^fallback.cherri$') fallback.cherri; do
+            [ -f "$src" ] || continue
+            if try_compile "$src"; then OK="$src"; break; fi
+            echo "!!! $src failed, trying next"
+          done
+          if [ -z "$OK" ]; then echo "all sources failed to produce a signed shortcut"; exit 1; fi
+          echo "signed successfully from: $OK"
+          ls -la AI-Router-signed.shortcut
+          echo "SIGNED_OK=1" >> "$GITHUB_ENV"
 
       - name: Upload artifact
         if: env.SIGNED_OK == '1'
@@ -107,6 +92,7 @@ jobs:
           cp AI-Router-signed.shortcut "signed/AI智能路由引擎-已签名.shortcut"
           git add signed/
           git commit -m "Add HubSign-signed shortcut (CI)"
+          git pull --rebase origin claude/ai-router-engine-v4-d30ilc || true
           git push origin HEAD:claude/ai-router-engine-v4-d30ilc
 
       - name: Publish to release
