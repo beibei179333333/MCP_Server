@@ -1,0 +1,45 @@
+name: Sign iOS Shortcut
+
+# 在 macOS 运行器上用苹果官方 `shortcuts sign` 给快捷指令签名，
+# 产出 iPhone 可直接导入的 .shortcut 文件，并发布到 GitHub Release。
+on:
+  push:
+    branches:
+      - claude/ai-router-engine-v4-d30ilc
+    paths:
+      - "scriptable/**"
+      - ".github/workflows/sign-shortcut.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sign:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sign shortcut (mode anyone)
+        run: |
+          shortcuts sign --mode anyone \
+            --input "scriptable/AI智能路由引擎.shortcut" \
+            --output "AI-Router.shortcut"
+          ls -la AI-Router.shortcut
+          file AI-Router.shortcut
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI-Router-signed
+          path: AI-Router.shortcut
+
+      - name: Publish to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create shortcut-signed \
+            --title "AI 智能路由引擎 · 已签名快捷指令" \
+            --notes "iPhone Safari 直接下载本文件，打开即可导入快捷指令 App。内部动作：通过 URL Scheme 运行 Scriptable 脚本「AI智能路由引擎」。" \
+            --target "${GITHUB_SHA}" || true
+          gh release upload shortcut-signed AI-Router.shortcut --clobber
