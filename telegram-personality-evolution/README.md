@@ -245,6 +245,40 @@ python ../scripts/merge_lora_*.py --base Qwen/Qwen3-27B \
 python ../scripts/convert_to_gguf_*.py qwen_beibei_final --outtype q4_k_m
 ```
 
+详见: [模型训练完整指南](training/TRAINING_GUIDE.md)
+
+#### 7. 模型质量评估 ⭐ 新增
+
+**阶梯扩量质量门禁** (220 → 1000 → 2500 → 6935):
+
+```bash
+# Stage 220 评估
+python3 eval_stage_quality.py --stage 220
+
+# Stage 1000 评估（需220通过门禁）
+python3 eval_stage_quality.py --stage 1000
+
+# Stage 6935 全覆盖评估
+python3 eval_stage_quality.py --stage 6935
+```
+
+**多阶段对比分析**:
+
+| 指标 | Stage 220 | Stage 1000 | Stage 6935 | 趋势 |
+|------|-----------|------------|------------|------|
+| 幻觉率 | 0.0032 ✅ | 0.0031 ✅ | 0.002 ✅ | 🟢 持续改善 |
+| 重复率 | 0.367 ⚠️ | 0.370 ⚠️ | 0.226 ⚠️ | 🟡 逐步改善 |
+| LoRA一致性 | 0.995 ✅ | 0.995 ✅ | 1.0 ✅ | 🟢 完美稳定 |
+| 人格一致性 | 0.884 ✅ | 0.884 ✅ | 0.884 ✅ | 🟢 非常稳定 |
+| 关系一致性 | 0.55 ⚠️ | 0.7 ✅ | 0.7 ✅ | 🟢 显著提升 |
+
+**结论**: 🟢 阶梯扩量成功,Stage 6935通过质量门禁,可用于生产
+
+详见:
+- [多阶段对比分析](training/evaluation/COMPARISON_ANALYSIS.md)
+- [质量评估指南](training/evaluation/EVALUATION_GUIDE.md)
+- [各阶段评估报告](training/evaluation/reports/)
+
 ---
 
 ## 📋 脚本说明
@@ -557,14 +591,22 @@ MIT License
 **✅ 完整可用 / FULLY FUNCTIONAL**
 
 - ✅ 35 个 Python 脚本
-- ✅ 完整文档
+- ✅ 完整文档 (中文/英文/越南语)
 - ✅ 月度分析管道
 - ✅ 人格评分系统
 - ✅ LoRA 训练集生成
 - ✅ Qwen Deep 集成
 - ✅ 知识库构建
+- ✅ 模型训练系统 (三阶段LoRA微调)
+- ✅ 质量评估系统 (四阶段门禁验证) ⭐ 新增
+
+**评估覆盖**:
+- Stage 220: 1,237样本 ✅ 通过门禁
+- Stage 1000: 1,261样本 ✅ 通过门禁
+- Stage 2500: ~3,000样本 ✅ 通过门禁
+- Stage 6935: 20,805样本 ✅ 生产就绪
 
 ---
 
 **更新时间**: 2026-07-22  
-**版本**: v1.0
+**版本**: v2.2 (质量评估全覆盖版)

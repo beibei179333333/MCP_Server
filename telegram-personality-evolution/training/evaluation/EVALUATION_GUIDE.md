@@ -676,10 +676,23 @@ Stage 6935评估结果显示:
 
 ---
 
-**评估指南版本**: v1.0  
-**最后更新**: 2026-07-22  
-**评估阶段**: Stage 6935  
-**评估样本**: 20,805行  
-**总体状态**: 🟢 **通过质量门禁,可用于生产**
+## 📚 相关文档 / Related Documentation
 
-🎉 **Quality Gate: PASS**
+- [训练指南](../TRAINING_GUIDE.md)
+- **[多阶段对比分析](./COMPARISON_ANALYSIS.md)** ⭐ **新增**
+- [质量评估报告](./reports/)
+  - [Stage 220报告](./reports/stage_220/)
+  - [Stage 1000报告](./reports/stage_1000/)
+  - [Stage 2500报告](./reports/stage_2500/)
+  - [Stage 6935报告](./reports/stage_6935/)
+- [主项目文档](../../README.md)
+
+---
+
+**评估指南版本**: v1.1  
+**最后更新**: 2026-07-22  
+**评估阶段**: 220 → 1000 → 2500 → 6935  
+**总样本量**: 23,303+ 条  
+**总体状态**: 🟢 **阶梯扩量成功,Stage 6935通过质量门禁,可用于生产**
+
+🎉 **Quality Gate: PASS** | 🚀 **Multi-Stage Validation: SUCCESS**
