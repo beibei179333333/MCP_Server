@@ -1,0 +1,54 @@
+# Qwen3-27B · 人格 Stage1 · 4bit LoRA（Axolotl）
+# 启动（需 NVIDIA CUDA 机器）：
+#   axolotl train config/qwen3.6_27b_personality_stage1.yaml
+#
+# 注意：lora_r=128，与旧 r=64 checkpoint 不兼容，须从本配置重训。
+
+base_model: Qwen/Qwen3-27B
+model_type: qwen2
+tokenizer_type: qwen2
+
+load_in_4bit: true
+adapter: lora
+lora_r: 128
+lora_alpha: 64
+lora_dropout: 0.05
+
+datasets:
+  - path: train_data_final/train.jsonl
+    type: alpaca
+    shuffle: true
+    split: train
+  - path: train_data_final/val.jsonl
+    type: alpaca
+    split: val
+  # knowledge/ 额外上下文（长期记忆锚定）
+  - path: train_data_knowledge/context.jsonl
+    type: alpaca
+    shuffle: true
+    split: train
+
+val_set_size: 0
+sequence_len: 8192
+sample_packing: true
+
+num_epochs: 1.5
+micro_batch_size: 2
+gradient_accumulation_steps: 4
+learning_rate: 2.0e-5
+optimizer: adamw_torch
+lr_scheduler: cosine
+warmup_steps: 100
+
+save_steps: 500
+eval_steps: 300
+logging_steps: 50
+
+output_dir: ./output/qwen_personality_stage1
+save_total_limit: 3
+
+bf16: auto
+gradient_checkpointing: true
+flash_attention: true
+pad_to_sequence_len: true
+strict: false

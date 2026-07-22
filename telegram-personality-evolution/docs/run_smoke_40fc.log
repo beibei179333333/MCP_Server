@@ -1,0 +1,1327 @@
+{
+  "status": "ready",
+  "source": "/Users/home/Downloads/tg_private_4y_monthly/06_full_coverage/contact_universe.json",
+  "deep_priority": "/Users/home/Downloads/tg_private_4y_monthly/06_full_coverage/deep_priority_le50.jsonl",
+  "policy": {
+    "filter_huiwang_lianghao": false,
+    "deep_analysis_max_messages": 50,
+    "full_strategy_for_all": true
+  },
+  "contact_count": 7988,
+  "deep_analysis_count": 6935
+}
+{
+  "contact_count": 7988,
+  "deep_analysis_count": 6935,
+  "relationship_stage_dist": {
+    "陌生": 1607,
+    "初识": 1270,
+    "建立信任": 2662,
+    "合作": 1304,
+    "熟悉": 379,
+    "长期": 766
+  },
+  "my_attitude_dist": {
+    "被动": 2272,
+    "主动": 1301,
+    "平衡": 3398,
+    "冷处理": 180,
+    "高投入": 665,
+    "低投入": 37,
+    "拒绝": 135
+  },
+  "unknown_stages": [],
+  "unknown_attitudes": []
+}
+{
+  "strategy_file": "/Users/home/Downloads/tg_private_4y_monthly/06_full_coverage/strategies/all_contacts_strategies.jsonl",
+  "contacts_scored": 7988,
+  "deep_analysis_contacts": 6935,
+  "missing_strategy_type_rows": 0,
+  "missing_confidence_rows": 0,
+  "low_confidence_rows": 4977,
+  "required_types": [
+    "利益捆绑",
+    "长期关系经营",
+    "战略价值整合",
+    "战略撤退",
+    "筹码对调",
+    "情绪杠杆",
+    "沉没成本",
+    "情报商",
+    "框架驯兽",
+    "规则降维",
+    "流失挽回",
+    "风险审核"
+  ],
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0,
+    "tone_clarity": 0.375,
+    "fragmentation": 0.25,
+    "coldness": 0.25,
+    "style_keyword_n": 3,
+    "confidence": 0.245,
+    "low_confidence": true
+  }
+}
+{
+  "train_n": 1,
+  "val_n": 3,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0123,
+    "tone_clarity": 0.4136,
+    "fragmentation": 0.4691,
+    "coldness": 0.0123,
+    "style_keyword_n": 16,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 78,
+  "val_n": 3,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0458,
+    "tone_clarity": 0.4312,
+    "fragmentation": 0.4312,
+    "coldness": 0.0459,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 101,
+  "val_n": 8,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0315,
+    "tone_clarity": 0.3911,
+    "fragmentation": 0.3832,
+    "coldness": 0.0131,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 345,
+  "val_n": 36,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0374,
+    "tone_clarity": 0.428,
+    "fragmentation": 0.4093,
+    "coldness": 0.0112,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 522,
+  "val_n": 13,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0389,
+    "tone_clarity": 0.4674,
+    "fragmentation": 0.3982,
+    "coldness": 0.0226,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 744,
+  "val_n": 52,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0364,
+    "tone_clarity": 0.4426,
+    "fragmentation": 0.3834,
+    "coldness": 0.0205,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1035,
+  "val_n": 37,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0267,
+    "tone_clarity": 0.4468,
+    "fragmentation": 0.3894,
+    "coldness": 0.0231,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1582,
+  "val_n": 64,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0246,
+    "tone_clarity": 0.453,
+    "fragmentation": 0.3661,
+    "coldness": 0.0291,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1293,
+  "val_n": 48,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0264,
+    "tone_clarity": 0.4375,
+    "fragmentation": 0.3466,
+    "coldness": 0.0368,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1561,
+  "val_n": 69,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0349,
+    "tone_clarity": 0.4433,
+    "fragmentation": 0.4105,
+    "coldness": 0.0331,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 2061,
+  "val_n": 56,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0334,
+    "tone_clarity": 0.431,
+    "fragmentation": 0.4044,
+    "coldness": 0.0295,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 2177,
+  "val_n": 98,
+  "year": 2022,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0309,
+    "tone_clarity": 0.4401,
+    "fragmentation": 0.3799,
+    "coldness": 0.0267,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1799,
+  "val_n": 146,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0307,
+    "tone_clarity": 0.4486,
+    "fragmentation": 0.3771,
+    "coldness": 0.0342,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1870,
+  "val_n": 87,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0264,
+    "tone_clarity": 0.422,
+    "fragmentation": 0.4094,
+    "coldness": 0.031,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 2342,
+  "val_n": 81,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0317,
+    "tone_clarity": 0.431,
+    "fragmentation": 0.374,
+    "coldness": 0.0336,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 2108,
+  "val_n": 66,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0265,
+    "tone_clarity": 0.4338,
+    "fragmentation": 0.3443,
+    "coldness": 0.0434,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1815,
+  "val_n": 73,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0302,
+    "tone_clarity": 0.4108,
+    "fragmentation": 0.339,
+    "coldness": 0.0321,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1004,
+  "val_n": 55,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0179,
+    "tone_clarity": 0.4221,
+    "fragmentation": 0.4177,
+    "coldness": 0.028,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 812,
+  "val_n": 81,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0252,
+    "tone_clarity": 0.4417,
+    "fragmentation": 0.3554,
+    "coldness": 0.042,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1041,
+  "val_n": 31,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.028,
+    "tone_clarity": 0.4329,
+    "fragmentation": 0.3888,
+    "coldness": 0.0327,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1458,
+  "val_n": 39,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0281,
+    "tone_clarity": 0.4327,
+    "fragmentation": 0.43,
+    "coldness": 0.0394,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1780,
+  "val_n": 71,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0393,
+    "tone_clarity": 0.4404,
+    "fragmentation": 0.3663,
+    "coldness": 0.0304,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 742,
+  "val_n": 47,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0294,
+    "tone_clarity": 0.4536,
+    "fragmentation": 0.467,
+    "coldness": 0.0303,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 2017,
+  "val_n": 60,
+  "year": 2023,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.021,
+    "tone_clarity": 0.4429,
+    "fragmentation": 0.4358,
+    "coldness": 0.0285,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1009,
+  "val_n": 42,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0369,
+    "tone_clarity": 0.4512,
+    "fragmentation": 0.4186,
+    "coldness": 0.0264,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1114,
+  "val_n": 23,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0939,
+    "tone_clarity": 0.4087,
+    "fragmentation": 0.4197,
+    "coldness": 0.0219,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1451,
+  "val_n": 105,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0231,
+    "tone_clarity": 0.3887,
+    "fragmentation": 0.3929,
+    "coldness": 0.0262,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1251,
+  "val_n": 47,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0222,
+    "tone_clarity": 0.3863,
+    "fragmentation": 0.4476,
+    "coldness": 0.0185,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1310,
+  "val_n": 44,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0228,
+    "tone_clarity": 0.3961,
+    "fragmentation": 0.3767,
+    "coldness": 0.0362,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 694,
+  "val_n": 52,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0338,
+    "tone_clarity": 0.4176,
+    "fragmentation": 0.3813,
+    "coldness": 0.0308,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 985,
+  "val_n": 22,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0303,
+    "tone_clarity": 0.4195,
+    "fragmentation": 0.3726,
+    "coldness": 0.033,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 745,
+  "val_n": 44,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0292,
+    "tone_clarity": 0.3985,
+    "fragmentation": 0.3308,
+    "coldness": 0.0231,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 630,
+  "val_n": 20,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.049,
+    "tone_clarity": 0.3752,
+    "fragmentation": 0.398,
+    "coldness": 0.0147,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 601,
+  "val_n": 12,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0143,
+    "tone_clarity": 0.3549,
+    "fragmentation": 0.4037,
+    "coldness": 0.0302,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 629,
+  "val_n": 67,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0259,
+    "tone_clarity": 0.3662,
+    "fragmentation": 0.3122,
+    "coldness": 0.0273,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 626,
+  "val_n": 69,
+  "year": 2024,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0397,
+    "tone_clarity": 0.3572,
+    "fragmentation": 0.2928,
+    "coldness": 0.0156,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 668,
+  "val_n": 39,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.043,
+    "tone_clarity": 0.3783,
+    "fragmentation": 0.4544,
+    "coldness": 0.0188,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 981,
+  "val_n": 137,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0289,
+    "tone_clarity": 0.4032,
+    "fragmentation": 0.3818,
+    "coldness": 0.0214,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 829,
+  "val_n": 106,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0284,
+    "tone_clarity": 0.3564,
+    "fragmentation": 0.4663,
+    "coldness": 0.0295,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 923,
+  "val_n": 27,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0204,
+    "tone_clarity": 0.3872,
+    "fragmentation": 0.4067,
+    "coldness": 0.016,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1089,
+  "val_n": 37,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0386,
+    "tone_clarity": 0.39,
+    "fragmentation": 0.3981,
+    "coldness": 0.0163,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1066,
+  "val_n": 97,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0303,
+    "tone_clarity": 0.3603,
+    "fragmentation": 0.4893,
+    "coldness": 0.0205,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1068,
+  "val_n": 52,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0429,
+    "tone_clarity": 0.338,
+    "fragmentation": 0.3677,
+    "coldness": 0.0231,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1079,
+  "val_n": 134,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0352,
+    "tone_clarity": 0.4058,
+    "fragmentation": 0.4388,
+    "coldness": 0.0254,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1647,
+  "val_n": 85,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.1592,
+    "tone_clarity": 0.4305,
+    "fragmentation": 0.3774,
+    "coldness": 0.029,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1991,
+  "val_n": 81,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0948,
+    "tone_clarity": 0.4153,
+    "fragmentation": 0.4606,
+    "coldness": 0.0207,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1977,
+  "val_n": 103,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0982,
+    "tone_clarity": 0.4076,
+    "fragmentation": 0.4133,
+    "coldness": 0.017,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 2062,
+  "val_n": 176,
+  "year": 2025,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.1063,
+    "tone_clarity": 0.3999,
+    "fragmentation": 0.4727,
+    "coldness": 0.0146,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1543,
+  "val_n": 236,
+  "year": 2026,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0858,
+    "tone_clarity": 0.3999,
+    "fragmentation": 0.3431,
+    "coldness": 0.0143,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1260,
+  "val_n": 69,
+  "year": 2026,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0519,
+    "tone_clarity": 0.3805,
+    "fragmentation": 0.4216,
+    "coldness": 0.0084,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 3199,
+  "val_n": 136,
+  "year": 2026,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0443,
+    "tone_clarity": 0.4193,
+    "fragmentation": 0.4422,
+    "coldness": 0.0131,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 3315,
+  "val_n": 113,
+  "year": 2026,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0411,
+    "tone_clarity": 0.4162,
+    "fragmentation": 0.4019,
+    "coldness": 0.0188,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 3129,
+  "val_n": 175,
+  "year": 2026,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0392,
+    "tone_clarity": 0.4165,
+    "fragmentation": 0.3311,
+    "coldness": 0.0209,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 1405,
+  "val_n": 75,
+  "year": 2026,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
+{
+  "personality_score": {
+    "emotion_richness": 0.0595,
+    "tone_clarity": 0.3574,
+    "fragmentation": 0.4141,
+    "coldness": 0.018,
+    "style_keyword_n": 25,
+    "confidence": 0.625,
+    "low_confidence": false
+  }
+}
+{
+  "train_n": 869,
+  "val_n": 22,
+  "year": 2026,
+  "errors": [],
+  "error_count": 0,
+  "ok": true
+}
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/build_contact_universe.py
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_relationship.py --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/relationship_summary.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_strategy.py --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/strategy_summary.json
+== 2022-01 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-01/metrics_2022-01.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-01/metrics_2022-01.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-01/train_2022-01_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-01/val_2022-01_alpaca.json --year 2022
+  completed
+== 2022-02 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-02/metrics_2022-02.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-02/metrics_2022-02.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-02/train_2022-02_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-02/val_2022-02_alpaca.json --year 2022
+  completed
+== 2022-03 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-03/metrics_2022-03.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-03/metrics_2022-03.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-03/train_2022-03_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-03/val_2022-03_alpaca.json --year 2022
+  completed
+== 2022-04 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-04/metrics_2022-04.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-04/metrics_2022-04.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-04/train_2022-04_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-04/val_2022-04_alpaca.json --year 2022
+  completed
+== 2022-05 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-05/metrics_2022-05.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-05/metrics_2022-05.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-05/train_2022-05_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-05/val_2022-05_alpaca.json --year 2022
+  completed
+== 2022-06 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-06/metrics_2022-06.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-06/metrics_2022-06.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-06/train_2022-06_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-06/val_2022-06_alpaca.json --year 2022
+  completed
+== 2022-07 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-07/metrics_2022-07.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-07/metrics_2022-07.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-07/train_2022-07_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-07/val_2022-07_alpaca.json --year 2022
+  completed
+== 2022-08 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-08/metrics_2022-08.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-08/metrics_2022-08.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-08/train_2022-08_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-08/val_2022-08_alpaca.json --year 2022
+  completed
+== 2022-09 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-09/metrics_2022-09.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-09/metrics_2022-09.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-09/train_2022-09_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-09/val_2022-09_alpaca.json --year 2022
+  completed
+== 2022-10 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-10/metrics_2022-10.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-10/metrics_2022-10.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-10/train_2022-10_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-10/val_2022-10_alpaca.json --year 2022
+  completed
+== 2022-11 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-11/metrics_2022-11.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-11/metrics_2022-11.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-11/train_2022-11_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-11/val_2022-11_alpaca.json --year 2022
+  completed
+== 2022-12 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-12/metrics_2022-12.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-12/metrics_2022-12.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-12/train_2022-12_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2022-12/val_2022-12_alpaca.json --year 2022
+  completed
+== 2023-01 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-01/metrics_2023-01.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-01/metrics_2023-01.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-01/train_2023-01_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-01/val_2023-01_alpaca.json --year 2023
+  completed
+== 2023-02 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-02/metrics_2023-02.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-02/metrics_2023-02.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-02/train_2023-02_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-02/val_2023-02_alpaca.json --year 2023
+  completed
+== 2023-03 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-03/metrics_2023-03.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-03/metrics_2023-03.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-03/train_2023-03_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-03/val_2023-03_alpaca.json --year 2023
+  completed
+== 2023-04 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-04/metrics_2023-04.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-04/metrics_2023-04.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-04/train_2023-04_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-04/val_2023-04_alpaca.json --year 2023
+  completed
+== 2023-05 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-05/metrics_2023-05.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-05/metrics_2023-05.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-05/train_2023-05_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-05/val_2023-05_alpaca.json --year 2023
+  completed
+== 2023-06 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-06/metrics_2023-06.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-06/metrics_2023-06.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-06/train_2023-06_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-06/val_2023-06_alpaca.json --year 2023
+  completed
+== 2023-07 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-07/metrics_2023-07.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-07/metrics_2023-07.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-07/train_2023-07_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-07/val_2023-07_alpaca.json --year 2023
+  completed
+== 2023-08 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-08/metrics_2023-08.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-08/metrics_2023-08.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-08/train_2023-08_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-08/val_2023-08_alpaca.json --year 2023
+  completed
+== 2023-09 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-09/metrics_2023-09.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-09/metrics_2023-09.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-09/train_2023-09_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-09/val_2023-09_alpaca.json --year 2023
+  completed
+== 2023-10 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-10/metrics_2023-10.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-10/metrics_2023-10.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-10/train_2023-10_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-10/val_2023-10_alpaca.json --year 2023
+  completed
+== 2023-11 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-11/metrics_2023-11.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-11/metrics_2023-11.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-11/train_2023-11_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-11/val_2023-11_alpaca.json --year 2023
+  completed
+== 2023-12 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-12/metrics_2023-12.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-12/metrics_2023-12.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-12/train_2023-12_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2023-12/val_2023-12_alpaca.json --year 2023
+  completed
+== 2024-01 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-01/metrics_2024-01.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-01/metrics_2024-01.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-01/train_2024-01_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-01/val_2024-01_alpaca.json --year 2024
+  completed
+== 2024-02 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-02/metrics_2024-02.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-02/metrics_2024-02.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-02/train_2024-02_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-02/val_2024-02_alpaca.json --year 2024
+  completed
+== 2024-03 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-03/metrics_2024-03.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-03/metrics_2024-03.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-03/train_2024-03_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-03/val_2024-03_alpaca.json --year 2024
+  completed
+== 2024-04 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-04/metrics_2024-04.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-04/metrics_2024-04.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-04/train_2024-04_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-04/val_2024-04_alpaca.json --year 2024
+  completed
+== 2024-05 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-05/metrics_2024-05.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-05/metrics_2024-05.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-05/train_2024-05_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-05/val_2024-05_alpaca.json --year 2024
+  completed
+== 2024-06 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-06/metrics_2024-06.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-06/metrics_2024-06.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-06/train_2024-06_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-06/val_2024-06_alpaca.json --year 2024
+  completed
+== 2024-07 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-07/metrics_2024-07.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-07/metrics_2024-07.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-07/train_2024-07_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-07/val_2024-07_alpaca.json --year 2024
+  completed
+== 2024-08 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-08/metrics_2024-08.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-08/metrics_2024-08.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-08/train_2024-08_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-08/val_2024-08_alpaca.json --year 2024
+  completed
+== 2024-09 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-09/metrics_2024-09.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-09/metrics_2024-09.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-09/train_2024-09_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-09/val_2024-09_alpaca.json --year 2024
+  completed
+== 2024-10 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-10/metrics_2024-10.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-10/metrics_2024-10.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-10/train_2024-10_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-10/val_2024-10_alpaca.json --year 2024
+  completed
+== 2024-11 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-11/metrics_2024-11.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-11/metrics_2024-11.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-11/train_2024-11_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-11/val_2024-11_alpaca.json --year 2024
+  completed
+== 2024-12 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-12/metrics_2024-12.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-12/metrics_2024-12.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-12/train_2024-12_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2024-12/val_2024-12_alpaca.json --year 2024
+  completed
+== 2025-01 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-01/metrics_2025-01.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-01/metrics_2025-01.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-01/train_2025-01_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-01/val_2025-01_alpaca.json --year 2025
+  completed
+== 2025-02 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-02/metrics_2025-02.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-02/metrics_2025-02.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-02/train_2025-02_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-02/val_2025-02_alpaca.json --year 2025
+  completed
+== 2025-03 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-03/metrics_2025-03.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-03/metrics_2025-03.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-03/train_2025-03_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-03/val_2025-03_alpaca.json --year 2025
+  completed
+== 2025-04 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-04/metrics_2025-04.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-04/metrics_2025-04.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-04/train_2025-04_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-04/val_2025-04_alpaca.json --year 2025
+  completed
+== 2025-05 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-05/metrics_2025-05.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-05/metrics_2025-05.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-05/train_2025-05_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-05/val_2025-05_alpaca.json --year 2025
+  completed
+== 2025-06 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-06/metrics_2025-06.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-06/metrics_2025-06.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-06/train_2025-06_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-06/val_2025-06_alpaca.json --year 2025
+  completed
+== 2025-07 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-07/metrics_2025-07.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-07/metrics_2025-07.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-07/train_2025-07_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-07/val_2025-07_alpaca.json --year 2025
+  completed
+== 2025-08 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-08/metrics_2025-08.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-08/metrics_2025-08.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-08/train_2025-08_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-08/val_2025-08_alpaca.json --year 2025
+  completed
+== 2025-09 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-09/metrics_2025-09.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-09/metrics_2025-09.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-09/train_2025-09_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-09/val_2025-09_alpaca.json --year 2025
+  completed
+== 2025-10 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-10/metrics_2025-10.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-10/metrics_2025-10.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-10/train_2025-10_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-10/val_2025-10_alpaca.json --year 2025
+  completed
+== 2025-11 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-11/metrics_2025-11.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-11/metrics_2025-11.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-11/train_2025-11_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-11/val_2025-11_alpaca.json --year 2025
+  completed
+== 2025-12 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-12/metrics_2025-12.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-12/metrics_2025-12.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-12/train_2025-12_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2025-12/val_2025-12_alpaca.json --year 2025
+  completed
+== 2026-01 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-01/metrics_2026-01.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-01/metrics_2026-01.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-01/train_2026-01_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-01/val_2026-01_alpaca.json --year 2026
+  completed
+== 2026-02 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-02/metrics_2026-02.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-02/metrics_2026-02.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-02/train_2026-02_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-02/val_2026-02_alpaca.json --year 2026
+  completed
+== 2026-03 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-03/metrics_2026-03.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-03/metrics_2026-03.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-03/train_2026-03_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-03/val_2026-03_alpaca.json --year 2026
+  completed
+== 2026-04 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-04/metrics_2026-04.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-04/metrics_2026-04.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-04/train_2026-04_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-04/val_2026-04_alpaca.json --year 2026
+  completed
+== 2026-05 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-05/metrics_2026-05.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-05/metrics_2026-05.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-05/train_2026-05_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-05/val_2026-05_alpaca.json --year 2026
+  completed
+== 2026-06 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-06/metrics_2026-06.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-06/metrics_2026-06.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-06/train_2026-06_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-06/val_2026-06_alpaca.json --year 2026
+  completed
+== 2026-07 ==
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_personality.py --metrics /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-07/metrics_2026-07.json --out /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-07/metrics_2026-07.json
++ /Users/home/Downloads/Telegram Lite/聊天记录最新716/.venv-parse/bin/python /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/score_lora.py --train /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-07/train_2026-07_alpaca.json --val /Users/home/Downloads/压缩包/skills/telegram-personality-evolution/outputs/2026-07/val_2026-07_alpaca.json --year 2026
+  completed
+DONE months=55

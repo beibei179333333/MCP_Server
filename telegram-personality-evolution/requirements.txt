@@ -1,0 +1,33 @@
+# Telegram Personality Evolution - Python Dependencies
+# 核心依赖 / Core Dependencies
+
+# 标准库增强 / Standard Library Enhancements
+typing-extensions>=4.5.0
+
+# 数据处理 / Data Processing
+python-dateutil>=2.8.2
+
+# API 客户端 (可选,根据需要) / API Clients (Optional, as needed)
+# 如果使用 Qwen/SiliconFlow API / If using Qwen/SiliconFlow API
+requests>=2.28.0
+
+# JSON 处理增强 / JSON Processing
+# jsonlines>=3.1.0  # 如果需要 / If needed
+
+# 并发处理 / Concurrent Processing
+# concurrent-futures 已包含在 Python 3.2+ / Already included in Python 3.2+
+
+# 可选：进度条 / Optional: Progress Bar
+# tqdm>=4.65.0
+
+# 可选：模型转换 / Optional: Model Conversion
+# 如果使用 convert_to_gguf / If using convert_to_gguf
+# llama-cpp-python>=0.2.0
+# gguf>=0.1.0
+
+# 可选：数据分析 / Optional: Data Analysis
+# pandas>=2.0.0
+# numpy>=1.24.0
+
+# Python 版本要求 / Python Version Requirement
+# Python >= 3.8

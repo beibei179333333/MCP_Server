@@ -1,0 +1,55 @@
+{
+  "name": "monthly_personality_evolution",
+  "version": "1.0.0",
+  "start_month": "2022-01",
+  "end_month": "2026-07",
+  "serial": true,
+  "forbid_future_leakage": true,
+  "paths": {
+    "pipeline_root": "/Users/home/Downloads/tg_private_4y_monthly",
+    "tasks_root": "/Users/home/Downloads/压缩包/monthly_agent_tasks_2022-2026-07",
+    "result_json": "/Users/home/Downloads/Telegram Lite/聊天记录最新716/result.json",
+    "source_readonly": "/Users/home/Documents/新筛选聊天",
+    "self_user_id": "1335016610"
+  },
+  "steps": [
+    "build_contact_universe",
+    "load_month_prompt",
+    "ensure_month_raw",
+    "score_personality",
+    "score_relationship",
+    "score_strategy",
+    "score_lora",
+    "write_month_report",
+    "generate_monthly_detailed_summary",
+    "append_evolution",
+    "gate_next_month",
+    "generate_final_evolution_after_all_months"
+  ],
+  "gates": {
+    "require_prev_month_completed": true,
+    "require_outputs": [
+      "report",
+      "metrics",
+      "train",
+      "val",
+      "detailed_personality_summary"
+    ],
+    "detailed_summary": {
+      "path": "reports/monthly/YYYY-MM_personality_summary_detailed.md",
+      "chapters": 22,
+      "min_summary_han": 1500,
+      "min_line_han": 11,
+      "forbid_contact_filter": true,
+      "forbid_future_leakage": true,
+      "require_validation_pass": true
+    }
+  },
+  "contact_policy": {
+    "filter_contacts": false,
+    "filter_huiwang_lianghao": false,
+    "deep_analysis_max_messages": 100,
+    "deep_analysis_also_high_value_min_stars": 3,
+    "full_strategy_for_all": true
+  }
+}
