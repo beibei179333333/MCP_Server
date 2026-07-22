@@ -1,0 +1,60 @@
+# Qwen3-27B · 商务 Stage2 · 从 Stage1 LoRA 续训（Axolotl）
+#
+# 前置：Stage1 已产出可用 checkpoint（adapter / trainer_state）
+#   ./output/qwen_personality_stage1
+#
+# 启动（NVIDIA CUDA 机器）：
+#   axolotl train config/qwen3.6_27b_business_stage2.yaml \
+#     --resume_from_checkpoint ./output/qwen_personality_stage1
+#
+# 注意：lora_r=128，须与 Stage1 同 rank 续训。
+
+base_model: Qwen/Qwen3-27B
+model_type: qwen2
+tokenizer_type: qwen2
+
+load_in_4bit: true
+adapter: lora
+lora_r: 128
+lora_alpha: 64
+lora_dropout: 0.05
+
+resume_from_checkpoint: ./output/qwen_personality_stage1
+
+datasets:
+  - path: train_data_business_stage2/train.jsonl
+    type: alpaca
+    shuffle: true
+    split: train
+  - path: train_data_business_stage2/val.jsonl
+    type: alpaca
+    split: val
+  - path: train_data_knowledge/context.jsonl
+    type: alpaca
+    shuffle: true
+    split: train
+
+val_set_size: 0
+sequence_len: 8192
+sample_packing: true
+
+num_epochs: 1.5
+micro_batch_size: 2
+gradient_accumulation_steps: 4
+learning_rate: 8.0e-6
+optimizer: adamw_torch
+lr_scheduler: cosine
+warmup_steps: 50
+
+save_steps: 300
+eval_steps: 200
+logging_steps: 40
+
+output_dir: ./output/qwen_business_stage2
+save_total_limit: 3
+
+bf16: auto
+gradient_checkpointing: true
+flash_attention: true
+pad_to_sequence_len: true
+strict: false

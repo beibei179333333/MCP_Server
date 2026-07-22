@@ -1,0 +1,25 @@
+# 本机 MLX 直接训练（Apple M4 Pro 24GB）
+# 模型：mlx-community/Qwen3-8B-4bit（本机可跑的较强档；14B 易顶满内存）
+model: mlx-community/Qwen3-8B-4bit
+train: true
+data: train_data_mlx
+fine_tune_type: lora
+optimizer: adamw
+batch_size: 1
+iters: 800
+val_batches: 25
+learning_rate: 1.0e-4
+steps_per_report: 20
+steps_per_eval: 100
+save_every: 100
+adapter_path: output/mlx_qwen3_8b_lora
+max_seq_length: 2048
+num_layers: 16
+grad_accumulation_steps: 4
+grad_checkpoint: true
+seed: 42
+mask_prompt: true
+lora_parameters:
+  rank: 64
+  scale: 32.0
+  dropout: 0.05

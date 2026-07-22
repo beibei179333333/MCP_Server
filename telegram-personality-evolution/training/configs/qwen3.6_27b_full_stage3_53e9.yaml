@@ -1,0 +1,64 @@
+# Qwen3-27B · 全量巩固 Stage3 · 从 Stage2 LoRA 续训（Axolotl）
+#
+# 前置：Stage2 已产出可用 checkpoint
+#   ./output/qwen_business_stage2
+#
+# 启动（NVIDIA CUDA 机器）：
+#   axolotl train config/qwen3.6_27b_full_stage3.yaml \
+#     --resume_from_checkpoint ./output/qwen_business_stage2
+#
+# 训完后合并为完整模型：
+#   axolotl merge-lora config/qwen3.6_27b_merge_final.yaml
+#
+# 注意：lora_r=128 强化长期记忆容量；须与 Stage1/2 同 rank。
+
+base_model: Qwen/Qwen3-27B
+model_type: qwen2
+tokenizer_type: qwen2
+
+load_in_4bit: true
+adapter: lora
+lora_r: 128
+lora_alpha: 64
+lora_dropout: 0.05
+
+resume_from_checkpoint: ./output/qwen_business_stage2
+
+datasets:
+  - path: train_data_final/train.jsonl
+    type: alpaca
+    shuffle: true
+    split: train
+  - path: train_data_final/val.jsonl
+    type: alpaca
+    split: val
+  # knowledge/ 目录全量上下文 — 额外长期记忆
+  - path: train_data_knowledge/context.jsonl
+    type: alpaca
+    shuffle: true
+    split: train
+
+val_set_size: 0
+sequence_len: 8192
+sample_packing: true
+
+num_epochs: 1.0
+micro_batch_size: 2
+gradient_accumulation_steps: 4
+learning_rate: 4.0e-6
+optimizer: adamw_torch
+lr_scheduler: cosine
+warmup_steps: 40
+
+save_steps: 400
+eval_steps: 250
+logging_steps: 40
+
+output_dir: ./output/qwen_full_stage3
+save_total_limit: 3
+
+bf16: auto
+gradient_checkpointing: true
+flash_attention: true
+pad_to_sequence_len: true
+strict: false

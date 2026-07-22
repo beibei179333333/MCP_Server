@@ -1,0 +1,23 @@
+# 最终合并：将 Stage3 LoRA 合并进基座，输出可直接加载的完整模型
+#
+# 前置：./output/qwen_full_stage3 含 adapter 权重
+#
+# 命令：
+#   axolotl merge-lora config/qwen3.6_27b_merge_final.yaml
+#
+# 合并产物目录：./output/qwen_merged_final
+
+base_model: Qwen/Qwen3-27B
+model_type: qwen2
+tokenizer_type: qwen2
+
+adapter: lora
+lora_model_dir: ./output/qwen_full_stage3
+output_dir: ./output/qwen_merged_final
+
+# 合并用高精度加载（非训练时的 4bit）
+load_in_8bit: false
+load_in_4bit: false
+bf16: true
+
+strict: false

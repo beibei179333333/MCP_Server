@@ -1,0 +1,22 @@
+{
+  "year_month": "YYYY-MM",
+  "report": "outputs/YYYY-MM/report_YYYY-MM.md",
+  "metrics": "outputs/YYYY-MM/metrics_YYYY-MM.json",
+  "train_dataset": "outputs/YYYY-MM/train_YYYY-MM_alpaca.json",
+  "val_dataset": "outputs/YYYY-MM/val_YYYY-MM_alpaca.json",
+  "mandatory": {
+    "detailed_personality_summary": "reports/monthly/YYYY-MM_personality_summary_detailed.md",
+    "detailed_summary_meta": "reports/monthly/YYYY-MM_personality_summary_detailed.meta.json",
+    "spec": "references/monthly_detailed_report_spec.md"
+  },
+  "optional": {
+    "contact_strategies": "outputs/YYYY-MM/contact_strategies_YYYY-MM.jsonl",
+    "task_status": "outputs/YYYY-MM/task_status_YYYY-MM.json"
+  },
+  "final_after_all_months": {
+    "evolution_report": "reports/final/report_2022-01_2026-07_personality_evolution.md",
+    "evolution_report_alias": "reports/final/report_2022-01_2026-07_personality_evolution",
+    "evolution_log": "outputs/long_term_personality_evolution.jsonl",
+    "legacy_copy": "outputs/report_2022-01_2026-07_personality_evolution.md"
+  }
+}
