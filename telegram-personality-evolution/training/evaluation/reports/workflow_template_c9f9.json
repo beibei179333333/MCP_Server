@@ -1,0 +1,25 @@
+{
+  "$schema": "telegram-personality-evolution/workflow_template",
+  "description": "单月执行骨架：复制后填 year_month / previous_month",
+  "year_month": "YYYY-MM",
+  "previous_month": null,
+  "inputs": {
+    "raw_month_dir": "00_raw_origin/YYYY-MM",
+    "prompt": "monthly_prompts/YYYY-MM.md",
+    "prev_metrics": "outputs/PREV/metrics_PREV.json"
+  },
+  "outputs": {
+    "report": "outputs/YYYY-MM/report_YYYY-MM.md",
+    "metrics": "outputs/YYYY-MM/metrics_YYYY-MM.json",
+    "train": "outputs/YYYY-MM/train_YYYY-MM_alpaca.json",
+    "val": "outputs/YYYY-MM/val_YYYY-MM_alpaca.json"
+  },
+  "checklist": [
+    "仅使用截至本月数据",
+    "未过滤汇旺/靓号联系人",
+    "≤50 深分析优先",
+    "全员策略或当月活跃子集策略已生成",
+    "Alpaca 无空 output、无 service、无会话泄漏",
+    "演化日志已追加"
+  ]
+}

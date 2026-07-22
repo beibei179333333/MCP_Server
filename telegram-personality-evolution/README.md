@@ -144,6 +144,7 @@ telegram-personality-evolution/
 - Python 3.8+
 - 8GB+ RAM（推荐 16GB+）
 - 存储空间：20GB+（用于数据和输出）
+- GPU（可选）：NVIDIA CUDA或Apple Silicon（用于模型训练）
 
 ### 安装
 
@@ -214,6 +215,34 @@ python3 run_qwen_deep_ladder.py --eval-tier 220
 python3 run_qwen_deep_ladder.py --expand-tier 1000 --workers 4
 
 # 继续扩量：2500 → 6935（禁止跳阶）
+```
+
+#### 6. 模型训练（LoRA微调）★新增
+
+```bash
+# 查看完整训练指南
+cat ../training/TRAINING_GUIDE.md
+
+# 三阶段训练（NVIDIA CUDA + Axolotl）
+cd ../training
+bash scripts/run_train_and_merge.sh
+
+# 或手动分步训练:
+# Stage 1: 人格基础
+axolotl train configs/qwen3.6_27b_personality_stage1.yaml
+
+# Stage 2: 商务强化
+axolotl train configs/qwen3.6_27b_business_stage2.yaml \
+  --resume_from_checkpoint ./output/qwen_personality_stage1
+
+# Stage 3: 全量巩固
+axolotl train configs/qwen3.6_27b_full_stage3.yaml \
+  --resume_from_checkpoint ./output/qwen_business_stage2
+
+# 合并LoRA & 量化GGUF
+python ../scripts/merge_lora_*.py --base Qwen/Qwen3-27B \
+  --lora output/qwen_full_stage3 --output qwen_beibei_final
+python ../scripts/convert_to_gguf_*.py qwen_beibei_final --outtype q4_k_m
 ```
 
 ---
