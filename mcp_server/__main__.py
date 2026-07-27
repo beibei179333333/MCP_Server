@@ -2,6 +2,7 @@
 
 Usage::
 
+    python -m mcp_server init            # interactive wizard: build servers.json locally
     python -m mcp_server                 # stdio transport (for Claude Desktop / Claude Code)
     python -m mcp_server --http          # streamable-HTTP transport on 127.0.0.1:8000
     python -m mcp_server --http --host 0.0.0.0 --port 9000
@@ -18,10 +19,10 @@ import argparse
 import sys
 
 
-def _print_inventory() -> int:
+def _print_inventory(path: str | None = None) -> int:
     from .manager import ServerManager
     try:
-        mgr = ServerManager.from_config()
+        mgr = ServerManager.from_config(path)
     except Exception as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
@@ -38,6 +39,10 @@ def _print_inventory() -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m mcp_server", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("command", nargs="?", choices=["init"],
+                        help="'init' launches the interactive local config wizard")
+    parser.add_argument("--config", default="servers.json", help="path to write/read (default servers.json)")
+    parser.add_argument("--force", action="store_true", help="overwrite an existing config in 'init'")
     parser.add_argument("--http", action="store_true", help="serve over streamable HTTP instead of stdio")
     parser.add_argument("--host", default="127.0.0.1", help="bind host for --http (default 127.0.0.1)")
     parser.add_argument("--port", type=int, default=8000, help="bind port for --http (default 8000)")
@@ -45,8 +50,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--list", action="store_true", help="print the configured servers and exit")
     args = parser.parse_args(argv)
 
+    if args.command == "init":
+        from .wizard import run_wizard
+        return run_wizard(path=args.config, force=args.force)
+
     if args.check or args.list:
-        return _print_inventory()
+        cfg = args.config if args.config != "servers.json" else None
+        return _print_inventory(cfg)
 
     # Import here so --check/--list work even if the MCP SDK is absent.
     from .server import mcp

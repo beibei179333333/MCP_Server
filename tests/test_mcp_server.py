@@ -267,6 +267,15 @@ def test_empty_command_rejected():
             assert "empty" in str(e)
 
 
+def test_wizard_helpers():
+    from mcp_server.wizard import _sanitize_env_name, _shell_quote
+    assert _sanitize_env_name("web-1") == "WEB_1"
+    assert _sanitize_env_name("staging.db 2") == "STAGING_DB_2"
+    # single-quoting must survive an embedded quote so `source` round-trips it
+    assert _shell_quote("simple") == "'simple'"
+    assert _shell_quote("p@ss'w0rd") == "'p@ss'\"'\"'w0rd'"
+
+
 def _run_all():
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     passed = 0

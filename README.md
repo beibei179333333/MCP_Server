@@ -11,9 +11,11 @@
 
 ```bash
 pip install -r requirements-mcp.txt          # mcp + paramiko + httpx
-cp servers.example.json servers.json          # 填入你的服务器（已 gitignore，不会泄露密钥）
-python -m mcp_server --check                   # 校验配置
+python -m mcp_server init                      # 交互式向导：逐台填 IP/端口/用户名，密码隐藏输入
+python -m mcp_server --check                   # 校验配置（servers.json 已 gitignore，不会泄露密钥）
 ```
+
+> 在**你自己的机器**上运行 `init`（就是将来跑 MCP Server 的那台）。密码不要贴进在线对话——既有泄露风险，也不会落到你机器上。
 
 然后在 Claude Code 里一行接入（把路径换成你的）：
 

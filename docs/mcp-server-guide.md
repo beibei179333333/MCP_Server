@@ -62,7 +62,17 @@ pip install -r requirements-mcp.txt                    # mcp + paramiko + httpx
 
 ## 4. 配置你的 6 台服务器
 
-复制示例并按需修改（`servers.json` 已被 `.gitignore`，不会误提交密钥）：
+> ⚠️ **在你自己的机器上做这一步。** MCP Server 运行在能 SSH 到这些服务器的机器上（你的电脑或一台跳板机）。`servers.json` 必须生成在那台机器上；密码也请在那里输入，不要贴进任何在线对话。
+
+### 方式一（推荐）：交互式向导，一条命令搞定
+
+```bash
+python -m mcp_server init
+```
+
+它逐台询问 主机 / 端口 / 用户名 / 标签，**密码用隐藏输入**（不回显），可选择存进环境变量（更安全）或写入本地 `servers.json`（权限自动设为 600）。全程凭据不经过网络。
+
+### 方式二：手动复制示例修改
 
 ```bash
 cp servers.example.json servers.json
