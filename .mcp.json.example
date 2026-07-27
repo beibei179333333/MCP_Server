@@ -1,0 +1,14 @@
+{
+  "_comment": "Claude Code project-scoped MCP config. Copy to .mcp.json and edit the absolute paths. See docs/mcp-server-guide.md. Remove SERVERS_MCP_READONLY to allow changes once you have verified read-only access.",
+  "mcpServers": {
+    "fleet": {
+      "command": "/path/to/MCP_Server/.venv/bin/python",
+      "args": ["-m", "mcp_server"],
+      "env": {
+        "PYTHONPATH": "/path/to/MCP_Server",
+        "SERVERS_MCP_CONFIG": "/path/to/MCP_Server/servers.json",
+        "SERVERS_MCP_READONLY": "1"
+      }
+    }
+  }
+}

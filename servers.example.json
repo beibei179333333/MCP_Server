@@ -1,0 +1,42 @@
+{
+  "_comment": "Copy to servers.json and edit. servers.json is gitignored. Passwords are best supplied via env: SERVERS_MCP_PASSWORD_<NAME> (name upper-cased, non-alphanumerics -> _). Prefer key-based auth.",
+
+  "defaults": {
+    "user": "root",
+    "port": 22,
+    "key_file": "~/.ssh/id_ed25519",
+    "connect_timeout": 10,
+    "use_sudo": false,
+    "strict_host_keys": false,
+    "deny_patterns": [
+      "rm\\s+-rf\\s+/(\\s|$)",
+      ":\\(\\)\\s*\\{\\s*:\\|:&\\s*\\};:",
+      "mkfs",
+      "\\bdd\\b.*of=/dev/"
+    ]
+  },
+
+  "read_only": false,
+  "backend": "auto",
+
+  "servers": [
+    { "name": "web-1", "host": "10.0.0.11", "tags": ["web", "prod"],
+      "health_url": "http://10.0.0.11/healthz", "description": "nginx front-end #1" },
+
+    { "name": "web-2", "host": "10.0.0.12", "tags": ["web", "prod"],
+      "health_url": "http://10.0.0.12/healthz", "description": "nginx front-end #2" },
+
+    { "name": "app-1", "host": "10.0.0.21", "tags": ["app", "prod"], "use_sudo": true,
+      "description": "application server #1" },
+
+    { "name": "app-2", "host": "10.0.0.22", "tags": ["app", "prod"], "use_sudo": true,
+      "description": "application server #2" },
+
+    { "name": "db-1", "host": "10.0.0.31", "tags": ["db", "prod"], "user": "ubuntu", "use_sudo": true,
+      "description": "primary database" },
+
+    { "name": "staging-1", "host": "10.0.1.10", "tags": ["staging"],
+      "key_file": "~/.ssh/staging_key", "health_url": "http://10.0.1.10:8080/health",
+      "description": "staging box (password auth demo: set SERVERS_MCP_PASSWORD_STAGING_1)" }
+  ]
+}

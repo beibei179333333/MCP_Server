@@ -1,3 +1,35 @@
+# MCP_Server
+
+本仓库现在包含两部分：
+
+| 目录 | 是什么 | 文档 |
+|------|--------|------|
+| **`mcp_server/`** | **把多台服务器接入 Claude 的 MCP Server** —— Claude（Agent）通过 MCP 协议调用工具，由它用 SSH/HTTP 连接并管理你的服务器（列清单 / 健康检查 / 看状态 / 跑命令 / 批量下发 / 控制服务 / 看日志）。 | **[docs/mcp-server-guide.md](docs/mcp-server-guide.md)** |
+| `group_export/` | Telegram 群成员全自动导出 / 清洗工具（见下文）。 | 本文件下半部分 |
+
+## 🚀 快速接入 Claude 管理 N 台服务器
+
+```bash
+pip install -r requirements-mcp.txt          # mcp + paramiko + httpx
+cp servers.example.json servers.json          # 填入你的服务器（已 gitignore，不会泄露密钥）
+python -m mcp_server --check                   # 校验配置
+```
+
+然后在 Claude Code 里一行接入（把路径换成你的）：
+
+```bash
+claude mcp add fleet \
+  --env PYTHONPATH=/path/to/MCP_Server \
+  --env SERVERS_MCP_CONFIG=/path/to/MCP_Server/servers.json \
+  --env SERVERS_MCP_READONLY=1 \
+  -- /path/to/MCP_Server/.venv/bin/python -m mcp_server
+```
+
+Claude Desktop / Agent SDK / 远程 HTTP 的接法、7 个工具说明、安全须知，全部见
+**[docs/mcp-server-guide.md](docs/mcp-server-guide.md)**。
+
+---
+
 # 群成员全自动导出 / 清洗工具 (group_export)
 
 基于 `fun-stat-bot.net` 的 API，自动导出群成员列表，并完成：
